@@ -55,9 +55,17 @@ public interface PolicyValueAdvisor extends AutoCloseable {
             List<PolicyValueEstimate> estimates = new ArrayList<>();
             for (Query query : queries) {
                 RotationStep step = query.getStep();
+                double[] weights = prior.weights(step.copy());
+                if (weights != null && weights.length == step.legalActionMask.length) {
+                    for (int actionId = 0; actionId < weights.length; actionId++) {
+                        if (step.legalActionMask[actionId] <= 0.5) {
+                            weights[actionId] = 0.0;
+                        }
+                    }
+                }
                 estimates.add(PolicyValueEstimate.validated(
                         query.getRequestId(),
-                        prior.weights(step.copy()),
+                        weights,
                         null,
                         query.getRecurrentState(),
                         step.legalActionMask));

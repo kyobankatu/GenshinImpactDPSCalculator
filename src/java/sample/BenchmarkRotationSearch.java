@@ -41,6 +41,8 @@ import mechanics.rotation.ExpertPolicyPrior;
 import mechanics.rotation.ExpertTrajectory;
 import mechanics.rotation.MctsRotationSearcher;
 import mechanics.rotation.PolicyAction;
+import mechanics.rotation.PolicyValueAdvisor;
+import mechanics.rotation.PolicyValueInferenceClient;
 import mechanics.rotation.RecordedExpertPolicyPrior;
 import mechanics.rotation.RotationEnvironment;
 import mechanics.rotation.RotationObjective;
@@ -102,7 +104,10 @@ public final class BenchmarkRotationSearch {
      *        {@code --split}, {@code --seeds}, {@code --budget},
      *        {@code --max-actions}, {@code --archive-size}, {@code --dataset},
      *        {@code --training-prior}, {@code --evaluation-prior}, and
-     *        {@code --model-traces}
+     *        {@code --model-traces}, {@code --guidance-mode},
+     *        {@code --policy-value-host}, {@code --policy-value-port},
+     *        {@code --policy-value-timeout-ms}, and
+     *        {@code --checkpoint-fingerprint}
      * @throws Exception when an input, replay, simulator result, budget, or atomic
      *         publication contract is invalid
      */
@@ -140,19 +145,17 @@ public final class BenchmarkRotationSearch {
                 RotationScenario scenario = createScenario(definition, seed);
                 SearchOutcome random = runRandomSearch(scenario, options);
                 SearchOutcome evolutionary = runEvolutionarySearch(
-                        scenario, options, ExpertPolicyPrior.uniform(), false);
+                        scenario, options, ExpertPolicyPrior.uniform(), null, false);
                 PriorArtifact artifact = definition.datasetSplit() == DatasetSplit.TRAIN
                         ? trainingPrior : evaluationPrior;
-                RecordedExpertPolicyPrior recordedPrior = artifact.priorFor(scenario);
-                SearchOutcome guided = runEvolutionarySearch(
-                        scenario, options, recordedPrior, true);
-                if (recordedPrior.getHitCount() <= 0L) {
-                    throw new IllegalStateException(
-                            "Guided search used only prior fallback for "
-                                    + scenario.getFingerprint());
-                }
+                GuidedOutcome guided = runGuidedSearch(
+                        scenario,
+                        options,
+                        datasetReplay.sourceHash,
+                        artifact);
                 SearchOutcome modelOnly = runModelTrace(scenario, modelTraces);
-                requireEqualBudget(random, evolutionary, guided, options.callBudget);
+                requireEqualBudget(
+                        random, evolutionary, guided.outcome, options.callBudget);
                 metrics.add(BenchmarkMetric.from(
                         "deterministic-random", definition, scenario, random,
                         datasetReplay, null));
@@ -160,8 +163,8 @@ public final class BenchmarkRotationSearch {
                         "unguided-evolutionary", definition, scenario, evolutionary,
                         datasetReplay, null));
                 metrics.add(BenchmarkMetric.from(
-                        "policy-guided", definition, scenario, guided,
-                        datasetReplay, artifact.revision()));
+                        "policy-guided", definition, scenario, guided.outcome,
+                        datasetReplay, guided.priorRevision));
                 metrics.add(BenchmarkMetric.from(
                         "model-only", definition, scenario, modelOnly,
                         datasetReplay, modelTraces.revision()));
@@ -922,7 +925,14 @@ public final class BenchmarkRotationSearch {
             throw new IllegalStateException("Random baseline failed exact simulator-call accounting");
         }
         return new SearchOutcome(
-                archive, incumbentHistory, calls, System.nanoTime() - start);
+                archive,
+                incumbentHistory,
+                calls,
+                System.nanoTime() - start,
+                0,
+                0,
+                0L,
+                0);
     }
 
     /** Runs the evolutionary teacher with uniform or recorded policy guidance. */
@@ -930,6 +940,7 @@ public final class BenchmarkRotationSearch {
             RotationScenario scenario,
             Options options,
             ExpertPolicyPrior prior,
+            PolicyValueAdvisor advisor,
             boolean forceInitialPriorRollout) {
         RotationSearchConfig config = new RotationSearchConfig(
                 options.callBudget,
@@ -943,6 +954,9 @@ public final class BenchmarkRotationSearch {
                 () -> false,
                 forceInitialPriorRollout
                         ? List.<int[]>of(new int[0]) : List.of());
+        if (advisor != null) {
+            config = config.withAdvisor(advisor, 50L);
+        }
         TrackingRotationEnvironment tracking = new TrackingRotationEnvironment(
                 new BattleRotationEnvironment(scenario));
         long start = System.nanoTime();
@@ -967,7 +981,52 @@ public final class BenchmarkRotationSearch {
             throw new IllegalStateException("Evolutionary incumbent history is incomplete");
         }
         return new SearchOutcome(
-                archive, incumbentHistory, result.simulatorCalls, wallTimeNanos);
+                archive,
+                incumbentHistory,
+                result.simulatorCalls,
+                wallTimeNanos,
+                result.statistics.inferenceCalls,
+                result.statistics.inferenceBatches,
+                result.statistics.inferenceLatencyNanos,
+                result.statistics.inferenceFallbacks);
+    }
+
+    private static GuidedOutcome runGuidedSearch(
+            RotationScenario scenario,
+            Options options,
+            String datasetSourceHash,
+            PriorArtifact artifact) throws IOException {
+        if ("live".equals(options.guidanceMode)) {
+            try (PolicyValueInferenceClient client = new PolicyValueInferenceClient(
+                    options.policyValueHost,
+                    options.policyValuePort,
+                    datasetSourceHash,
+                    options.checkpointFingerprint,
+                    options.policyValueTimeoutMillis)) {
+                SearchOutcome outcome = runEvolutionarySearch(
+                        scenario,
+                        options,
+                        ExpertPolicyPrior.uniform(),
+                        client,
+                        true);
+                return new GuidedOutcome(
+                        outcome,
+                        "live-policy-value-v1:" + options.checkpointFingerprint);
+            }
+        }
+        RecordedExpertPolicyPrior recordedPrior = artifact.priorFor(scenario);
+        SearchOutcome outcome = runEvolutionarySearch(
+                scenario,
+                options,
+                recordedPrior,
+                PolicyValueAdvisor.fromPrior(recordedPrior),
+                true);
+        if (recordedPrior.getHitCount() <= 0L) {
+            throw new IllegalStateException(
+                    "Guided search used only prior fallback for "
+                            + scenario.getFingerprint());
+        }
+        return new GuidedOutcome(outcome, artifact.revision());
     }
 
     /** Replays one immutable model trace as a single model-only evaluation call. */
@@ -1008,7 +1067,11 @@ public final class BenchmarkRotationSearch {
                 List.of(candidate),
                 List.of(step.objective.objectiveScore),
                 1,
-                System.nanoTime() - start);
+                System.nanoTime() - start,
+                0,
+                0,
+                0L,
+                0);
     }
 
     private static int randomLegalAction(RotationStep step, Random random) {
@@ -1255,6 +1318,11 @@ public final class BenchmarkRotationSearch {
         private final Path trainingPrior;
         private final Path evaluationPrior;
         private final Path modelTraces;
+        private final String guidanceMode;
+        private final String policyValueHost;
+        private final int policyValuePort;
+        private final int policyValueTimeoutMillis;
+        private final String checkpointFingerprint;
 
         private Options(
                 Path output,
@@ -1266,7 +1334,12 @@ public final class BenchmarkRotationSearch {
                 Path datasetManifest,
                 Path trainingPrior,
                 Path evaluationPrior,
-                Path modelTraces) {
+                Path modelTraces,
+                String guidanceMode,
+                String policyValueHost,
+                int policyValuePort,
+                int policyValueTimeoutMillis,
+                String checkpointFingerprint) {
             this.output = output;
             this.split = split;
             this.seeds = seeds.clone();
@@ -1277,6 +1350,11 @@ public final class BenchmarkRotationSearch {
             this.trainingPrior = trainingPrior;
             this.evaluationPrior = evaluationPrior;
             this.modelTraces = modelTraces;
+            this.guidanceMode = guidanceMode;
+            this.policyValueHost = policyValueHost;
+            this.policyValuePort = policyValuePort;
+            this.policyValueTimeoutMillis = policyValueTimeoutMillis;
+            this.checkpointFingerprint = checkpointFingerprint;
         }
 
         /** Parses strict flag/value pairs and rejects unknown or repeated flags. */
@@ -1291,6 +1369,11 @@ public final class BenchmarkRotationSearch {
             Path trainingPrior = null;
             Path evaluationPrior = null;
             Path modelTraces = null;
+            String guidanceMode = "recorded";
+            String policyValueHost = null;
+            int policyValuePort = 0;
+            int policyValueTimeoutMillis = 50;
+            String checkpointFingerprint = null;
             Set<String> seen = new HashSet<>();
 
             if (args.length % 2 != 0) {
@@ -1336,6 +1419,26 @@ public final class BenchmarkRotationSearch {
                     case "--model-traces":
                         modelTraces = requirePath(value, flag);
                         break;
+                    case "--guidance-mode":
+                        guidanceMode = value.toLowerCase(Locale.ROOT);
+                        if (!"recorded".equals(guidanceMode)
+                                && !"live".equals(guidanceMode)) {
+                            throw new IllegalArgumentException(
+                                    "--guidance-mode must be recorded or live");
+                        }
+                        break;
+                    case "--policy-value-host":
+                        policyValueHost = value;
+                        break;
+                    case "--policy-value-port":
+                        policyValuePort = parsePositiveInt(value, flag);
+                        break;
+                    case "--policy-value-timeout-ms":
+                        policyValueTimeoutMillis = parsePositiveInt(value, flag);
+                        break;
+                    case "--checkpoint-fingerprint":
+                        checkpointFingerprint = value;
+                        break;
                     default:
                         throw new IllegalArgumentException("Unknown benchmark flag: " + flag);
                 }
@@ -1345,6 +1448,14 @@ public final class BenchmarkRotationSearch {
                 throw new IllegalArgumentException(
                         "--dataset, --training-prior, --evaluation-prior, and "
                                 + "--model-traces are required");
+            }
+            if ("live".equals(guidanceMode)
+                    && (policyValueHost == null || policyValueHost.isBlank()
+                            || policyValuePort <= 0
+                            || checkpointFingerprint == null
+                            || !checkpointFingerprint.matches("[0-9a-f]{64}"))) {
+                throw new IllegalArgumentException(
+                        "Live guidance requires host, port, and checkpoint fingerprint");
             }
             return new Options(
                     output,
@@ -1356,7 +1467,12 @@ public final class BenchmarkRotationSearch {
                     dataset,
                     trainingPrior,
                     evaluationPrior,
-                    modelTraces);
+                    modelTraces,
+                    guidanceMode,
+                    policyValueHost,
+                    policyValuePort,
+                    policyValueTimeoutMillis,
+                    checkpointFingerprint);
         }
 
         private static Path requirePath(String value, String flag) {
@@ -1404,21 +1520,36 @@ public final class BenchmarkRotationSearch {
         private final List<Double> incumbentHistory;
         private final int simulatorCalls;
         private final long wallTimeNanos;
+        private final int inferenceCalls;
+        private final int inferenceBatches;
+        private final long inferenceLatencyNanos;
+        private final int inferenceFallbacks;
 
         private SearchOutcome(
                 List<Candidate> archive,
                 List<Double> incumbentHistory,
                 int simulatorCalls,
-                long wallTimeNanos) {
+                long wallTimeNanos,
+                int inferenceCalls,
+                int inferenceBatches,
+                long inferenceLatencyNanos,
+                int inferenceFallbacks) {
             if (archive == null || archive.isEmpty()
                     || incumbentHistory == null || incumbentHistory.isEmpty()
-                    || simulatorCalls <= 0 || wallTimeNanos < 0L) {
+                    || simulatorCalls <= 0 || wallTimeNanos < 0L
+                    || inferenceCalls < 0 || inferenceBatches < 0
+                    || inferenceLatencyNanos < 0L || inferenceFallbacks < 0
+                    || inferenceFallbacks > inferenceCalls) {
                 throw new IllegalArgumentException("Invalid search outcome");
             }
             this.archive = List.copyOf(archive);
             this.incumbentHistory = List.copyOf(incumbentHistory);
             this.simulatorCalls = simulatorCalls;
             this.wallTimeNanos = wallTimeNanos;
+            this.inferenceCalls = inferenceCalls;
+            this.inferenceBatches = inferenceBatches;
+            this.inferenceLatencyNanos = inferenceLatencyNanos;
+            this.inferenceFallbacks = inferenceFallbacks;
             double previous = Double.NEGATIVE_INFINITY;
             for (double score : incumbentHistory) {
                 requireFinite(score, "incumbent history score");
@@ -1431,6 +1562,19 @@ public final class BenchmarkRotationSearch {
 
         private Candidate best() {
             return archive.get(0);
+        }
+    }
+
+    private static final class GuidedOutcome {
+        private final SearchOutcome outcome;
+        private final String priorRevision;
+
+        private GuidedOutcome(SearchOutcome outcome, String priorRevision) {
+            if (outcome == null || priorRevision == null || priorRevision.isBlank()) {
+                throw new IllegalArgumentException("Invalid guided search outcome");
+            }
+            this.outcome = outcome;
+            this.priorRevision = priorRevision;
         }
     }
 
@@ -2011,6 +2155,10 @@ public final class BenchmarkRotationSearch {
         private final String simulatorRevision;
         private final String datasetRevision;
         private final String priorRevision;
+        private final int inferenceCalls;
+        private final int inferenceBatches;
+        private final long inferenceLatencyNanos;
+        private final int inferenceFallbacks;
 
         private BenchmarkMetric(
                 String method,
@@ -2034,7 +2182,11 @@ public final class BenchmarkRotationSearch {
                 int[] bestFoundActions,
                 String simulatorRevision,
                 String datasetRevision,
-                String priorRevision) {
+                String priorRevision,
+                int inferenceCalls,
+                int inferenceBatches,
+                long inferenceLatencyNanos,
+                int inferenceFallbacks) {
             this.method = method;
             this.seed = seed;
             this.split = split;
@@ -2057,6 +2209,10 @@ public final class BenchmarkRotationSearch {
             this.simulatorRevision = simulatorRevision;
             this.datasetRevision = datasetRevision;
             this.priorRevision = priorRevision;
+            this.inferenceCalls = inferenceCalls;
+            this.inferenceBatches = inferenceBatches;
+            this.inferenceLatencyNanos = inferenceLatencyNanos;
+            this.inferenceFallbacks = inferenceFallbacks;
         }
 
         private static BenchmarkMetric from(
@@ -2093,7 +2249,11 @@ public final class BenchmarkRotationSearch {
                     best.actions,
                     ExpertDatasetRecord.SIMULATOR_REVISION,
                     datasetReplay.revision(),
-                    priorRevision);
+                    priorRevision,
+                    outcome.inferenceCalls,
+                    outcome.inferenceBatches,
+                    outcome.inferenceLatencyNanos,
+                    outcome.inferenceFallbacks);
             metric.validate();
             return metric;
         }
@@ -2102,6 +2262,9 @@ public final class BenchmarkRotationSearch {
             if (method == null || split == null || scenarioFingerprint == null
                     || simulatorRevision == null || simulatorCalls <= 0
                     || wallTimeNanos < 0L || invalidActionCount < 0
+                    || inferenceCalls < 0 || inferenceBatches < 0
+                    || inferenceLatencyNanos < 0L || inferenceFallbacks < 0
+                    || inferenceFallbacks > inferenceCalls
                     || archiveSize <= 0
                     || bestFoundActions.length == 0) {
                 throw new IllegalStateException("Benchmark metric metadata is invalid");

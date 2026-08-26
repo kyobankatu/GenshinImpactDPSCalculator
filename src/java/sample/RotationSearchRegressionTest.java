@@ -3,12 +3,15 @@ package sample;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import mechanics.rotation.EvolutionaryRotationSearcher;
 import mechanics.rotation.ExpertPolicyPrior;
 import mechanics.rotation.ExpertTrajectory;
 import mechanics.rotation.MctsRotationSearcher;
 import mechanics.rotation.PolicyAction;
+import mechanics.rotation.PolicyValueAdvisor;
+import mechanics.rotation.PolicyValueEstimate;
 import mechanics.rotation.RotationEnvironment;
 import mechanics.rotation.RotationObjective;
 import mechanics.rotation.RotationScenario;
@@ -26,6 +29,8 @@ public class RotationSearchRegressionTest {
     public static void main(String[] args) {
         assertDeterministicDelayedReward(new EvolutionaryRotationSearcher());
         assertDeterministicDelayedReward(new MctsRotationSearcher());
+        assertUniformAdvisorReproducesUnguided();
+        assertAdvisorGuidesBothStrategies();
         assertArchiveRetainsEqualScoreDiversity();
         assertPriorOnlySeedMarker();
         assertWaitGeneRoundTrip();
@@ -58,6 +63,60 @@ public class RotationSearchRegressionTest {
                 || result.best.getEvaluationMode()
                         != mechanics.rotation.RotationEvaluationMode.REPAIR) {
             throw new AssertionError("Empty prior-only seed marker was not repaired");
+        }
+    }
+
+    private static void assertUniformAdvisorReproducesUnguided() {
+        for (RotationSearchStrategy strategy : List.of(
+                new EvolutionaryRotationSearcher(),
+                new MctsRotationSearcher())) {
+            RotationSearchConfig config = config(240, 2, 2468L, () -> false);
+            RotationSearchStrategy.Result unguided = strategy.search(
+                    DelayedRewardEnvironment::new,
+                    config);
+            RotationSearchStrategy.Result uniform = strategy.search(
+                    DelayedRewardEnvironment::new,
+                    config.withAdvisor(PolicyValueAdvisor.uniform(), 100L));
+            assertResultEquals(unguided, uniform);
+        }
+    }
+
+    private static void assertAdvisorGuidesBothStrategies() {
+        for (RotationSearchStrategy strategy : List.of(
+                new EvolutionaryRotationSearcher(),
+                new MctsRotationSearcher())) {
+            AtomicInteger calls = new AtomicInteger();
+            PolicyValueAdvisor advisor = (queries, timeoutMillis) -> {
+                calls.incrementAndGet();
+                java.util.ArrayList<PolicyValueEstimate> estimates =
+                        new java.util.ArrayList<>();
+                for (PolicyValueAdvisor.Query query : queries) {
+                    RotationStep step = query.getStep();
+                    double[] prior = new double[PolicyAction.SIZE];
+                    int preferred = step.legalActionMask[BURST] > 0.5 ? BURST : SETUP;
+                    prior[preferred] = 1.0;
+                    estimates.add(PolicyValueEstimate.validated(
+                            query.getRequestId(),
+                            prior,
+                            100.0 - step.stepCount,
+                            query.getRecurrentState(),
+                            step.legalActionMask));
+                }
+                return estimates;
+            };
+            RotationSearchStrategy.Result result = strategy.search(
+                    DelayedRewardEnvironment::new,
+                    config(240, 2, 2468L, () -> false)
+                            .withAdvisor(advisor, 100L));
+            if (calls.get() <= 0 || result.simulatorCalls != 240
+                    || result.best.getObjective().invalidActionCount != 0
+                    || result.statistics.inferenceCalls <= 0
+                    || result.statistics.inferenceBatches
+                            != result.statistics.inferenceCalls
+                    || result.statistics.inferenceFallbacks != 0
+                    || result.statistics.inferenceLatencyNanos < 0L) {
+                throw new AssertionError("Advisor bypassed search accounting or legality");
+            }
         }
     }
 
@@ -355,7 +414,7 @@ public class RotationSearchRegressionTest {
             long hash = 31L * stepCount + (setup ? 7L : 0L)
                     + Double.doubleToLongBits(damage);
             return new RotationStep(
-                    new double[] {stepCount, setup ? 1.0 : 0.0, damage},
+                    fixtureObservation(),
                     new double[0],
                     mask,
                     0.0,
@@ -369,6 +428,14 @@ public class RotationSearchRegressionTest {
                     0,
                     hash,
                     objective().evaluate(damage, stepCount, 0.0, 0));
+        }
+
+        private double[] fixtureObservation() {
+            double[] observation = new double[287];
+            observation[0] = stepCount;
+            observation[1] = setup ? 1.0 : 0.0;
+            observation[2] = damage;
+            return observation;
         }
 
         protected void ensureReady() {

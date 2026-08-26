@@ -37,7 +37,8 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
                             config,
                             random,
                             budget,
-                            mode);
+                            mode,
+                            statistics);
                 } catch (IllegalArgumentException exception) {
                     statistics.recordRejectedTrajectory();
                     throw exception;
@@ -58,13 +59,17 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
                 }
             }
             RotationStep rootStep = environment.reset();
+            long nextAdvisorRequestId = 0L;
             Node root = new Node(
                     null,
                     -1,
                     rootStep,
                     environment.snapshot(),
                     0,
-                    config.prior);
+                    config,
+                    nextAdvisorRequestId++,
+                    new double[0],
+                    statistics);
             int consecutiveZeroCallIterations = 0;
             while (!cancelled && budget.remaining() > 0) {
                 int callsBefore = budget.used();
@@ -100,7 +105,12 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
                             expandedStep,
                             environment.snapshot(),
                             node.depth + 1,
-                            config.prior);
+                            config,
+                            nextAdvisorRequestId++,
+                            node.advisorEstimate == null
+                                    ? new double[0]
+                                    : node.advisorEstimate.getRecurrentState(),
+                            statistics);
                     node.children.put(actionId, child);
                     node = child;
                     path.add(node);
@@ -189,7 +199,8 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
                                 config,
                                 random,
                                 budget,
-                                RotationEvaluationMode.REPAIR);
+                                RotationEvaluationMode.REPAIR,
+                                statistics);
                 if (evaluation == null) {
                     break;
                 }
@@ -249,14 +260,12 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
         double minimumValue = Double.POSITIVE_INFINITY;
         double maximumValue = Double.NEGATIVE_INFINITY;
         for (Node child : parent.children.values()) {
-            if (child.visits > 0) {
-                double meanValue = child.totalValue / child.visits;
-                minimumValue = Math.min(minimumValue, meanValue);
-                maximumValue = Math.max(maximumValue, meanValue);
-            }
+            double selectionValue = child.selectionValue();
+            minimumValue = Math.min(minimumValue, selectionValue);
+            maximumValue = Math.max(maximumValue, selectionValue);
         }
         for (Node child : parent.children.values()) {
-            double meanValue = child.visits > 0 ? child.totalValue / child.visits : 0.0;
+            double meanValue = child.selectionValue();
             double normalizedValue = maximumValue > minimumValue
                     ? (meanValue - minimumValue) / (maximumValue - minimumValue)
                     : 0.0;
@@ -301,6 +310,7 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
         private final List<Integer> legalActions;
         private final double[] priorWeights;
         private final double priorProbability;
+        private final PolicyValueEstimate advisorEstimate;
         private final Map<Integer, Node> children = new LinkedHashMap<>();
         private int visits;
         private double totalValue;
@@ -311,7 +321,10 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
                 RotationStep step,
                 RotationEnvironment.Snapshot snapshot,
                 int depth,
-                ExpertPolicyPrior prior) {
+                RotationSearchConfig config,
+                long requestId,
+                double[] recurrentState,
+                RotationSearchStatistics.Mutable statistics) {
             this.parent = parent;
             this.incomingAction = incomingAction;
             this.step = step.copy();
@@ -319,15 +332,34 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
             this.depth = depth;
             this.legalActions = step.done
                     ? List.of() : RotationSearchSupport.legalActions(step);
+            this.advisorEstimate = step.done || !config.advisorGuidanceEnabled
+                    ? null
+                    : RotationSearchSupport.advise(
+                            step,
+                            recurrentState,
+                            config,
+                            requestId,
+                            statistics);
             this.priorWeights = step.done
                     ? new double[step.legalActionMask.length]
-                    : RotationSearchSupport.validatedWeights(step, prior);
+                    : advisorEstimate == null
+                            ? RotationSearchSupport.validatedWeights(step, config.prior)
+                            : advisorEstimate.getPolicyPrior();
             this.priorProbability = parent == null
                     ? 1.0 : normalizedPrior(parent, incomingAction);
         }
 
         private boolean isFullyExpanded() {
             return children.size() == legalActions.size();
+        }
+
+        private double selectionValue() {
+            if (visits > 0) {
+                return totalValue / visits;
+            }
+            Double estimate = advisorEstimate == null
+                    ? null : advisorEstimate.getValueEstimate();
+            return estimate == null ? 0.0 : estimate;
         }
 
         private int sampleUnexpandedAction(Random random) {
@@ -359,5 +391,6 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
             }
             return parent.priorWeights[actionId] / total;
         }
+
     }
 }

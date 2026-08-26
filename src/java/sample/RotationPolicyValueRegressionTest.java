@@ -1,5 +1,9 @@
 package sample;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -9,6 +13,7 @@ import mechanics.rotation.ExpertPolicyPrior;
 import mechanics.rotation.PolicyAction;
 import mechanics.rotation.PolicyValueAdvisor;
 import mechanics.rotation.PolicyValueEstimate;
+import mechanics.rotation.PolicyValueInferenceClient;
 import mechanics.rotation.RecordedPolicyValueAdvisor;
 import mechanics.rotation.RotationObjective;
 import mechanics.rotation.RotationSearchConfig;
@@ -30,8 +35,12 @@ public final class RotationPolicyValueRegressionTest {
         assertUniformAndCompatibilityAdapters();
         assertRecordedBatchAndRecurrentRoundTrip();
         assertTypedFallbacks();
+        assertInferenceClientRoundTripAndTimeout();
         assertInvalidOutputsRejected();
         assertStaleAndMalformedArtifactsRejected();
+        if (args.length > 0) {
+            assertLiveService(args);
+        }
         System.out.println("RotationPolicyValueRegressionTest passed");
     }
 
@@ -161,6 +170,91 @@ public final class RotationPolicyValueRegressionTest {
                 12L, valid, null, new double[]{Double.NaN}, mask));
     }
 
+    private static void assertInferenceClientRoundTripAndTimeout() throws Exception {
+        try (ServerSocket server = new ServerSocket(0)) {
+            Thread responder = respondOnce(server, responseJson(13L), 0L);
+            try (PolicyValueInferenceClient client = new PolicyValueInferenceClient(
+                    "127.0.0.1",
+                    server.getLocalPort(),
+                    DATASET_HASH,
+                    CHECKPOINT_HASH,
+                    1000)) {
+                PolicyValueEstimate estimate = client.advise(
+                        List.of(query(13L, 42L)), 1000L).get(0);
+                assertNear(estimate.getPolicyPrior()[PolicyAction.NORMAL.getId()], 2.0 / 3.0);
+                assertNear(estimate.getPolicyPrior()[PolicyAction.WAIT_SHORT.getId()], 1.0 / 3.0);
+                if (estimate.getValueEstimate() == null
+                        || estimate.getValueEstimate() != 8.5
+                        || !Arrays.equals(
+                                estimate.getRecurrentState(),
+                                new double[]{0.5, -0.25})) {
+                    throw new AssertionError("Inference client response mismatch");
+                }
+            }
+            responder.join(1000L);
+        }
+        try (ServerSocket server = new ServerSocket(0)) {
+            Thread responder = respondOnce(server, responseJson(14L), 30L);
+            try (PolicyValueInferenceClient client = new PolicyValueInferenceClient(
+                    "127.0.0.1",
+                    server.getLocalPort(),
+                    DATASET_HASH,
+                    CHECKPOINT_HASH,
+                    1000)) {
+                PolicyValueEstimate timeout = PolicyValueAdvisor.withUniformFallback(client)
+                        .advise(List.of(query(14L, 42L)), 1L).get(0);
+                if (timeout.getDiagnostic() != PolicyValueEstimate.Diagnostic.TIMEOUT) {
+                    throw new AssertionError("Inference timeout did not fail closed");
+                }
+            }
+            responder.join(1000L);
+        }
+    }
+
+    private static Thread respondOnce(
+            ServerSocket server,
+            String response,
+            long delayMillis) {
+        Thread thread = new Thread(() -> {
+            try (Socket socket = server.accept();
+                    DataInputStream input = new DataInputStream(socket.getInputStream());
+                    DataOutputStream output = new DataOutputStream(socket.getOutputStream())) {
+                int size = input.readInt();
+                if (input.readNBytes(size).length != size) {
+                    throw new AssertionError("Inference client request was truncated");
+                }
+                if (delayMillis > 0L) {
+                    Thread.sleep(delayMillis);
+                }
+                byte[] encoded = response.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                output.writeInt(encoded.length);
+                output.write(encoded);
+                output.flush();
+            } catch (java.io.IOException exception) {
+                if (delayMillis == 0L) {
+                    throw new IllegalStateException(exception);
+                }
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        thread.start();
+        return thread;
+    }
+
+    private static String responseJson(long requestId) {
+        return "{\"schemaVersion\":1,\"kind\":\"response\",\"contract\":{"
+                + "\"simulatorRevision\":\"rotation-simulator-v4\","
+                + "\"datasetSchemaVersion\":2,\"datasetSourceHash\":\""
+                + DATASET_HASH + "\",\"actionLayoutRevision\":2,"
+                + "\"observationSchemaRevision\":2,\"modelRevision\":2,"
+                + "\"checkpointFingerprint\":\"" + CHECKPOINT_HASH + "\"},"
+                + "\"items\":[{\"requestId\":" + requestId
+                + ",\"policyPrior\":[2,0,0,0,0,0,1,0,0,0,0],"
+                + "\"valueEstimate\":8.5,\"recurrentState\":[0.5,-0.25],"
+                + "\"diagnostic\":\"none\"}]}";
+    }
+
     private static void assertStaleAndMalformedArtifactsRejected() throws Exception {
         expectFailure(() -> loadRecorded(DATASET_HASH, "c".repeat(64), FIXTURE));
         expectFailure(() -> loadRecorded("a".repeat(64), CHECKPOINT_HASH, FIXTURE));
@@ -170,6 +264,32 @@ public final class RotationPolicyValueRegressionTest {
             expectFailure(() -> loadRecorded(DATASET_HASH, CHECKPOINT_HASH, malformed));
         } finally {
             Files.deleteIfExists(malformed);
+        }
+    }
+
+    private static void assertLiveService(String[] args) throws Exception {
+        if (args.length != 4) {
+            throw new IllegalArgumentException(
+                    "Live regression requires host, port, dataset hash, and checkpoint hash");
+        }
+        try (PolicyValueInferenceClient client = new PolicyValueInferenceClient(
+                args[0],
+                Integer.parseInt(args[1]),
+                args[2],
+                args[3],
+                1000)) {
+            PolicyValueAdvisor.Query base = query(15L, 42L);
+            PolicyValueAdvisor.Query live = new PolicyValueAdvisor.Query(
+                    base.getRequestId(),
+                    base.getStep(),
+                    new double[0]);
+            PolicyValueEstimate estimate = client.advise(List.of(live), 1000L).get(0);
+            double total = Arrays.stream(estimate.getPolicyPrior()).sum();
+            if (Math.abs(total - 1.0) > 1.0e-6
+                    || estimate.getValueEstimate() == null
+                    || estimate.getRecurrentState().length == 0) {
+                throw new AssertionError("Live policy-value service response mismatch");
+            }
         }
     }
 

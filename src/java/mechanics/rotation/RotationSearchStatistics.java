@@ -11,6 +11,10 @@ public final class RotationSearchStatistics {
     public final int repairedActions;
     public final int rejectedTrajectories;
     public final int diagnosticTrajectories;
+    public final int inferenceCalls;
+    public final int inferenceBatches;
+    public final long inferenceLatencyNanos;
+    public final int inferenceFallbacks;
 
     private RotationSearchStatistics(Mutable mutable, int simulatorCalls) {
         this.simulatorCalls = simulatorCalls;
@@ -22,6 +26,10 @@ public final class RotationSearchStatistics {
         this.repairedActions = mutable.repairedActions;
         this.rejectedTrajectories = mutable.rejectedTrajectories;
         this.diagnosticTrajectories = mutable.diagnosticTrajectories;
+        this.inferenceCalls = mutable.inferenceCalls;
+        this.inferenceBatches = mutable.inferenceBatches;
+        this.inferenceLatencyNanos = mutable.inferenceLatencyNanos;
+        this.inferenceFallbacks = mutable.inferenceFallbacks;
     }
 
     /** Returns whether an evolutionary run completed initialization and mutation. */
@@ -39,6 +47,10 @@ public final class RotationSearchStatistics {
         private int repairedActions;
         private int rejectedTrajectories;
         private int diagnosticTrajectories;
+        private int inferenceCalls;
+        private int inferenceBatches;
+        private long inferenceLatencyNanos;
+        private int inferenceFallbacks;
 
         void recordEvaluation(
                 ExpertTrajectory trajectory,
@@ -68,6 +80,19 @@ public final class RotationSearchStatistics {
 
         void recordCompletedGeneration() {
             completedGenerations++;
+        }
+
+        void recordInference(
+                int calls,
+                long latencyNanos,
+                int fallbacks) {
+            if (calls <= 0 || latencyNanos < 0L || fallbacks < 0 || fallbacks > calls) {
+                throw new IllegalArgumentException("Invalid inference accounting");
+            }
+            inferenceCalls += calls;
+            inferenceBatches++;
+            inferenceLatencyNanos += latencyNanos;
+            inferenceFallbacks += fallbacks;
         }
 
         RotationSearchStatistics freeze(int simulatorCalls) {

@@ -35,7 +35,8 @@ public final class EvolutionaryRotationSearcher implements RotationSearchStrateg
                             config,
                             random,
                             budget,
-                            mode);
+                            mode,
+                            statistics);
                 } catch (IllegalArgumentException exception) {
                     statistics.recordRejectedTrajectory();
                     throw exception;
@@ -63,7 +64,8 @@ public final class EvolutionaryRotationSearcher implements RotationSearchStrateg
                         config,
                         random,
                         budget,
-                        RotationEvaluationMode.REPAIR);
+                        RotationEvaluationMode.REPAIR,
+                        statistics);
                 if (evaluation == null) {
                     break;
                 }
@@ -103,7 +105,8 @@ public final class EvolutionaryRotationSearcher implements RotationSearchStrateg
                             config,
                             random,
                             budget,
-                            RotationEvaluationMode.REPAIR);
+                            RotationEvaluationMode.REPAIR,
+                            statistics);
                     if (evaluation == null) {
                         break;
                     }
@@ -132,7 +135,8 @@ public final class EvolutionaryRotationSearcher implements RotationSearchStrateg
                         config,
                         random,
                         budget,
-                        RotationEvaluationMode.REPAIR);
+                        RotationEvaluationMode.REPAIR,
+                        statistics);
                 if (evaluation == null) {
                     break;
                 }

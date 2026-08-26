@@ -10,16 +10,21 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
-from binary_protocol import ACTION_LAYOUT_REVISION, OBSERVATION_SCHEMA_REVISION
+from binary_protocol import (
+    ACTION_LAYOUT_REVISION,
+    MAX_POLICY_VALUE_FRAME_BYTES,
+    OBSERVATION_SCHEMA_REVISION,
+    POLICY_VALUE_VERSION,
+)
 from expert_dataset import SCHEMA_VERSION as DATASET_SCHEMA_VERSION
 from expert_dataset import SIMULATOR_REVISION
 from recurrent_ppo import ARCHITECTURE_REVISION
 
 
-POLICY_VALUE_SCHEMA_VERSION = 1
+POLICY_VALUE_SCHEMA_VERSION = POLICY_VALUE_VERSION
 ACTION_SIZE = 11
 OBSERVATION_SIZE = 287
-MAX_FRAME_BYTES = 16 * 1024 * 1024
+MAX_FRAME_BYTES = MAX_POLICY_VALUE_FRAME_BYTES
 MASKED_MASS_TOLERANCE = 1.0e-12
 DIAGNOSTICS = frozenset(("none", "unavailable", "timeout", "invalid-response"))
 

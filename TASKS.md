@@ -37,7 +37,8 @@ and lineage provenance in schema v2 and requires exact replay before
 publication. Phase 21 froze a replay-complete 58-seed, 131-record three-way
 dataset after canonical source-leakage and matched-baseline gates. Phase 22
 froze the versioned policy-value advisor boundary with typed uniform fallback.
-Phase 23 is the next active target. No dependent phase may bypass
+Phase 23 integrated bounded local inference into both teacher strategies.
+Phase 24 is the next active target. No dependent phase may bypass
 the preceding correctness or quality gate.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
@@ -24872,9 +24873,9 @@ Completion evidence:
 
 ## Implementation Order: Expert-Iteration Rotation Optimization Model B-212
 
-Status: In progress (2026-08-26). Phases 1-22 are implemented. Phases 23-25
-continue from the frozen teacher dataset through neural guidance and expert
-iteration; Phase 23 is the next active target. The
+Status: In progress (2026-08-26). Phases 1-23 are implemented. Phases 24-25
+continue from the frozen teacher dataset through matched model research and
+expert iteration; Phase 24 is the next active target. The
 cross-phase responsibility and NN-integration decisions are recorded in
 `ROTATION_SEARCH_ARCHITECTURE.md`.
 
@@ -27302,7 +27303,7 @@ Completion evidence:
 
 ### Phase 23: Neural Guidance In MCTS And Evolutionary Search
 
-Status: Planned.
+Status: Done (2026-08-26).
 
 Why eighth:
 
@@ -27353,6 +27354,23 @@ Verification:
 - `./gradlew RotationSearchRegressionTest RotationPolicyValueRegressionTest BenchmarkRotationSearch BenchmarkRLJava build`
 - `python -m pytest src/python/rl/tests/test_policy_value_service.py src/python/rl/tests/test_policy_value_protocol.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- MCTS now carries recurrent state through branches, uses legal policy mass in
+  PUCT, and uses optional values only to order unvisited non-terminal leaves;
+  every archived return still comes from a simulator trajectory.
+- Evolutionary initialization and mutation repair use the same advisor boundary
+  while strict human seeds, feasibility ranking, cancellation, and exact call
+  budgets remain unchanged. Uniform guidance reproduced fixed-seed unguided
+  archives and simulator-call counters.
+- Added a persistent loopback-only Java client and threaded Python batch service
+  with deadlines, close-based cancellation, fingerprint checks, bounded frames,
+  and typed fallback. Benchmark JSON now records inference calls, batches,
+  latency, and fallback count and can select recorded or live guidance.
+- A real debug checkpoint completed Python-to-Java inference over localhost;
+  focused Java search/client tests, the restore benchmark, rollout benchmark,
+  build/Javadoc, and 18 Python protocol/service/expert-iteration tests passed.
 
 ### Phase 24: Matched Model-Architecture Tournament
 

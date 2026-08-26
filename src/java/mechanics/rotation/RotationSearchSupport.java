@@ -15,13 +15,15 @@ final class RotationSearchSupport {
             RotationSearchConfig config,
             Random random,
             Budget budget,
-            RotationEvaluationMode mode) {
+            RotationEvaluationMode mode,
+            RotationSearchStatistics.Mutable statistics) {
         if (environment == null
                 || proposedActions == null
                 || config == null
                 || random == null
                 || budget == null
-                || mode == null) {
+                || mode == null
+                || statistics == null) {
             throw new IllegalArgumentException("evaluation arguments are required");
         }
         if (mode == RotationEvaluationMode.STRICT && proposedActions.length == 0) {
@@ -49,7 +51,21 @@ final class RotationSearchSupport {
                             "strict seed action is unavailable at index " + (proposedIndex - 1)
                                     + ": " + actionId);
                 }
-                actionId = sampleLegal(step, config.prior, random);
+                if (config.advisorGuidanceEnabled) {
+                    PolicyValueEstimate estimate = advise(
+                            step,
+                            new double[0],
+                            config,
+                            Integer.toUnsignedLong(step.stepCount),
+                            statistics);
+                    actionId = sampleFromActions(
+                            step,
+                            legalActions(step),
+                            estimate.getPolicyPrior(),
+                            random);
+                } else {
+                    actionId = sampleLegal(step, config.prior, random);
+                }
                 repairedActions++;
             }
             if (!budget.consume(1)) {
@@ -103,6 +119,29 @@ final class RotationSearchSupport {
             throw new IllegalArgumentException("policy prior has no legal probability mass");
         }
         return weights;
+    }
+
+    static PolicyValueEstimate advise(
+            RotationStep step,
+            double[] recurrentState,
+            RotationSearchConfig config,
+            long requestId,
+            RotationSearchStatistics.Mutable statistics) {
+        long started = System.nanoTime();
+        List<PolicyValueEstimate> estimates = config.advisor.advise(
+                List.of(new PolicyValueAdvisor.Query(
+                        requestId,
+                        step,
+                        recurrentState)),
+                config.advisorTimeoutMillis);
+        long elapsed = System.nanoTime() - started;
+        if (estimates == null || estimates.size() != 1
+                || estimates.get(0).getRequestId() != requestId) {
+            throw new IllegalArgumentException("Policy-value advisor response mismatch");
+        }
+        PolicyValueEstimate estimate = estimates.get(0);
+        statistics.recordInference(1, elapsed, estimate.isFallback() ? 1 : 0);
+        return estimate;
     }
 
     static int sampleFromActions(
