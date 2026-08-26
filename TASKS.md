@@ -27,10 +27,10 @@ The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
 and pilot contracts. Phase 15 completed with 127 researched candidates and 73
-newly retained source-matched scenarios; Phase 16 is the next active target
-in the ordered Phase 16-25 teacher-search, dataset, neural-guidance, model-
-comparison, and expert-iteration plan. No dependent phase may bypass the
-preceding correctness or quality gate.
+newly retained source-matched scenarios. Phases 16 and 17 are complete; the
+Phase 17 audit admitted no production party because direct restore diverged on
+pending events, so Phase 17A is the next active target before Phase 18. No
+dependent phase may bypass the preceding correctness or quality gate.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
@@ -26764,7 +26764,15 @@ Verification:
 
 ### Phase 16: Seeded Teacher Search And Feasibility-First Ranking
 
-Status: Planned.
+Status: Done (2026-08-26).
+
+Completion:
+
+- Strict and repair seed evaluation, complete seed-first budgets, typed search
+  counters, and feasibility-first public archives are implemented for both
+  search strategies.
+- Focused teacher/search regressions, Java build, Javadoc, and routed preflight
+  pass in commit `f2b31e0`.
 
 Why first:
 
@@ -26826,7 +26834,16 @@ Verification:
 
 ### Phase 17: Snapshot Safety Audit And Search Admission
 
-Status: Planned.
+Status: Done (2026-08-26); fail-closed with zero production parties admitted.
+
+Completion:
+
+- Exact-loadout snapshot admission is carried by `RotationScenario` and checked
+  by both search strategies before any trajectory enters an archive.
+- Six strongest snapshot-contract candidates diverged under direct restore:
+  five lost pending Energy and two also exposed damage divergence.
+- Catalog replay and history restore remain supported; all direct-search
+  candidates are rejected until B-213 repairs pending-event restoration.
 
 Why second:
 
@@ -26877,9 +26894,56 @@ Verification:
 - `./gradlew CharacterSnapshotContractRegressionTest RotationEnvironmentRegressionTest RotationSnapshotSafetyRegressionTest RotationSeedRegressionTest build`
 - `python scripts/agent_validate.py --path src/java/simulation/SimulatorSnapshot.java --run`
 
-### Phase 18: Direct Restore And Wait-Macro Throughput
+### Phase 17A: Pending-Event Snapshot Completeness
 
 Status: Planned.
+
+Why before Phase 18:
+
+- Phase 17 proved that character-level snapshot interfaces alone do not restore
+  generic particle arrivals and every delayed damage event. Direct restore must
+  have at least one audited production scenario before it can replace replay.
+
+Target files:
+
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/event/`
+- `src/java/mechanics/energy/`
+- affected snapshot-aware character, weapon, and artifact owners
+- `src/java/sample/RotationSnapshotSafetyRegressionTest.java`
+- `src/java/sample/CharacterSnapshotContractRegressionTest.java`
+
+Tasks:
+
+- Classify each divergent pending event by owner and reconstruct it from typed,
+  immutable snapshot state without serializing executable closures.
+- Restore particle arrivals, delayed damage, owner generation, deterministic
+  RNG state, and event ordering exactly once after the timer queue is cleared.
+- Re-run multi-depth terminal equivalence on the six Phase 17 candidates and
+  admit only each exact loadout that passes independently.
+
+Acceptance criteria:
+
+- At least one production party passes uninterrupted, history-replay, and
+  direct-restore suffix equivalence through the cycle boundary.
+- Energy, damage, state hash, action mask, event order, and terminal objective
+  match exactly; duplicate, omitted, foreign-owner, and stale events fail closed.
+
+Test cases to add or update:
+
+- Normal: particle arrival before/after a branch, delayed owner hit, nested
+  timer order, two branch depths, and complete-cycle terminal equivalence.
+- Abnormal: omitted event state, duplicate reschedule, stale generation,
+  incompatible owner, and event time earlier than restored clock.
+
+Verification:
+
+- `./gradlew CharacterSnapshotContractRegressionTest RotationSnapshotSafetyRegressionTest ReactionRegressionTest PartyCatalogRegressionTest build`
+- `python scripts/agent_validate.py --path src/java/simulation/SimulatorSnapshot.java --run`
+
+### Phase 18: Direct Restore And Wait-Macro Throughput
+
+Status: Blocked until Phase 17A admits at least one production scenario.
 
 Why third:
 

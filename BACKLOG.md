@@ -4636,3 +4636,19 @@ experiment record.
   satisfies every KQMS ER ceiling. Phase 15 remains
   active until the 100-candidate and 40-accepted-seed breadth gates or source
   convergence; Phase 16 remains ordered after it.
+
+### B-213 — Pending-event snapshot completeness for rotation search
+
+- **Status:** active; ordered as TASKS.md Phase 17A before B-212 Phase 18
+- **Source:** B-212 Phase 17 direct-restore audit on 2026-08-26.
+- **Evidence:** `HuTaoXianyunVaporize`, `XiaoFurina`, `XiaoLanYan`,
+  `NaviaDoubleHydro`, `AlhaithamYelanQuickbloom`, and
+  `AyatoXilonenMonoHydro` all diverge after direct branch restore. Five lose
+  pending particle Energy; Navia and Alhaitham additionally diverge in delayed
+  damage/state. History replay remains exact.
+- **Scope/risk:** reconstruct generic particle arrivals and owner-scoped delayed
+  events from typed immutable state after timer-queue clear, preserve event
+  order and deterministic RNG, then admit exact loadouts individually; high and
+  cross-cutting simulator state.
+- **Boundary:** do not serialize closures, globally trust snapshot-aware marker
+  interfaces, or enable direct search restore before full-cycle equivalence.
