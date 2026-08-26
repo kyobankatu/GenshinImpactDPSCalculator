@@ -57,4 +57,9 @@ public final class AyatoXilonenMonoHydroPartyDefinition
                         PolicyAction.SKILL_PRESS,
                         PolicyAction.BURST));
     }
+
+    @Override
+    public boolean supportsExactSnapshotRestore() {
+        return true;
+    }
 }

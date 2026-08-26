@@ -1,11 +1,14 @@
 package model.weapon;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.DoubleSupplier;
 
 import mechanics.energy.ParticleType;
 import model.entity.Character;
 import model.entity.DamageTriggeredWeaponEffect;
+import model.entity.SnapshotAwareWeaponEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.Element;
@@ -22,7 +25,9 @@ import simulation.action.AttackAction;
  * refinement proc chance with one injectable draw. A successful Windfall emits
  * three neutral particles, matching the existing six-base-energy approximation.
  */
-public abstract class FavoniusWeapon extends Weapon implements DamageTriggeredWeaponEffect {
+public abstract class FavoniusWeapon extends Weapon implements
+        DamageTriggeredWeaponEffect,
+        SnapshotAwareWeaponEffect {
     private static final double BASE_PROC_CHANCE = 0.50;
     private static final double PROC_CHANCE_PER_REFINEMENT = 0.10;
     private static final double BASE_COOLDOWN = 13.50;
@@ -32,6 +37,8 @@ public abstract class FavoniusWeapon extends Weapon implements DamageTriggeredWe
     private final double procChance;
     private final double procCooldown;
     private final DoubleSupplier procDraw;
+    private final List<Double> procDrawTape = new ArrayList<>();
+    private int procDrawCursor;
     private double nextProcTime = Double.NEGATIVE_INFINITY;
 
     /**
@@ -95,7 +102,7 @@ public abstract class FavoniusWeapon extends Weapon implements DamageTriggeredWe
 
         double critRate = user.getEffectiveStats(currentTime).get(StatType.CRIT_RATE);
         critRate = Math.max(0.0, Math.min(critRate, 1.0));
-        if (procDraw.getAsDouble() >= critRate * procChance) {
+        if (nextProcDraw() >= critRate * procChance) {
             return;
         }
 
@@ -106,6 +113,59 @@ public abstract class FavoniusWeapon extends Weapon implements DamageTriggeredWe
             System.out.println(String.format(
                     "   [Favonius] Windfall Triggered by %s (CR: %.1f%%)",
                     user.getName(), critRate * 100.0));
+        }
+    }
+
+    /** Captures cooldown and deterministic draw replay state. */
+    @Override
+    public final State captureWeaponState() {
+        return new FavoniusState(
+                this,
+                nextProcTime,
+                procDrawCursor);
+    }
+
+    /** Restores state captured from this exact Favonius instance. */
+    @Override
+    public final void restoreWeaponState(State state) {
+        if (!(state instanceof FavoniusState)) {
+            throw new IllegalArgumentException("Favonius weapon state type is invalid");
+        }
+        FavoniusState restored = (FavoniusState) state;
+        if (restored.source != this) {
+            throw new IllegalArgumentException(
+                    "Favonius weapon state belongs to another instance");
+        }
+        nextProcTime = restored.nextProcTime;
+        procDrawCursor = restored.procDrawCursor;
+    }
+
+    private double nextProcDraw() {
+        if (procDrawCursor < procDrawTape.size()) {
+            return procDrawTape.get(procDrawCursor++);
+        }
+        double draw = procDraw.getAsDouble();
+        if (!Double.isFinite(draw) || draw < 0.0 || draw >= 1.0) {
+            throw new IllegalStateException("Favonius proc draw must be in [0, 1)");
+        }
+        procDrawTape.add(draw);
+        procDrawCursor++;
+        return draw;
+    }
+
+    /** Immutable cooldown and random-tape snapshot. */
+    private static final class FavoniusState implements State {
+        private final FavoniusWeapon source;
+        private final double nextProcTime;
+        private final int procDrawCursor;
+
+        private FavoniusState(
+                FavoniusWeapon source,
+                double nextProcTime,
+                int procDrawCursor) {
+            this.source = source;
+            this.nextProcTime = nextProcTime;
+            this.procDrawCursor = procDrawCursor;
         }
     }
 }

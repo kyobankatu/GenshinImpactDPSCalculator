@@ -40,4 +40,9 @@ public final class XiaoFurinaPartyDefinition
                         PolicyAction.PLUNGE,
                         PolicyAction.BURST));
     }
+
+    @Override
+    public boolean supportsExactSnapshotRestore() {
+        return true;
+    }
 }

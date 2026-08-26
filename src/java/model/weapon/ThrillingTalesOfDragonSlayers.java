@@ -5,6 +5,7 @@ import mechanics.buff.BuffId;
 import mechanics.buff.SimpleBuff;
 import model.entity.Character;
 import model.entity.SimulatorInitializedWeaponEffect;
+import model.entity.SnapshotAwareWeaponEffect;
 import model.entity.SwitchAwareWeaponEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
@@ -20,7 +21,9 @@ import simulation.CombatSimulator;
  * twenty-second cooldown and replaces an existing Legacy buff on that target.</p>
  */
 public class ThrillingTalesOfDragonSlayers extends Weapon
-        implements SimulatorInitializedWeaponEffect, SwitchAwareWeaponEffect {
+        implements SimulatorInitializedWeaponEffect,
+        SnapshotAwareWeaponEffect,
+        SwitchAwareWeaponEffect {
     private static final double BUFF_DURATION = 10.0;
     private static final double COOLDOWN = 20.0;
 
@@ -130,5 +133,39 @@ public class ThrillingTalesOfDragonSlayers extends Weapon
         legacy.sourcedBy(owner.getCharacterId());
         incoming.addBuff(legacy);
         lastActivationTime = currentTime;
+    }
+
+    /** Captures the Legacy activation cooldown for branch rollback. */
+    @Override
+    public State captureWeaponState() {
+        return new ThrillingTalesState(this, lastActivationTime);
+    }
+
+    /** Restores state captured from this exact weapon instance. */
+    @Override
+    public void restoreWeaponState(State state) {
+        if (!(state instanceof ThrillingTalesState)) {
+            throw new IllegalArgumentException(
+                    "Thrilling Tales state type is invalid");
+        }
+        ThrillingTalesState restored = (ThrillingTalesState) state;
+        if (restored.source != this) {
+            throw new IllegalArgumentException(
+                    "Thrilling Tales state belongs to another instance");
+        }
+        lastActivationTime = restored.lastActivationTime;
+    }
+
+    /** Immutable Legacy cooldown snapshot. */
+    private static final class ThrillingTalesState implements State {
+        private final ThrillingTalesOfDragonSlayers source;
+        private final double lastActivationTime;
+
+        private ThrillingTalesState(
+                ThrillingTalesOfDragonSlayers source,
+                double lastActivationTime) {
+            this.source = source;
+            this.lastActivationTime = lastActivationTime;
+        }
     }
 }

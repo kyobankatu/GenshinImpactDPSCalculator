@@ -7159,6 +7159,49 @@ public class ReactionRegressionTest {
         assertClose(energyAfterFirstProc, replayOwner.getCurrentEnergy(), EPS,
                 "Identical Favonius sequences should generate equal energy");
 
+        int[] branchDrawIndex = { 0 };
+        model.weapon.FavoniusCodex branchWeapon = new model.weapon.FavoniusCodex(
+                () -> draws[branchDrawIndex[0]++]);
+        TestCharacter branchOwner = testCharacter(Element.HYDRO)
+                .withStat(StatType.CRIT_RATE, 0.5);
+        branchOwner.setWeapon(branchWeapon);
+        CombatSimulator branchSim = simulatorWith(branchOwner);
+        branchOwner.restoreCurrentEnergy(0.0);
+        SimulatorSnapshot branchSnapshot = branchSim.saveSnapshot();
+        branchWeapon.onDamage(branchOwner, hit, 0.0, branchSim);
+        captureStandardOutput(() -> branchWeapon.onDamage(
+                branchOwner, hit, 0.0, branchSim));
+        double branchEnergy = branchOwner.getCurrentEnergy();
+        assertEquals(2, branchDrawIndex[0],
+                "Initial Favonius branch should consume two draws");
+        branchSim.restoreSnapshot(branchSnapshot);
+        branchWeapon.onDamage(branchOwner, hit, 0.0, branchSim);
+        captureStandardOutput(() -> branchWeapon.onDamage(
+                branchOwner, hit, 0.0, branchSim));
+        assertEquals(2, branchDrawIndex[0],
+                "Restored Favonius branch should replay its draw tape");
+        assertClose(branchEnergy, branchOwner.getCurrentEnergy(), EPS,
+                "Restored Favonius branch should reproduce Windfall Energy");
+        model.weapon.FavoniusCodex foreignBranchWeapon =
+                new model.weapon.FavoniusCodex(() -> 0.0);
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> foreignBranchWeapon.restoreWeaponState(
+                        branchWeapon.captureWeaponState()),
+                "Favonius should reject a foreign weapon snapshot");
+
+        model.weapon.FavoniusCodex invalidDrawWeapon =
+                new model.weapon.FavoniusCodex(() -> 1.0);
+        TestCharacter invalidDrawOwner = testCharacter(Element.HYDRO)
+                .withStat(StatType.CRIT_RATE, 1.0);
+        invalidDrawOwner.setWeapon(invalidDrawWeapon);
+        CombatSimulator invalidDrawSim = simulatorWith(invalidDrawOwner);
+        assertThrows(
+                IllegalStateException.class,
+                () -> invalidDrawWeapon.onDamage(
+                        invalidDrawOwner, hit, 0.0, invalidDrawSim),
+                "Favonius should reject a draw outside [0, 1)");
+
         double[] r1Draws = { 0.6, 0.599999, 0.0 };
         int[] r1DrawIndex = { 0 };
         model.weapon.FavoniusCodex r1Weapon = new model.weapon.FavoniusCodex(
@@ -15279,6 +15322,7 @@ public class ReactionRegressionTest {
                 Element.PYRO, CharacterId.AMBER);
         CombatSimulator talesSim = simulatorWith(talesOwner);
         talesSim.addCharacter(talesTarget);
+        SimulatorSnapshot talesSnapshot = talesSim.saveSnapshot();
         talesSim.switchCharacter(CharacterId.AMBER);
         assertClose(0.48,
                 resolvedStat(talesSim, talesTarget, StatType.ATK_PERCENT),
@@ -15289,6 +15333,11 @@ public class ReactionRegressionTest {
                                 == BuffId.THRILLING_TALES_LEGACY)
                         .count(),
                 "TTDS should apply one typed buff");
+        talesSim.restoreSnapshot(talesSnapshot);
+        talesSim.switchCharacter(CharacterId.AMBER);
+        assertClose(0.48,
+                resolvedStat(talesSim, talesTarget, StatType.ATK_PERCENT),
+                EPS, "TTDS snapshot should restore Legacy eligibility");
         assertClose(0.0,
                 effectiveStatAt(talesTarget, StatType.ATK_PERCENT, 10.0),
                 EPS, "TTDS should expire at exactly ten seconds");
@@ -24451,6 +24500,25 @@ public class ReactionRegressionTest {
         if (!condition) {
             throw new AssertionError(message);
         }
+    }
+
+    private static void assertThrows(
+            Class<? extends Throwable> expected,
+            Runnable action,
+            String message) {
+        try {
+            action.run();
+        } catch (Throwable thrown) {
+            if (expected.isInstance(thrown)) {
+                return;
+            }
+            throw new AssertionError(
+                    message + ": expected " + expected.getSimpleName()
+                            + " but got " + thrown.getClass().getSimpleName(),
+                    thrown);
+        }
+        throw new AssertionError(
+                message + ": expected " + expected.getSimpleName());
     }
 
     private static void assertEquals(Object expected, Object actual, String message) {

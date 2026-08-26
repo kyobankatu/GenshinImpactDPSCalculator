@@ -46,4 +46,9 @@ public final class HuTaoXianyunVaporizePartyDefinition
                         PolicyAction.PLUNGE,
                         PolicyAction.SKILL_PRESS));
     }
+
+    @Override
+    public boolean supportsExactSnapshotRestore() {
+        return true;
+    }
 }

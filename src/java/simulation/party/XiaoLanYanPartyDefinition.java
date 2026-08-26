@@ -40,4 +40,9 @@ public final class XiaoLanYanPartyDefinition
                         PolicyAction.PLUNGE,
                         PolicyAction.BURST));
     }
+
+    @Override
+    public boolean supportsExactSnapshotRestore() {
+        return true;
+    }
 }
