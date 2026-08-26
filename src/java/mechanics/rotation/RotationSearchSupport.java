@@ -153,6 +153,13 @@ final class RotationSearchSupport {
                 && step.legalActionMask[actionId] > 0.5;
     }
 
+    static void requireSearchAdmission(RotationEnvironment environment) {
+        RotationScenario scenario = environment.scenario();
+        if (scenario != null) {
+            scenario.getSnapshotSafety().requireSearchAdmission();
+        }
+    }
+
     /** One completed proposal evaluation and its repair accounting. */
     static final class Evaluation {
         final ExpertTrajectory trajectory;

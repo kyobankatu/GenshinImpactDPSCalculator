@@ -28,6 +28,7 @@ import mechanics.rotation.RotationObjective;
 import mechanics.rotation.RotationScenario;
 import mechanics.rotation.RotationSearchConfig;
 import mechanics.rotation.RotationSearchStrategy;
+import mechanics.rotation.RotationSnapshotSafety;
 import mechanics.rotation.RotationStep;
 import model.entity.ArtifactSet;
 import model.entity.Character;
@@ -178,11 +179,28 @@ public class PartyCatalogRegressionTest {
                 mechanics.rotation.ExpertPolicyPrior.uniform(),
                 () -> false,
                 List.of());
-        RotationSearchStrategy.Result result = new EvolutionaryRotationSearcher().search(
-                () -> new BattleRotationEnvironment(scenario), config);
-        if (result.simulatorCalls != config.simulatorCallBudget
-                || result.best.getObjective().invalidActionCount != 0) {
-            throw new AssertionError("Unseeded search contract failed for " + definition.name());
+        RotationSnapshotSafety.Assessment assessment = scenario.getSnapshotSafety();
+        if (assessment.admitted) {
+            RotationSearchStrategy.Result result = new EvolutionaryRotationSearcher().search(
+                    () -> new BattleRotationEnvironment(scenario), config);
+            if (result.simulatorCalls != config.simulatorCallBudget
+                    || result.best.getObjective().invalidActionCount != 0) {
+                throw new AssertionError("Unseeded search contract failed for " + definition.name());
+            }
+        } else {
+            expectSnapshotSearchRejection(() -> new EvolutionaryRotationSearcher().search(
+                    () -> new BattleRotationEnvironment(scenario), config), definition.name());
+        }
+    }
+
+    private static void expectSnapshotSearchRejection(Runnable search, String partyName) {
+        try {
+            search.run();
+            throw new AssertionError("Expected snapshot-search rejection for " + partyName);
+        } catch (IllegalStateException expected) {
+            if (!expected.getMessage().contains("snapshot admission rejected")) {
+                throw new AssertionError("Unexpected search rejection for " + partyName, expected);
+            }
         }
     }
 

@@ -300,6 +300,18 @@ public class BattleEnvironment {
                 currentStintStartTime);
     }
 
+    /** Restores paired simulator and RL state for audited branch snapshots. */
+    public void restoreSnapshot(
+            simulation.SimulatorSnapshot snapshot,
+            BranchStateSnapshot branchState) {
+        if (snapshot == null || branchState == null) {
+            throw new IllegalArgumentException("snapshot and branchState must not be null");
+        }
+        ensureReset();
+        simulator.restoreSnapshot(snapshot);
+        restoreBranchState(branchState);
+    }
+
     /**
      * Runs K independent Monte Carlo rollouts from a snapshot and returns their mean discounted return.
      *

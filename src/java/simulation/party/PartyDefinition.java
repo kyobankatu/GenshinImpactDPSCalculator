@@ -54,4 +54,9 @@ public interface PartyDefinition {
     default boolean publishDocsReport() {
         return false;
     }
+
+    /** Returns whether this exact loadout passed branch snapshot restoration. */
+    default boolean supportsExactSnapshotRestore() {
+        return false;
+    }
 }

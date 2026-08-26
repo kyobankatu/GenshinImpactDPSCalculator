@@ -19,6 +19,7 @@ public final class RotationScenario {
     private final int cycleCount;
     private final long seed;
     private final RotationObjective objective;
+    private final RotationSnapshotSafety.Assessment snapshotSafety;
 
     /**
      * Creates a scenario around an already configured episode factory.
@@ -39,6 +40,26 @@ public final class RotationScenario {
             int cycleCount,
             long seed,
             RotationObjective objective) {
+        this(
+                fingerprint,
+                episodeFactory,
+                preferredPartyId,
+                cycleDurationSeconds,
+                cycleCount,
+                seed,
+                objective,
+                RotationSnapshotSafety.Assessment.unscoped(fingerprint));
+    }
+
+    private RotationScenario(
+            String fingerprint,
+            RLEpisodeFactory episodeFactory,
+            int preferredPartyId,
+            double cycleDurationSeconds,
+            int cycleCount,
+            long seed,
+            RotationObjective objective,
+            RotationSnapshotSafety.Assessment snapshotSafety) {
         if (fingerprint == null || fingerprint.isBlank()) {
             throw new IllegalArgumentException("fingerprint must not be blank");
         }
@@ -54,8 +75,8 @@ public final class RotationScenario {
         if (!Double.isFinite(cycleDurationSeconds * cycleCount)) {
             throw new IllegalArgumentException("total horizon must be finite");
         }
-        if (objective == null) {
-            throw new IllegalArgumentException("objective must not be null");
+        if (objective == null || snapshotSafety == null) {
+            throw new IllegalArgumentException("objective and snapshotSafety must not be null");
         }
         this.fingerprint = fingerprint;
         this.episodeFactory = episodeFactory;
@@ -64,6 +85,7 @@ public final class RotationScenario {
         this.cycleCount = cycleCount;
         this.seed = seed;
         this.objective = objective;
+        this.snapshotSafety = snapshotSafety;
     }
 
     /**
@@ -133,7 +155,8 @@ public final class RotationScenario {
                 cycleDurationSeconds,
                 cycleCount,
                 seed,
-                objective);
+                objective,
+                RotationSnapshotSafety.assess(definition));
     }
 
     public String getFingerprint() {
@@ -166,5 +189,9 @@ public final class RotationScenario {
 
     public RotationObjective getObjective() {
         return objective;
+    }
+
+    public RotationSnapshotSafety.Assessment getSnapshotSafety() {
+        return snapshotSafety;
     }
 }

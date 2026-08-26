@@ -131,25 +131,15 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
                 actionHistory,
                 invalidActionCount,
                 currentStep.copy(),
-                stateHash);
+                stateHash,
+                simulatorSnapshot,
+                branchState);
     }
 
     @Override
     public RotationStep restore(Snapshot snapshot) {
         ensureReady();
-        if (!(snapshot instanceof BattleSnapshot)) {
-            throw new IllegalArgumentException("snapshot was not created by BattleRotationEnvironment");
-        }
-        BattleSnapshot battleSnapshot = (BattleSnapshot) snapshot;
-        if (battleSnapshot.ownerId != ownerId) {
-            throw new IllegalArgumentException("snapshot belongs to a different environment");
-        }
-        if (battleSnapshot.resetGeneration != resetGeneration) {
-            throw new IllegalArgumentException("snapshot belongs to a different reset generation");
-        }
-        if (!scenario.getFingerprint().equals(battleSnapshot.scenarioFingerprint)) {
-            throw new IllegalArgumentException("snapshot scenario fingerprint mismatch");
-        }
+        BattleSnapshot battleSnapshot = requireOwnedSnapshot(snapshot);
         rebuildFromHistory(battleSnapshot.actionHistory);
         if (invalidActionCount != battleSnapshot.invalidActionCount) {
             throw new IllegalStateException("replayed invalid-action count mismatch");
@@ -160,6 +150,29 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
                 battleSnapshot.step.legalActionMask);
         if (restoredHash != battleSnapshot.stateHash) {
             throw new IllegalStateException("restored state hash mismatch");
+        }
+        currentStep = battleSnapshot.step.copy();
+        return currentStep.copy();
+    }
+
+    /** Restores one branch directly for snapshot-admission regression audits. */
+    public RotationStep restoreDirectForAudit(Snapshot snapshot) {
+        ensureReady();
+        BattleSnapshot battleSnapshot = requireOwnedSnapshot(snapshot);
+        battleEnvironment.restoreSnapshot(
+                battleSnapshot.simulatorSnapshot,
+                battleSnapshot.branchState);
+        invalidActionCount = battleSnapshot.invalidActionCount;
+        actionHistory.clear();
+        for (int actionId : battleSnapshot.actionHistory) {
+            actionHistory.add(actionId);
+        }
+        long restoredHash = hashState(
+                battleEnvironment.saveSnapshot(),
+                battleEnvironment.saveBranchState(),
+                battleSnapshot.step.legalActionMask);
+        if (restoredHash != battleSnapshot.stateHash) {
+            throw new IllegalStateException("direct restored state hash mismatch");
         }
         currentStep = battleSnapshot.step.copy();
         return currentStep.copy();
@@ -193,6 +206,23 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         if (currentStep == null) {
             throw new IllegalStateException("rotation environment must be reset first");
         }
+    }
+
+    private BattleSnapshot requireOwnedSnapshot(Snapshot snapshot) {
+        if (!(snapshot instanceof BattleSnapshot)) {
+            throw new IllegalArgumentException("snapshot was not created by BattleRotationEnvironment");
+        }
+        BattleSnapshot battleSnapshot = (BattleSnapshot) snapshot;
+        if (battleSnapshot.ownerId != ownerId) {
+            throw new IllegalArgumentException("snapshot belongs to a different environment");
+        }
+        if (battleSnapshot.resetGeneration != resetGeneration) {
+            throw new IllegalArgumentException("snapshot belongs to a different reset generation");
+        }
+        if (!scenario.getFingerprint().equals(battleSnapshot.scenarioFingerprint)) {
+            throw new IllegalArgumentException("snapshot scenario fingerprint mismatch");
+        }
+        return battleSnapshot;
     }
 
     private void rebuildFromHistory(int[] history) {
@@ -272,6 +302,8 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         private final int invalidActionCount;
         private final RotationStep step;
         private final long stateHash;
+        private final SimulatorSnapshot simulatorSnapshot;
+        private final BattleEnvironment.BranchStateSnapshot branchState;
 
         private BattleSnapshot(
                 long ownerId,
@@ -280,7 +312,9 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
                 List<Integer> actionHistory,
                 int invalidActionCount,
                 RotationStep step,
-                long stateHash) {
+                long stateHash,
+                SimulatorSnapshot simulatorSnapshot,
+                BattleEnvironment.BranchStateSnapshot branchState) {
             this.ownerId = ownerId;
             this.resetGeneration = resetGeneration;
             this.scenarioFingerprint = scenarioFingerprint;
@@ -288,6 +322,8 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
             this.invalidActionCount = invalidActionCount;
             this.step = step;
             this.stateHash = stateHash;
+            this.simulatorSnapshot = simulatorSnapshot;
+            this.branchState = branchState;
         }
 
         @Override

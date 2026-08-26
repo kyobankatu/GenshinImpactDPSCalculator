@@ -25,6 +25,7 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
         boolean cancelled = false;
 
         try (RotationEnvironment environment = requireEnvironment(environmentFactory)) {
+            RotationSearchSupport.requireSearchAdmission(environment);
             for (int[] initialSeed : config.getInitialSeeds()) {
                 RotationSearchSupport.Evaluation evaluation;
                 RotationEvaluationMode mode = initialSeed.length == 0

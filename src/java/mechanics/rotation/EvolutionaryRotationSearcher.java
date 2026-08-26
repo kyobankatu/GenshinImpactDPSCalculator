@@ -23,6 +23,7 @@ public final class EvolutionaryRotationSearcher implements RotationSearchStrateg
         List<int[]> initialSeeds = config.getInitialSeeds();
 
         try (RotationEnvironment environment = requireEnvironment(environmentFactory)) {
+            RotationSearchSupport.requireSearchAdmission(environment);
             for (int[] initialSeed : initialSeeds) {
                 RotationSearchSupport.Evaluation evaluation;
                 RotationEvaluationMode mode = initialSeed.length == 0
