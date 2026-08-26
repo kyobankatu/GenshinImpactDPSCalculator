@@ -22,6 +22,11 @@ from expert_dataset import (
     load_expert_dataset,
     training_records,
 )
+from policy_value_protocol import (
+    DATASET_SCHEMA_VERSION,
+    PolicyValueContract,
+    normalize_policy_value_estimate,
+)
 from recurrent_ppo import load_policy
 
 
@@ -48,6 +53,7 @@ class PolicyPriorProvider:
         self.policy = None
         self.hidden_size = None
         self.failure = None
+        self.contract = None
         try:
             payload = torch.load(checkpoint_path, map_location="cpu")
             checkpoint_dataset_hash = payload.get(
@@ -72,6 +78,18 @@ class PolicyPriorProvider:
             self.policy, _ = load_policy(checkpoint_path)
             self.policy.eval()
             self.hidden_size = self.policy.hidden_size
+            self.contract = PolicyValueContract(
+                simulator_revision=payload["simulator_revision"],
+                dataset_schema_version=DATASET_SCHEMA_VERSION,
+                dataset_source_hash=dataset_source_hash,
+                action_layout_revision=payload["action_layout_revision"],
+                observation_schema_revision=payload["observation_schema_revision"],
+                model_revision=payload["architecture_revision"],
+                checkpoint_fingerprint=hashlib.sha256(
+                    Path(checkpoint_path).read_bytes()
+                ).hexdigest(),
+            )
+            self.contract.validate()
         except (OSError, RuntimeError, ValueError) as error:
             self.failure = error
             if not allow_fallback:
@@ -94,9 +112,14 @@ class PolicyPriorProvider:
                     deterministic=False,
                 )
             probabilities = output["probabilities"][0].tolist()
-            if any(not math.isfinite(value) or value < 0.0 for value in probabilities):
-                raise ValueError("Policy prior returned invalid probabilities")
-            return tuple(probabilities)
+            estimate = normalize_policy_value_estimate(
+                0,
+                probabilities,
+                float(output["value"][0]),
+                output["hidden"][0].tolist(),
+                action_mask,
+            )
+            return estimate.policy_prior
         except (RuntimeError, ValueError) as error:
             self.failure = error
             if not self.allow_fallback:

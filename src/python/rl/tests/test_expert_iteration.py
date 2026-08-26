@@ -58,6 +58,8 @@ def test_policy_prior_fallback_and_recovery_selection(expert_checkpoint, tmp_pat
         expert_checkpoint, dataset.source_hash, allow_fallback=False
     )
     weights = provider.weights(decision.observation, decision.legal_action_mask)
+    assert provider.contract.dataset_source_hash == dataset.source_hash
+    assert len(provider.contract.checkpoint_fingerprint) == 64
     assert math.isclose(sum(weights), 1.0, abs_tol=1e-6)
     assert all(
         weights[index] == 0.0

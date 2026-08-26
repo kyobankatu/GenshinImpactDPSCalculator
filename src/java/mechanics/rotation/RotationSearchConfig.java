@@ -19,6 +19,7 @@ public final class RotationSearchConfig {
     public final double explorationConstant;
     public final long seed;
     public final ExpertPolicyPrior prior;
+    public final PolicyValueAdvisor advisor;
     public final BooleanSupplier cancellation;
     private final List<int[]> initialSeeds;
 
@@ -45,7 +46,8 @@ public final class RotationSearchConfig {
                 prior,
                 cancellation,
                 initialSeeds,
-                1);
+                1,
+                PolicyValueAdvisor.fromPrior(prior));
     }
 
     /** Creates a fully explicit search configuration including Wait macros. */
@@ -61,6 +63,34 @@ public final class RotationSearchConfig {
             BooleanSupplier cancellation,
             List<int[]> initialSeeds,
             int maxWaitRunLength) {
+        this(
+                simulatorCallBudget,
+                maxActions,
+                archiveSize,
+                populationSize,
+                eliteCount,
+                explorationConstant,
+                seed,
+                prior,
+                cancellation,
+                initialSeeds,
+                maxWaitRunLength,
+                PolicyValueAdvisor.fromPrior(prior));
+    }
+
+    private RotationSearchConfig(
+            int simulatorCallBudget,
+            int maxActions,
+            int archiveSize,
+            int populationSize,
+            int eliteCount,
+            double explorationConstant,
+            long seed,
+            ExpertPolicyPrior prior,
+            BooleanSupplier cancellation,
+            List<int[]> initialSeeds,
+            int maxWaitRunLength,
+            PolicyValueAdvisor advisor) {
         if (simulatorCallBudget <= 0) {
             throw new IllegalArgumentException("simulatorCallBudget must be positive");
         }
@@ -83,8 +113,9 @@ public final class RotationSearchConfig {
         if (!Double.isFinite(explorationConstant) || explorationConstant < 0.0) {
             throw new IllegalArgumentException("explorationConstant must be finite and non-negative");
         }
-        if (prior == null || cancellation == null || initialSeeds == null) {
-            throw new IllegalArgumentException("prior, cancellation, and initialSeeds are required");
+        if (prior == null || advisor == null || cancellation == null || initialSeeds == null) {
+            throw new IllegalArgumentException(
+                    "prior, advisor, cancellation, and initialSeeds are required");
         }
         List<int[]> seedCopy = copySeeds(initialSeeds);
         int longestSeed = 0;
@@ -100,6 +131,7 @@ public final class RotationSearchConfig {
         this.explorationConstant = explorationConstant;
         this.seed = seed;
         this.prior = prior;
+        this.advisor = advisor;
         this.cancellation = cancellation;
         this.initialSeeds = seedCopy;
     }
@@ -132,7 +164,8 @@ public final class RotationSearchConfig {
                 prior,
                 cancellation,
                 seeds,
-                maxWaitRunLength);
+                maxWaitRunLength,
+                advisor);
     }
 
     /** Returns a copy using a validated model or recorded policy prior. */
@@ -148,7 +181,30 @@ public final class RotationSearchConfig {
                 policyPrior,
                 cancellation,
                 initialSeeds,
-                maxWaitRunLength);
+                maxWaitRunLength,
+                PolicyValueAdvisor.fromPrior(policyPrior));
+    }
+
+    /** Returns a copy using the versioned advisor through the legacy prior adapter. */
+    public RotationSearchConfig withAdvisor(
+            PolicyValueAdvisor policyValueAdvisor,
+            long timeoutMillis) {
+        ExpertPolicyPrior policyPrior = ExpertPolicyPrior.fromAdvisor(
+                policyValueAdvisor,
+                timeoutMillis);
+        return new RotationSearchConfig(
+                simulatorCallBudget,
+                maxActions,
+                archiveSize,
+                populationSize,
+                eliteCount,
+                explorationConstant,
+                seed,
+                policyPrior,
+                cancellation,
+                initialSeeds,
+                maxWaitRunLength,
+                policyValueAdvisor);
     }
 
     /** Returns a copy with one search-internal Wait run maximum. */
@@ -164,7 +220,8 @@ public final class RotationSearchConfig {
                 prior,
                 cancellation,
                 initialSeeds,
-                waitRunLength);
+                waitRunLength,
+                advisor);
     }
 
     /** Returns defensive copies of optional human or prior-search seeds. */

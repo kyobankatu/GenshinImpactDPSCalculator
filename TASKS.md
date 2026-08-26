@@ -35,8 +35,9 @@ disabled after their quality gate failed. Phase 19 admitted five of six audited
 teachers under matched budgets. Phase 20 froze complete source, search, build,
 and lineage provenance in schema v2 and requires exact replay before
 publication. Phase 21 froze a replay-complete 58-seed, 131-record three-way
-dataset after canonical source-leakage and matched-baseline gates. Phase 22 is
-the next active target. No dependent phase may bypass
+dataset after canonical source-leakage and matched-baseline gates. Phase 22
+froze the versioned policy-value advisor boundary with typed uniform fallback.
+Phase 23 is the next active target. No dependent phase may bypass
 the preceding correctness or quality gate.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
@@ -24871,9 +24872,9 @@ Completion evidence:
 
 ## Implementation Order: Expert-Iteration Rotation Optimization Model B-212
 
-Status: In progress (2026-08-26). Phases 1-21 are implemented. Phases 22-25
+Status: In progress (2026-08-26). Phases 1-22 are implemented. Phases 23-25
 continue from the frozen teacher dataset through neural guidance and expert
-iteration; Phase 22 is the next active target. The
+iteration; Phase 23 is the next active target. The
 cross-phase responsibility and NN-integration decisions are recorded in
 `ROTATION_SEARCH_ARCHITECTURE.md`.
 
@@ -27236,7 +27237,7 @@ Completion evidence:
 
 ### Phase 22: Versioned Policy-Value Advisor Contract
 
-Status: Planned.
+Status: Done (2026-08-26).
 
 Why seventh:
 
@@ -27286,6 +27287,18 @@ Verification:
 - `./gradlew RotationPolicyValueRegressionTest RotationExpertIterationRegressionTest BenchmarkRLJava build`
 - `python -m pytest src/python/rl/tests/test_policy_value_protocol.py src/python/rl/tests/test_expert_iteration.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Added a schema-v1 batched Java/Python contract covering simulator, dataset,
+  action, observation, model, and checkpoint fingerprints plus caller-owned
+  recurrent state and optional non-terminal value estimates.
+- Both uniform and recorded advisors normalize only simulator-legal mass;
+  unavailable states, late responses, malformed output, and response-order or
+  mask disagreement fail closed through typed deterministic fallback.
+- A shared JSON fixture reproduced policy normalization and recurrent-state
+  output in both languages. The focused Java gate, Javadoc, build, rollout
+  benchmark, and 14 Python contract/expert-iteration tests passed.
 
 ### Phase 23: Neural Guidance In MCTS And Evolutionary Search
 
