@@ -140,6 +140,19 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
     public RotationStep restore(Snapshot snapshot) {
         ensureReady();
         BattleSnapshot battleSnapshot = requireOwnedSnapshot(snapshot);
+        if (!scenario.getSnapshotSafety().admitted) {
+            return restoreByReplay(battleSnapshot);
+        }
+        return restoreDirect(battleSnapshot);
+    }
+
+    /** Restores one branch by replay as a direct-restore correctness oracle. */
+    public RotationStep restoreByReplayForAudit(Snapshot snapshot) {
+        ensureReady();
+        return restoreByReplay(requireOwnedSnapshot(snapshot));
+    }
+
+    private RotationStep restoreByReplay(BattleSnapshot battleSnapshot) {
         rebuildFromHistory(battleSnapshot.actionHistory);
         if (invalidActionCount != battleSnapshot.invalidActionCount) {
             throw new IllegalStateException("replayed invalid-action count mismatch");
@@ -155,10 +168,7 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         return currentStep.copy();
     }
 
-    /** Restores one branch directly for snapshot-admission regression audits. */
-    public RotationStep restoreDirectForAudit(Snapshot snapshot) {
-        ensureReady();
-        BattleSnapshot battleSnapshot = requireOwnedSnapshot(snapshot);
+    private RotationStep restoreDirect(BattleSnapshot battleSnapshot) {
         battleEnvironment.restoreSnapshot(
                 battleSnapshot.simulatorSnapshot,
                 battleSnapshot.branchState);

@@ -132,11 +132,11 @@ public class RotationSnapshotSafetyRegressionTest {
             RotationEnvironment.Snapshot snapshot = environment.snapshot();
             List<StepSignature> uninterrupted = executeSuffix(
                     environment, step, actions, branchDepth, partyName);
-            RotationStep directBranch =
-                    environment.restoreDirectForAudit(snapshot);
+            RotationStep directBranch = environment.restore(snapshot);
             List<StepSignature> direct = executeSuffix(
                     environment, directBranch, actions, branchDepth, partyName);
-            RotationStep replayedBranch = environment.restore(snapshot);
+            RotationStep replayedBranch =
+                    environment.restoreByReplayForAudit(snapshot);
             List<StepSignature> replayed = executeSuffix(
                     environment, replayedBranch, actions, branchDepth, partyName);
             assertSameSuffix(
