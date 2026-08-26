@@ -8,9 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 import java.util.zip.GZIPOutputStream;
 
@@ -38,13 +38,7 @@ public final class ExpertDatasetWriter {
         if (recordsPerShard <= 0) {
             throw new IllegalArgumentException("recordsPerShard must be positive");
         }
-        Set<String> recordIds = new HashSet<>();
-        for (ExpertDatasetRecord record : records) {
-            record.validate();
-            if (!recordIds.add(record.getRecordId())) {
-                throw new IllegalArgumentException("Duplicate dataset record ID: " + record.getRecordId());
-            }
-        }
+        validateRecords(records);
         Files.createDirectories(directory);
         List<DatasetManifest.Shard> shards = new ArrayList<>();
         for (int offset = 0; offset < records.size(); offset += recordsPerShard) {
@@ -69,6 +63,40 @@ public final class ExpertDatasetWriter {
             Files.deleteIfExists(temporaryManifest);
         }
         return manifest;
+    }
+
+    /** Validates record identity and ordered parent lineage as one dataset unit. */
+    static void validateRecords(List<ExpertDatasetRecord> records) {
+        Map<String, Integer> recordIndexes = new HashMap<>();
+        for (int index = 0; index < records.size(); index++) {
+            ExpertDatasetRecord record = records.get(index);
+            if (record == null) {
+                throw new IllegalArgumentException("Dataset contains a null record");
+            }
+            record.validate();
+            record.replayAndValidate();
+            if (recordIndexes.putIfAbsent(record.getRecordId(), index) != null) {
+                throw new IllegalArgumentException(
+                        "Duplicate dataset record ID: " + record.getRecordId());
+            }
+        }
+        for (int index = 0; index < records.size(); index++) {
+            ExpertDatasetRecord record = records.get(index);
+            for (String parentId : record.getProvenance().getParentRecordIds()) {
+                Integer parentIndex = recordIndexes.get(parentId);
+                if (parentIndex == null || parentIndex >= index) {
+                    throw new IllegalArgumentException(
+                            "Dataset parent must precede its child: " + parentId);
+                }
+                ExpertDatasetRecord parent = records.get(parentIndex);
+                if (!parent.getScenarioFingerprint().equals(record.getScenarioFingerprint())
+                        || !parent.getProvenance().getSourceContentHash().equals(
+                                record.getProvenance().getSourceContentHash())) {
+                    throw new IllegalArgumentException(
+                            "Dataset lineage crosses source or scenario boundaries");
+                }
+            }
+        }
     }
 
     private static DatasetManifest.Shard writeShard(

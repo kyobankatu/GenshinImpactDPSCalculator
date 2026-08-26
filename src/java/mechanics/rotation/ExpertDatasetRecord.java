@@ -11,14 +11,15 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import mechanics.optimization.TotalOptimizationResult;
 import mechanics.rl.ObservationEncoder;
 import mechanics.rl.PrivilegedStateEncoder;
 import simulation.party.PartyCatalog;
 
 /** Versioned, hash-protected expert trajectory with per-decision labels. */
 public final class ExpertDatasetRecord {
-    public static final int SCHEMA_VERSION = 1;
-    public static final String SIMULATOR_REVISION = "rotation-simulator-v2";
+    public static final int SCHEMA_VERSION = 2;
+    public static final String SIMULATOR_REVISION = "rotation-simulator-v3";
 
     private static final Gson GSON = new Gson();
 
@@ -37,6 +38,7 @@ public final class ExpertDatasetRecord {
     private final int privilegedSchemaRevision;
     private final int searchBudget;
     private final int trajectoryRank;
+    private final ExpertDatasetProvenance provenance;
     private final List<Decision> decisions;
     private final Objective terminalObjective;
 
@@ -51,6 +53,7 @@ public final class ExpertDatasetRecord {
             int cycleCount,
             int searchBudget,
             int trajectoryRank,
+            ExpertDatasetProvenance provenance,
             List<Decision> decisions,
             Objective terminalObjective) {
         this.schemaVersion = SCHEMA_VERSION;
@@ -68,6 +71,7 @@ public final class ExpertDatasetRecord {
         this.privilegedSchemaRevision = PrivilegedStateEncoder.SCHEMA_REVISION;
         this.searchBudget = searchBudget;
         this.trajectoryRank = trajectoryRank;
+        this.provenance = provenance;
         this.decisions = decisions == null ? null : List.copyOf(decisions);
         this.terminalObjective = terminalObjective;
         validate(false);
@@ -82,9 +86,11 @@ public final class ExpertDatasetRecord {
             String split,
             int searchBudget,
             int trajectoryRank,
+            ExpertDatasetProvenance provenance,
             int[] actions) {
-        if (scenario == null || actions == null) {
-            throw new IllegalArgumentException("scenario and actions are required");
+        if (scenario == null || provenance == null || actions == null) {
+            throw new IllegalArgumentException(
+                    "scenario, provenance, and actions are required");
         }
         List<Decision> decisions = new ArrayList<>();
         RotationStep step;
@@ -122,6 +128,7 @@ public final class ExpertDatasetRecord {
                 scenario.getCycleCount(),
                 searchBudget,
                 trajectoryRank,
+                provenance,
                 decisions,
                 Objective.from(step.objective));
     }
@@ -164,13 +171,30 @@ public final class ExpertDatasetRecord {
                 || cycleCount <= 0 || searchBudget <= 0 || trajectoryRank < 0) {
             throw new IllegalArgumentException("Invalid dataset metadata: " + recordId);
         }
-        if (decisions == null || decisions.isEmpty() || terminalObjective == null) {
+        if (provenance == null
+                || decisions == null
+                || decisions.isEmpty()
+                || terminalObjective == null) {
             throw new IllegalArgumentException("Dataset trajectory must not be empty: " + recordId);
+        }
+        provenance.validate();
+        if (provenance.getFeasibilityRank() != trajectoryRank
+                || provenance.getSearchSeed() != seed
+                || !provenance.getScenarioBuildFingerprint().equals(scenarioFingerprint)) {
+            throw new IllegalArgumentException(
+                    "Dataset provenance identity mismatch: " + recordId);
         }
         for (int index = 0; index < decisions.size(); index++) {
             decisions.get(index).validate(index == 0, recordId);
         }
         terminalObjective.validate(recordId);
+        if (terminalObjective.elapsedSeconds + 1.0e-6
+                        < cycleDurationSeconds * cycleCount
+                || terminalObjective.invalidActionCount != 0
+                || !terminalObjective.cyclicEnergyFeasible) {
+            throw new IllegalArgumentException(
+                    "Dataset trajectory is not terminal and cyclic: " + recordId);
+        }
         if (requireHash && !calculateHash().equals(recordHash)) {
             throw new IllegalArgumentException("Dataset record hash mismatch: " + recordId);
         }
@@ -179,8 +203,15 @@ public final class ExpertDatasetRecord {
     /** Replays this record against the current simulator and requires exact labels. */
     public void replayAndValidate() {
         validate();
-        RotationScenario scenario = RotationScenario.forParty(
-                PartyCatalog.require(partyName),
+        simulation.party.PartyDefinition definition = PartyCatalog.require(partyName);
+        if (!definition.loadoutFingerprint().equals(
+                provenance.getPartyLoadoutFingerprint())) {
+            throw new IllegalArgumentException("Dataset party loadout is stale: " + recordId);
+        }
+        TotalOptimizationResult build = provenance.reconstructBuild();
+        RotationScenario scenario = RotationScenario.forPartyBuild(
+                definition,
+                build,
                 new mechanics.rl.EpisodeConfig(),
                 cycleDurationSeconds,
                 cycleCount,
@@ -224,6 +255,10 @@ public final class ExpertDatasetRecord {
 
     public String getSplit() {
         return split;
+    }
+
+    public ExpertDatasetProvenance getProvenance() {
+        return provenance;
     }
 
     public List<Decision> getDecisions() {

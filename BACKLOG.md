@@ -4636,6 +4636,12 @@ experiment record.
   satisfies every KQMS ER ceiling. Phase 15 remains
   active until the 100-candidate and 40-accepted-seed breadth gates or source
   convergence; Phase 16 remains ordered after it.
+- **Dataset-provenance checkpoint (2026-08-26):** schema v2 records now embed
+  complete source/search/build/lineage evidence and reconstruct exact KQMS
+  builds without rerunning optimization. Writer and reader require exact
+  simulator replay before publication or consumption. The qualified Hu Tao
+  teacher reproduced eight records at 16,384 calls and all replayed exactly;
+  Phase 21 split breadth and leakage gates remain open.
 
 ### B-213 — Pending-event snapshot completeness for rotation search
 

@@ -10,6 +10,7 @@ import mechanics.rl.EpisodeConfig;
 import mechanics.rotation.BattleRotationEnvironment;
 import mechanics.rotation.EvolutionaryRotationSearcher;
 import mechanics.rotation.ExpertDatasetRecord;
+import mechanics.rotation.ExpertDatasetProvenance;
 import mechanics.rotation.ExpertDatasetWriter;
 import mechanics.rotation.ExpertPolicyPrior;
 import mechanics.rotation.ExpertTrajectory;
@@ -72,7 +73,7 @@ public class GenerateRotationDataset {
                 if (campaign) {
                     continue;
                 }
-                qualityReport.requirePublishable(scenario.getFingerprint());
+                quality = qualityReport.requirePublishable(scenario.getFingerprint());
             }
             Arm requestedArm = teacherArm(strategyName);
             if (quality.getRetainedTeacher() != requestedArm) {
@@ -113,13 +114,28 @@ public class GenerateRotationDataset {
             totalSimulatorCalls += result.simulatorCalls;
             for (int rank = 0; rank < result.archive.size(); rank++) {
                 ExpertTrajectory trajectory = result.archive.get(rank);
+                String recordId = definition.name() + "-" + scenarioSeed + "-" + rank;
+                ExpertDatasetProvenance provenance =
+                        ExpertDatasetProvenance.capture(
+                                sourceSeed,
+                                definition,
+                                build,
+                                scenario,
+                                quality,
+                                result,
+                                rank,
+                                rank == 0
+                                        ? List.of()
+                                        : List.of(definition.name() + "-"
+                                                + scenarioSeed + "-0"));
                 records.add(ExpertDatasetRecord.capture(
-                        definition.name() + "-" + scenarioSeed + "-" + rank,
+                        recordId,
                         scenario,
                         definition.name(),
                         split,
                         callBudget,
                         rank,
+                        provenance,
                         trajectory.getActions()));
             }
         }

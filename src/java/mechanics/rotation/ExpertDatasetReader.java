@@ -90,6 +90,7 @@ public final class ExpertDatasetReader {
         if (records.size() != manifest.getTotalRecords()) {
             throw new IllegalArgumentException("Dataset manifest total record count mismatch");
         }
+        ExpertDatasetWriter.validateRecords(records);
         return List.copyOf(records);
     }
 }

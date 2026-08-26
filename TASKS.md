@@ -32,8 +32,10 @@ The initial Phase 17 audit rejected all six production candidates, then Phase
 17A repaired pending particle, weapon, reaction, and timer state and admitted
 all six exact loadouts. Phase 18 retained direct restore but left Wait macros
 disabled after their quality gate failed. Phase 19 admitted five of six audited
-teachers under matched budgets. Phase 20 is the next active target. No dependent phase
-may bypass the preceding correctness or quality gate.
+teachers under matched budgets. Phase 20 froze complete source, search, build,
+and lineage provenance in schema v2 and requires exact replay before
+publication. Phase 21 is the next active target. No dependent phase may bypass
+the preceding correctness or quality gate.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
@@ -27095,7 +27097,7 @@ Verification:
 
 ### Phase 20: Expert Dataset Provenance And Replay Schema
 
-Status: Planned.
+Status: Done (2026-08-26).
 
 Why fifth:
 
@@ -27109,6 +27111,7 @@ Target files:
 - `src/java/mechanics/rotation/ExpertDatasetReader.java`
 - `src/java/mechanics/rotation/DatasetManifest.java`
 - `config/rotation_dataset/schema_v1.json`
+- `config/rotation_dataset/schema_v2.json`
 - `src/java/sample/GenerateRotationDataset.java`
 - `src/java/sample/ReplayRotationDataset.java`
 - `src/java/sample/RotationDatasetRegressionTest.java`
@@ -27142,7 +27145,20 @@ Test cases to add or update:
 Verification:
 
 - `./gradlew RotationDatasetRegressionTest RotationTeacherQualityRegressionTest BenchmarkRotationSearch build javadoc`
-- `python scripts/agent_validate.py --path config/rotation_dataset/schema_v1.json --run`
+- `python scripts/agent_validate.py --path config/rotation_dataset/schema_v1.json --path config/rotation_dataset/schema_v2.json --path src/java/mechanics/rotation/ExpertDatasetRecord.java --run`
+
+Completion evidence:
+
+- Schema v2 persists source identity/adaptation, ordered parent lineage,
+  retained search mode/rank/accounting, matched quality seeds and medians, exact
+  ER targets and rolls, optimizer/artifact revisions, and all build/loadout
+  fingerprints. Schema v1 records fail closed rather than being inferred.
+- Writer and reader validate the complete lineage and replay every trajectory
+  from its reconstructed frozen build before returning or publishing it.
+- Deterministic mixed-archetype round trips, malformed provenance cases, the
+  specified Java gates, and routed agent validation pass. A qualified Hu Tao
+  16,384-call generation published eight schema-v2 records and replayed all
+  eight exactly.
 
 ### Phase 21: Dataset Split And Final Quality Gate
 

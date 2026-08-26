@@ -1,7 +1,5 @@
 package sample;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -19,9 +17,6 @@ import mechanics.optimization.PartyBuildResolver;
 import mechanics.optimization.TotalOptimizationResult;
 import mechanics.rotation.BattleRotationEnvironment;
 import mechanics.rotation.EvolutionaryRotationSearcher;
-import mechanics.rotation.ExpertDatasetRecord;
-import mechanics.rotation.ExpertDatasetReader;
-import mechanics.rotation.ExpertDatasetWriter;
 import mechanics.rotation.PolicyAction;
 import mechanics.rotation.RotationEnvironment;
 import mechanics.rotation.RotationObjective;
@@ -46,14 +41,12 @@ public class PartyCatalogRegressionTest {
     public static void main(String[] args) {
         QuietExecution.call(() -> {
             assertCampaignMetadata();
-            List<ExpertDatasetRecord> records = new ArrayList<>();
             for (PartyDefinition definition : PartyCatalog.rlEnabled()) {
                 assertDefinitionAndRlFactoryMatch(definition.name());
                 assertFreshRlSimulators(definition.name());
-                records.add(assertBaselineMask(definition));
+                assertBaselineMask(definition);
                 assertSnapshotAndUnseededSearch(definition);
             }
-            assertDatasetShardReplay(records);
             assertAbnormalRegistrationsRejected();
             assertRlDoesNotContain("DisabledFixture");
             return null;
@@ -103,7 +96,7 @@ public class PartyCatalogRegressionTest {
                 "holdout scenario count");
     }
 
-    private static ExpertDatasetRecord assertBaselineMask(PartyDefinition definition) {
+    private static void assertBaselineMask(PartyDefinition definition) {
         RotationScenario scenario = scenario(definition, 1000L);
         List<Integer> accepted = new ArrayList<>();
         try (BattleRotationEnvironment environment = new BattleRotationEnvironment(scenario)) {
@@ -125,32 +118,6 @@ public class PartyCatalogRegressionTest {
                 }
                 actionIndex++;
             }
-        }
-        int[] actions = accepted.stream().mapToInt(Integer::intValue).toArray();
-        return ExpertDatasetRecord.capture(
-                "party-campaign-" + definition.name(),
-                scenario,
-                definition.name(),
-                definition.datasetSplit().getWireName(),
-                12,
-                0,
-                actions);
-    }
-
-    private static void assertDatasetShardReplay(List<ExpertDatasetRecord> records) {
-        try {
-            Path directory = Files.createTempDirectory("party-campaign-dataset-");
-            ExpertDatasetWriter.write(directory, records, 1);
-            List<ExpertDatasetRecord> loaded = ExpertDatasetReader.read(
-                    directory.resolve(ExpertDatasetWriter.MANIFEST_FILE));
-            if (loaded.size() != records.size()) {
-                throw new AssertionError("Campaign dataset changed record count");
-            }
-            for (ExpertDatasetRecord record : loaded) {
-                record.replayAndValidate();
-            }
-        } catch (java.io.IOException exception) {
-            throw new IllegalStateException("Campaign dataset round trip failed", exception);
         }
     }
 
