@@ -27,10 +27,11 @@ The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
 and pilot contracts. Phase 15 completed with 127 researched candidates and 73
-newly retained source-matched scenarios. Phases 16 and 17 are complete; the
-Phase 17 audit admitted no production party because direct restore diverged on
-pending events, so Phase 17A is the next active target before Phase 18. No
-dependent phase may bypass the preceding correctness or quality gate.
+newly retained source-matched scenarios. Phases 16, 17, and 17A are complete.
+The initial Phase 17 audit rejected all six production candidates, then Phase
+17A repaired pending particle, weapon, reaction, and timer state and admitted
+all six exact loadouts. Phase 18 is the next active target. No dependent phase
+may bypass the preceding correctness or quality gate.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
@@ -26896,7 +26897,18 @@ Verification:
 
 ### Phase 17A: Pending-Event Snapshot Completeness
 
-Status: Planned.
+Status: Done (2026-08-26).
+
+Completion:
+
+- Reconstructed branch-local particle arrivals and restored deterministic
+  Favonius, Thrilling Tales, Wolf-Fang, and timed EM weapon state without
+  serializing timer closures.
+- Restored pending Dendro Core expiry events from typed immutable payloads and
+  rejected duplicate IDs, expired deadlines, and owners outside the party.
+- All six Phase 17 candidates now match uninterrupted execution, history
+  replay, and direct restore at shallow and mid-cycle branch depths through the
+  complete cycle boundary.
 
 Why before Phase 18:
 
@@ -26943,7 +26955,7 @@ Verification:
 
 ### Phase 18: Direct Restore And Wait-Macro Throughput
 
-Status: Blocked until Phase 17A admits at least one production scenario.
+Status: Planned; Phase 17A admission gate satisfied.
 
 Why third:
 

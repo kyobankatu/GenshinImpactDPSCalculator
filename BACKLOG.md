@@ -4639,13 +4639,14 @@ experiment record.
 
 ### B-213 — Pending-event snapshot completeness for rotation search
 
-- **Status:** active; ordered as TASKS.md Phase 17A before B-212 Phase 18
+- **Status:** completed 2026-08-26 in TASKS.md Phase 17A
 - **Source:** B-212 Phase 17 direct-restore audit on 2026-08-26.
-- **Evidence:** `HuTaoXianyunVaporize`, `XiaoFurina`, `XiaoLanYan`,
-  `NaviaDoubleHydro`, `AlhaithamYelanQuickbloom`, and
-  `AyatoXilonenMonoHydro` all diverge after direct branch restore. Five lose
-  pending particle Energy; Navia and Alhaitham additionally diverge in delayed
-  damage/state. History replay remains exact.
+- **Evidence:** the initial audit found direct-restore divergence in
+  `HuTaoXianyunVaporize`, `XiaoFurina`, `XiaoLanYan`, `NaviaDoubleHydro`,
+  `AlhaithamYelanQuickbloom`, and `AyatoXilonenMonoHydro`. Typed particle,
+  deterministic weapon, periodic weapon, and Dendro Core expiry restoration
+  now makes all six match uninterrupted execution and history replay through
+  the full cycle at two branch depths.
 - **Scope/risk:** reconstruct generic particle arrivals and owner-scoped delayed
   events from typed immutable state after timer-queue clear, preserve event
   order and deterministic RNG, then admit exact loadouts individually; high and
