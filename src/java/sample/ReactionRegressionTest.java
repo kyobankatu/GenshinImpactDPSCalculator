@@ -12311,6 +12311,32 @@ public class ReactionRegressionTest {
     }
 
     private static void testAccuracyPhaseF_SkillBurstOffensiveWeapons() {
+        model.weapon.WolfFang wolfFang = new model.weapon.WolfFang();
+        TestCharacter wolfOwner = testCharacter(Element.HYDRO);
+        wolfOwner.setWeapon(wolfFang);
+        CombatSimulator wolfSim = simulatorWith(wolfOwner);
+        SimulatorSnapshot wolfSnapshot = wolfSim.saveSnapshot();
+        wolfFang.onDamage(
+                wolfOwner,
+                typedDamageHit("Wolf-Fang Skill", ActionType.SKILL, 1.0),
+                0.0,
+                wolfSim);
+        assertClose(0.04,
+                resolvedStat(
+                        wolfSim, wolfOwner, StatType.SKILL_CRIT_RATE),
+                EPS, "Wolf-Fang should gain one Skill stack");
+        wolfSim.restoreSnapshot(wolfSnapshot);
+        assertClose(0.0,
+                resolvedStat(
+                        wolfSim, wolfOwner, StatType.SKILL_CRIT_RATE),
+                EPS, "Wolf-Fang snapshot should remove future Skill stacks");
+        model.weapon.WolfFang foreignWolfFang = new model.weapon.WolfFang();
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> foreignWolfFang.restoreWeaponState(
+                        wolfFang.captureWeaponState()),
+                "Wolf-Fang should reject a foreign weapon snapshot");
+
         model.weapon.FleuveCendreFerryman fleuve =
                 new model.weapon.FleuveCendreFerryman();
         assertEquals("Fleuve Cendre Ferryman", fleuve.getName(),

@@ -1,6 +1,7 @@
 package model.weapon;
 
 import model.entity.DamageTriggeredWeaponEffect;
+import model.entity.SnapshotAwareWeaponEffect;
 import model.entity.Weapon;
 import model.entity.Character;
 import model.stats.StatsContainer;
@@ -15,7 +16,9 @@ import java.util.Iterator;
 /**
  * Wolf-Fang sword with stacking skill and burst CRIT bonuses.
  */
-public class WolfFang extends Weapon implements DamageTriggeredWeaponEffect {
+public class WolfFang extends Weapon implements
+        DamageTriggeredWeaponEffect,
+        SnapshotAwareWeaponEffect {
     /**
      * Constructs Wolf-Fang with Lv 90 base stats.
      */
@@ -27,8 +30,8 @@ public class WolfFang extends Weapon implements DamageTriggeredWeaponEffect {
         this.weaponType = WeaponType.SWORD;
     }
 
-    private List<Double> skillStacks = new ArrayList<>();
-    private List<Double> burstStacks = new ArrayList<>();
+    private final List<Double> skillStacks = new ArrayList<>();
+    private final List<Double> burstStacks = new ArrayList<>();
 
     private double lastSkillStackTime = -1.0;
     private double lastBurstStackTime = -1.0;
@@ -51,15 +54,19 @@ public class WolfFang extends Weapon implements DamageTriggeredWeaponEffect {
         long bCount = burstStacks.stream().filter(t -> t > currentTime).count();
 
         // Cap at 4
-        if (sCount > 4)
+        if (sCount > 4) {
             sCount = 4;
-        if (bCount > 4)
+        }
+        if (bCount > 4) {
             bCount = 4;
+        }
 
-        if (sCount > 0)
+        if (sCount > 0) {
             stats.add(StatType.SKILL_CRIT_RATE, sCount * 0.04);
-        if (bCount > 0)
+        }
+        if (bCount > 0) {
             stats.add(StatType.BURST_CRIT_RATE, bCount * 0.04);
+        }
     }
 
     /**
@@ -102,12 +109,64 @@ public class WolfFang extends Weapon implements DamageTriggeredWeaponEffect {
         }
     }
 
+    /** Captures both stack timelines and their acquisition cooldowns. */
+    @Override
+    public State captureWeaponState() {
+        return new WolfFangState(
+                this,
+                skillStacks,
+                burstStacks,
+                lastSkillStackTime,
+                lastBurstStackTime);
+    }
+
+    /** Restores state captured from this exact Wolf-Fang instance. */
+    @Override
+    public void restoreWeaponState(State state) {
+        if (!(state instanceof WolfFangState)) {
+            throw new IllegalArgumentException("Wolf-Fang state type is invalid");
+        }
+        WolfFangState restored = (WolfFangState) state;
+        if (restored.source != this) {
+            throw new IllegalArgumentException(
+                    "Wolf-Fang state belongs to another instance");
+        }
+        skillStacks.clear();
+        skillStacks.addAll(restored.skillStacks);
+        burstStacks.clear();
+        burstStacks.addAll(restored.burstStacks);
+        lastSkillStackTime = restored.lastSkillStackTime;
+        lastBurstStackTime = restored.lastBurstStackTime;
+    }
+
     private void cleanup(List<Double> stacks, double currentTime) {
         Iterator<Double> it = stacks.iterator();
         while (it.hasNext()) {
             if (it.next() <= currentTime) {
                 it.remove();
             }
+        }
+    }
+
+    /** Immutable Wolf-Fang stack snapshot. */
+    private static final class WolfFangState implements State {
+        private final WolfFang source;
+        private final List<Double> skillStacks;
+        private final List<Double> burstStacks;
+        private final double lastSkillStackTime;
+        private final double lastBurstStackTime;
+
+        private WolfFangState(
+                WolfFang source,
+                List<Double> skillStacks,
+                List<Double> burstStacks,
+                double lastSkillStackTime,
+                double lastBurstStackTime) {
+            this.source = source;
+            this.skillStacks = List.copyOf(skillStacks);
+            this.burstStacks = List.copyOf(burstStacks);
+            this.lastSkillStackTime = lastSkillStackTime;
+            this.lastBurstStackTime = lastBurstStackTime;
         }
     }
 }

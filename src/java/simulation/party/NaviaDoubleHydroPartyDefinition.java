@@ -47,4 +47,9 @@ public final class NaviaDoubleHydroPartyDefinition
                         PolicyAction.SKILL_PRESS,
                         PolicyAction.BURST));
     }
+
+    @Override
+    public boolean supportsExactSnapshotRestore() {
+        return true;
+    }
 }
