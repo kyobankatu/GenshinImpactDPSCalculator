@@ -27457,6 +27457,9 @@ Progress evidence:
   traces: they retain exact random/unguided/guided call budgets and publish
   checkpoint/dataset provenance directly. The Python runner owns service
   readiness, Gradle execution, report validation, and guaranteed shutdown.
+- Chunk-level tensor collation reduced the measured ten-batch frozen-dataset
+  preparation time from 2.866s to 1.959s (19,370 decisions, same CPU), while
+  resume determinism and all 94 Python RL tests remained unchanged.
 
 ### Phase 25: Transactional Expert Iteration
 

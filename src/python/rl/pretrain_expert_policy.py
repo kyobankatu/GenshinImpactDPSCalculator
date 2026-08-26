@@ -245,18 +245,25 @@ def _collate(chunks: list[ExpertSequenceChunk], policy, device):
     sequence_mask = torch.zeros(batch_size, length, device=device)
     loss_mask = torch.zeros(batch_size, length, device=device)
     for row, chunk in enumerate(chunks):
-        for column, decision in enumerate(chunk.decisions):
-            observations[row, column] = torch.tensor(decision.observation, device=device)
-            action_masks[row, column] = torch.tensor(
-                decision.legal_action_mask, device=device
-            )
-            policy_targets[row, column] = torch.tensor(
-                decision.visit_policy_target, device=device
-            )
-            value_targets[row, column] = chunk.value_targets[column]
-            sequence_mask[row, column] = 1.0
-            if column >= chunk.loss_start:
-                loss_mask[row, column] = 1.0
+        count = len(chunk.decisions)
+        observations[row, :count] = torch.tensor(
+            [decision.observation for decision in chunk.decisions],
+            device=device,
+        )
+        action_masks[row, :count] = torch.tensor(
+            [decision.legal_action_mask for decision in chunk.decisions],
+            device=device,
+        )
+        policy_targets[row, :count] = torch.tensor(
+            [decision.visit_policy_target for decision in chunk.decisions],
+            device=device,
+        )
+        value_targets[row, :count] = torch.tensor(
+            chunk.value_targets,
+            device=device,
+        )
+        sequence_mask[row, :count] = 1.0
+        loss_mask[row, chunk.loss_start:count] = 1.0
     return {
         "observations": observations,
         "action_masks": action_masks,
