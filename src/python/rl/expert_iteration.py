@@ -51,7 +51,7 @@ class PolicyPriorProvider:
     def __init__(self, checkpoint_path, dataset_source_hash, allow_fallback=True):
         self.allow_fallback = allow_fallback
         self.policy = None
-        self.hidden_size = None
+        self.recurrent_state_size = None
         self.failure = None
         self.contract = None
         try:
@@ -77,7 +77,7 @@ class PolicyPriorProvider:
             self.training_fingerprints = tuple(training_fingerprints)
             self.policy, _ = load_policy(checkpoint_path)
             self.policy.eval()
-            self.hidden_size = self.policy.hidden_size
+            self.recurrent_state_size = self.policy.recurrent_state_size
             self.contract = PolicyValueContract(
                 simulator_revision=payload["simulator_revision"],
                 dataset_schema_version=DATASET_SCHEMA_VERSION,
@@ -103,7 +103,7 @@ class PolicyPriorProvider:
         try:
             hidden = recurrent_state
             if hidden is None:
-                hidden = torch.zeros(1, self.hidden_size)
+                hidden = torch.zeros(1, self.recurrent_state_size)
             with torch.no_grad():
                 output = self.policy.act(
                     torch.tensor([observation], dtype=torch.float32),
@@ -188,7 +188,7 @@ def select_recovery_candidates(
     candidates = []
     with torch.no_grad():
         for record in dataset.records:
-            hidden = torch.zeros(1, policy.hidden_size)
+            hidden = torch.zeros(1, policy.recurrent_state_size)
             for decision in record.decisions:
                 result = policy.act(
                     torch.tensor([decision.observation], dtype=torch.float32),
@@ -237,7 +237,7 @@ def export_recorded_policy_prior(
     weights_by_state = {}
     counts_by_state = {}
     for record in selected_records:
-        hidden = torch.zeros(1, provider.hidden_size)
+        hidden = torch.zeros(1, provider.recurrent_state_size)
         for decision in record.decisions:
             weights = provider.weights(
                 decision.observation,

@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 
@@ -19,6 +20,7 @@ from evaluation import (
     build_rotation_generalization_report,
     validate_rotation_generalization,
 )
+from rotation_model_registry import REQUIRED_METRICS, model_names
 
 
 def test_complete_equal_budget_generalization_report_passes(tmp_path):
@@ -226,6 +228,36 @@ def test_missing_required_input_writes_failed_report(tmp_path, capsys):
     assert "FAIL:" in capsys.readouterr().err
 
 
+def test_optional_matched_tournament_is_embedded(tmp_path):
+    java_summary, model_summary = _valid_inputs()
+    java_path = tmp_path / "java.json"
+    model_path = tmp_path / "model.json"
+    tournament_path = tmp_path / "tournament.json"
+    output = tmp_path / "report.json"
+    java_path.write_text(json.dumps(java_summary), encoding="utf-8")
+    model_path.write_text(json.dumps(model_summary), encoding="utf-8")
+    tournament_path.write_text(
+        json.dumps(_tournament_manifest()), encoding="utf-8"
+    )
+    assert main(
+        [
+            "--preset",
+            "benchmark",
+            "--java-report",
+            str(java_path),
+            "--model-summary",
+            str(model_path),
+            "--tournament-manifest",
+            str(tournament_path),
+            "--output",
+            str(output),
+        ]
+    ) == 0
+    report, _ = load_json_object(output)
+    assert report["modelTournament"]["qualityGatePassed"] is True
+    assert report["modelTournament"]["champion"] == "gru"
+
+
 def _valid_inputs():
     splits = {
         "train": ["train-fingerprint"],
@@ -320,3 +352,33 @@ def _run(method, split, fingerprint, seed, score):
     else:
         run["archiveScores"] = [score - 1.0, score]
     return run
+
+
+def _tournament_manifest():
+    runs = []
+    for model in model_names():
+        for seed in (11, 13):
+            metrics = {name: 1.0 for name in REQUIRED_METRICS}
+            metrics["holdoutTeacherAdvantage"] = (
+                2.0 if model == "gru" else 1.0
+            )
+            runs.append(
+                {
+                    "model": model,
+                    "seed": seed,
+                    "datasetSourceHash": "a" * 64,
+                    "trainingFingerprints": ["train-fingerprint"],
+                    "holdoutFingerprints": ["holdout-fingerprint"],
+                    "optimizationSteps": 10,
+                    "searchCallBudget": 128,
+                    "checkpointSelectionRule": "validation-policy-loss",
+                    "checkpointFingerprint": model[0] * 64,
+                    "metrics": metrics,
+                }
+            )
+    return {
+        "schemaVersion": 1,
+        "models": list(model_names()),
+        "seeds": [11, 13],
+        "runs": runs,
+    }

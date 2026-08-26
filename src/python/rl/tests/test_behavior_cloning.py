@@ -23,6 +23,7 @@ from pretrain_expert_policy import (
     run_pretraining,
 )
 from recurrent_ppo import build_policy, load_policy
+from rotation_model_registry import model_names
 from train_recurrent_ppo import load_expert_initialization
 
 
@@ -196,6 +197,20 @@ def test_checkpoint_fingerprint_provenance_fails_closed(tmp_path):
     policy = build_policy("gru", 287, 8, 11)
     with pytest.raises(ValueError, match="normalization fingerprints"):
         load_expert_initialization(policy, checkpoint)
+
+
+@pytest.mark.parametrize("policy_type", model_names())
+def test_all_registered_models_train_and_restore(policy_type, tmp_path):
+    checkpoint = tmp_path / f"{policy_type}.pt"
+    config = dataclasses.replace(
+        _config(checkpoint, epochs=1),
+        policy_type=policy_type,
+    )
+    policy, history = run_pretraining(config)
+    restored, _ = load_policy(checkpoint)
+    assert history[-1]["epoch"] == 1.0
+    assert type(restored) is type(policy)
+    assert restored.recurrent_state_size == policy.recurrent_state_size
 
 
 def _config(output, epochs):

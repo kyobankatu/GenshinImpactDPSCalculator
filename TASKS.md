@@ -38,8 +38,9 @@ publication. Phase 21 froze a replay-complete 58-seed, 131-record three-way
 dataset after canonical source-leakage and matched-baseline gates. Phase 22
 froze the versioned policy-value advisor boundary with typed uniform fallback.
 Phase 23 integrated bounded local inference into both teacher strategies.
-Phase 24 is the next active target. No dependent phase may bypass
-the preceding correctness or quality gate.
+Phase 24 is active: its common model registry and matched-manifest gate are
+implemented, while the full model/seed tournament remains pending. No
+dependent phase may bypass the preceding correctness or quality gate.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
@@ -25409,7 +25410,7 @@ Test cases:
 Verification:
 
 - `python -m pytest src/python/rl/tests`
-- `python3 src/python/rl/pretrain_expert_policy.py --preset debug --dataset src/python/rl/tests/fixtures/expert_dataset_v1.jsonl`
+- `python3 src/python/rl/pretrain_expert_policy.py --preset debug --dataset src/python/rl/tests/fixtures/expert_dataset_v2.jsonl`
 
 Completion evidence:
 
@@ -27374,7 +27375,7 @@ Completion evidence:
 
 ### Phase 24: Matched Model-Architecture Tournament
 
-Status: Planned.
+Status: In Progress (2026-08-26; local model-registry gate complete).
 
 Why ninth:
 
@@ -27425,6 +27426,22 @@ Verification:
 - `python3 src/python/rl/pretrain_expert_policy.py --preset debug --dataset src/python/rl/tests/fixtures/expert_dataset_v1.jsonl`
 - `python3 src/python/rl/evaluate_rotation_optimizer.py --preset benchmark`
 - `python scripts/preflight.py --run`
+
+Progress evidence:
+
+- MLP, GRU, LSTM, and Transformer candidates now share one build, forward,
+  recurrent-state, checkpoint-save, and checkpoint-restore interface. Existing
+  PPO, BC, evaluation, expert-prior, and local inference paths allocate each
+  model's declared recurrent-state width.
+- The schema-v1 tournament manifest requires every model/seed cell, matched
+  dataset/splits/optimization steps/search calls/checkpoint selection, finite
+  metrics, and deterministic champion selection. Missing or duplicated cells,
+  split contamination, unmatched budgets, unknown models, and NaN metrics fail
+  closed.
+- All 87 Python RL tests passed. One-epoch fixed-seed debug training and restore
+  completed for all four candidates. Full multi-seed training, live guided
+  search evaluation, tournament report publication, and champion qualification
+  remain pending; Phase 25 is therefore still blocked.
 
 ### Phase 25: Transactional Expert Iteration
 

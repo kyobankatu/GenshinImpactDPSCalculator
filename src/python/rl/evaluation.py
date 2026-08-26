@@ -222,7 +222,12 @@ def evaluate_single_episode(
     observations, _privileged_observations, masks, _party_ids = client.reset_runner(
         runner_id, generate_report, forced_party_id=forced_party_id
     )
-    hidden = torch.zeros(1, policy.hidden_size, dtype=torch.float32, device=device)
+    hidden = torch.zeros(
+        1,
+        policy.recurrent_state_size,
+        dtype=torch.float32,
+        device=device,
+    )
     total_reward = 0.0
     invalid_actions = 0
     steps = 0

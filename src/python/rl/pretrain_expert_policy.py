@@ -31,6 +31,7 @@ from recurrent_ppo import (
     build_policy,
     validate_checkpoint_payload,
 )
+from rotation_model_registry import model_names
 
 
 PRETRAINING_REVISION = 2
@@ -88,8 +89,10 @@ class PretrainingConfig:
             raise ValueError("value_coefficient must be non-negative")
         if not 0.0 < self.scheduler_gamma <= 1.0:
             raise ValueError("scheduler_gamma must be within (0, 1]")
-        if self.policy_type not in ("gru", "transformer"):
-            raise ValueError("policy_type must be gru or transformer")
+        if self.policy_type not in model_names():
+            raise ValueError(
+                f"policy_type must be one of {', '.join(model_names())}"
+            )
 
 
 def run_pretraining(config: PretrainingConfig) -> tuple[torch.nn.Module, list[dict[str, float]]]:
@@ -260,7 +263,7 @@ def _collate(chunks: list[ExpertSequenceChunk], policy, device):
         "sequence_mask": sequence_mask,
         "loss_mask": loss_mask,
         "initial_hidden": torch.zeros(
-            batch_size, policy.hidden_size, device=device
+            batch_size, policy.recurrent_state_size, device=device
         ),
     }
 
@@ -404,7 +407,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--learning-rate", type=float)
     parser.add_argument("--value-coefficient", type=float)
     parser.add_argument("--scheduler-gamma", type=float)
-    parser.add_argument("--policy-type", choices=("gru", "transformer"))
+    parser.add_argument("--policy-type", choices=model_names())
     parser.add_argument("--seed", type=int, default=1234)
     parser.add_argument("--device", default="cpu")
     return parser.parse_args()

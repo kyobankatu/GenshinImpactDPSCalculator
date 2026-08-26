@@ -17,6 +17,7 @@ from evaluation import (
     build_rotation_generalization_report,
 )
 from expert_dataset import SIMULATOR_REVISION
+from rotation_model_registry import evaluate_tournament_manifest
 
 BENCHMARK_PRESET = RotationEvaluationPreset(
     name="benchmark",
@@ -42,6 +43,18 @@ def main(argv=None):
         report = build_rotation_generalization_report(
             java_summary, model_summary, preset
         )
+        if args.tournament_manifest is not None:
+            tournament, tournament_hash = load_json_object(
+                args.tournament_manifest
+            )
+            input_hashes["tournamentManifestSha256"] = tournament_hash
+            tournament_report = evaluate_tournament_manifest(tournament)
+            report["modelTournament"] = tournament_report
+            if not tournament_report["qualityGatePassed"]:
+                report["qualityGatePassed"] = False
+                report["failures"].append(
+                    "matched model tournament produced no qualifying champion"
+                )
     except (OSError, ValueError) as error:
         report = failure_report(preset, str(error))
     report["inputs"] = input_hashes
@@ -80,6 +93,11 @@ def parse_args(argv=None):
             "optional model-only service JSON; model-only runs and checkpoint "
             "provenance must exist in one of the supplied inputs"
         ),
+    )
+    parser.add_argument(
+        "--tournament-manifest",
+        default=None,
+        help="optional matched model/seed tournament manifest",
     )
     parser.add_argument(
         "--output",

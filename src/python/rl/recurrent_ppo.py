@@ -247,6 +247,10 @@ class SlotEquivariantBackbone(nn.Module):
 
 
 class RecurrentPolicy(nn.Module):
+    """Slot-equivariant GRU policy implementing the shared model contract."""
+
+    policy_type = "gru"
+
     def __init__(
         self,
         observation_size,
@@ -284,6 +288,15 @@ class RecurrentPolicy(nn.Module):
         self.recurrent = nn.GRUCell(hidden_size * 3, hidden_size)
         self.value_head = nn.Linear(hidden_size * 2, 1)
 
+    @property
+    def recurrent_state_size(self):
+        """Return the externally carried recurrent-state width."""
+        return self.hidden_size
+
+    def validate_recurrent_state(self, recurrent_state, batch_size):
+        """Validate the model-specific recurrent-state tensor."""
+        self.equivariant.validate_hidden(recurrent_state, batch_size)
+
     def forward_step(
         self,
         observation,
@@ -294,7 +307,7 @@ class RecurrentPolicy(nn.Module):
         invariant_input, char_encodings, attention_scores = (
             self.equivariant.encode_actor(observation)
         )
-        self.equivariant.validate_hidden(
+        self.validate_recurrent_state(
             recurrent_state,
             observation.shape[0],
         )
@@ -326,7 +339,7 @@ class RecurrentPolicy(nn.Module):
             raise ValueError("observations must match the policy sequence shape")
         if action_masks.shape[:2] != observations.shape[:2]:
             raise ValueError("action_masks sequence shape does not match observations")
-        self.equivariant.validate_hidden(initial_hidden, observations.shape[0])
+        self.validate_recurrent_state(initial_hidden, observations.shape[0])
         prepared_masks = self.equivariant.prepare_action_mask(
             action_masks,
             sequence_mask,
@@ -387,7 +400,7 @@ class RecurrentPolicy(nn.Module):
 
     def save(self, path, optimizer=None, extra_state=None):
         payload = {
-            "policy_type": "gru",
+            "policy_type": self.policy_type,
             "observation_size": self.observation_size,
             "hidden_size": self.hidden_size,
             "action_size": self.action_size,
@@ -415,9 +428,9 @@ class RecurrentPolicy(nn.Module):
     @classmethod
     def load(cls, path, map_location="cpu"):
         payload = cls.load_payload(path, map_location=map_location)
-        if payload["policy_type"] != "gru":
+        if payload["policy_type"] != cls.policy_type:
             raise ValueError(
-                "Checkpoint is not a RecurrentPolicy "
+                f"Checkpoint is not a {cls.__name__} "
                 f"(got policy_type={payload['policy_type']})"
             )
         model = cls(
@@ -439,6 +452,107 @@ class RecurrentPolicy(nn.Module):
         return payload
 
 
+class MlpPolicy(RecurrentPolicy):
+    """Stateless MLP candidate retaining the shared recurrent API."""
+
+    policy_type = "mlp"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.recurrent = nn.Sequential(
+            nn.Linear(self.hidden_size * 3, self.hidden_size),
+            nn.Tanh(),
+            nn.Linear(self.hidden_size, self.hidden_size),
+            nn.Tanh(),
+        )
+
+    def forward_step(
+        self,
+        observation,
+        recurrent_state,
+        action_mask,
+        privileged_observation=None,
+    ):
+        invariant_input, char_encodings, attention_scores = (
+            self.equivariant.encode_actor(observation)
+        )
+        self.validate_recurrent_state(recurrent_state, observation.shape[0])
+        prepared_mask = self.equivariant.prepare_action_mask(action_mask)
+        hidden = self.recurrent(invariant_input)
+        logits = self.equivariant.policy_logits(hidden, char_encodings)
+        masked_logits = self.equivariant.mask_logits(logits, prepared_mask)
+        privileged_encoding = self.equivariant.encode_privileged(
+            privileged_observation,
+            observation.shape[0],
+            observation.device,
+        )
+        value = self.value_head(
+            torch.cat([hidden, privileged_encoding], dim=-1)
+        ).squeeze(-1)
+        auxiliary_prediction = self.equivariant.auxiliary_prediction(
+            hidden,
+            char_encodings,
+        )
+        return masked_logits, value, hidden, attention_scores, auxiliary_prediction
+
+
+class LstmPolicy(RecurrentPolicy):
+    """LSTM candidate carrying concatenated hidden and cell state."""
+
+    policy_type = "lstm"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.recurrent = nn.LSTMCell(self.hidden_size * 3, self.hidden_size)
+
+    @property
+    def recurrent_state_size(self):
+        return self.hidden_size * 2
+
+    def validate_recurrent_state(self, recurrent_state, batch_size):
+        self.equivariant.validate_matrix(
+            recurrent_state,
+            self.recurrent_state_size,
+            "recurrent_state",
+        )
+        if recurrent_state.shape[0] != batch_size:
+            raise ValueError("recurrent_state batch size does not match observation")
+
+    def forward_step(
+        self,
+        observation,
+        recurrent_state,
+        action_mask,
+        privileged_observation=None,
+    ):
+        invariant_input, char_encodings, attention_scores = (
+            self.equivariant.encode_actor(observation)
+        )
+        self.validate_recurrent_state(recurrent_state, observation.shape[0])
+        prepared_mask = self.equivariant.prepare_action_mask(action_mask)
+        previous_hidden, previous_cell = recurrent_state.chunk(2, dim=-1)
+        hidden, cell = self.recurrent(
+            invariant_input,
+            (previous_hidden, previous_cell),
+        )
+        logits = self.equivariant.policy_logits(hidden, char_encodings)
+        masked_logits = self.equivariant.mask_logits(logits, prepared_mask)
+        privileged_encoding = self.equivariant.encode_privileged(
+            privileged_observation,
+            observation.shape[0],
+            observation.device,
+        )
+        value = self.value_head(
+            torch.cat([hidden, privileged_encoding], dim=-1)
+        ).squeeze(-1)
+        auxiliary_prediction = self.equivariant.auxiliary_prediction(
+            hidden,
+            char_encodings,
+        )
+        next_state = torch.cat([hidden, cell], dim=-1)
+        return masked_logits, value, next_state, attention_scores, auxiliary_prediction
+
+
 class TransformerPolicy(nn.Module):
     """Transformer-based policy with summary-token cross-chunk continuity.
 
@@ -450,6 +564,8 @@ class TransformerPolicy(nn.Module):
     summary, providing GRU-like cross-chunk continuity through a single
     bottleneck token while gaining full attention within a chunk.
     """
+
+    policy_type = "transformer"
 
     def __init__(
         self,
@@ -502,6 +618,11 @@ class TransformerPolicy(nn.Module):
         self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
         self.value_head = nn.Linear(hidden_size * 2, 1)
+
+    @property
+    def recurrent_state_size(self):
+        """Return the summary-token width carried between chunks."""
+        return self.hidden_size
 
     def _encode_token(self, observation):
         """Encode one timestep of observation into a single (B, hidden_size) token.
@@ -653,7 +774,7 @@ class TransformerPolicy(nn.Module):
 
     def save(self, path, optimizer=None, extra_state=None):
         payload = {
-            "policy_type": "transformer",
+            "policy_type": self.policy_type,
             "observation_size": self.observation_size,
             "hidden_size": self.hidden_size,
             "action_size": self.action_size,
@@ -683,7 +804,7 @@ class TransformerPolicy(nn.Module):
     @classmethod
     def load(cls, path, map_location="cpu"):
         payload = cls.load_payload(path, map_location=map_location)
-        if payload["policy_type"] != "transformer":
+        if payload["policy_type"] != cls.policy_type:
             raise ValueError(
                 "Checkpoint is not a TransformerPolicy "
                 f"(got policy_type={payload['policy_type']})"
@@ -731,7 +852,7 @@ def validate_checkpoint_payload(payload, path=None):
     if missing:
         location = f" checkpoint {path}" if path else " checkpoint"
         raise ValueError(f"Missing required metadata in{location}: {missing}")
-    if payload["policy_type"] not in ("gru", "transformer"):
+    if payload["policy_type"] not in ("mlp", "gru", "lstm", "transformer"):
         raise ValueError(f"Unsupported policy_type in checkpoint: {payload['policy_type']!r}")
     if payload["action_layout_revision"] != ACTION_LAYOUT_REVISION:
         raise ValueError(
@@ -770,20 +891,18 @@ def validate_checkpoint_payload(payload, path=None):
 
 
 def build_policy(policy_type, *args, **kwargs):
-    if policy_type == "gru":
-        return RecurrentPolicy(*args, **kwargs)
-    if policy_type == "transformer":
-        return TransformerPolicy(*args, **kwargs)
-    raise ValueError(f"unknown policy_type: {policy_type!r} (expected 'gru' or 'transformer')")
+    from rotation_model_registry import build_registered_policy
+
+    return build_registered_policy(policy_type, *args, **kwargs)
 
 
 def load_policy(path, map_location="cpu"):
     payload = torch.load(path, map_location=map_location)
     validate_checkpoint_payload(payload, path)
     policy_type = payload["policy_type"]
-    if policy_type == "transformer":
-        return TransformerPolicy.load(path, map_location=map_location)
-    return RecurrentPolicy.load(path, map_location=map_location)
+    from rotation_model_registry import load_registered_policy
+
+    return load_registered_policy(policy_type, path, map_location=map_location)
 
 
 def compute_advantages(segments, gamma, gae_lambda):

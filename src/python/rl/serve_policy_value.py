@@ -54,11 +54,11 @@ class TorchPolicyValueAdvisor:
         hidden_rows = []
         for query in queries:
             if query.recurrent_state:
-                if len(query.recurrent_state) != self.policy.hidden_size:
+                if len(query.recurrent_state) != self.policy.recurrent_state_size:
                     raise ValueError("Policy-value recurrent state dimension mismatch")
                 hidden_rows.append(query.recurrent_state)
             else:
-                hidden_rows.append((0.0,) * self.policy.hidden_size)
+                hidden_rows.append((0.0,) * self.policy.recurrent_state_size)
         with self._inference_lock, torch.no_grad():
             output = self.policy.act(
                 torch.tensor(

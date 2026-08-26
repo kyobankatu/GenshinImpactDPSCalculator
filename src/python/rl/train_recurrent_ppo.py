@@ -33,6 +33,7 @@ from recurrent_ppo import (
     compute_advantages,
     validate_checkpoint_payload,
 )
+from rotation_model_registry import model_names
 from rollout_service_client import build_rollout_client
 from sil_buffer import SILBuffer
 
@@ -145,9 +146,7 @@ def load_expert_initialization(policy, checkpoint_path, device="cpu"):
         raise ValueError("Expert initialization revision mismatch")
     if not payload["dataset_source_hash"] or not payload["dataset_record_hashes"]:
         raise ValueError("Expert initialization dataset provenance is empty")
-    if payload["policy_type"] != (
-        "transformer" if policy.__class__.__name__ == "TransformerPolicy" else "gru"
-    ):
+    if payload["policy_type"] != policy.policy_type:
         raise ValueError("Expert initialization policy type mismatch")
     if payload["hidden_size"] != policy.hidden_size:
         raise ValueError("Expert initialization hidden size mismatch")
@@ -402,7 +401,12 @@ def run_training(args, run=None):
         if checkpoint_fingerprints != expected_fingerprints:
             raise ValueError("Resume checkpoint fingerprint provenance mismatch")
         print(f"Resuming training from {args.resume_from} at update {start_update}")
-    hidden_states = torch.zeros(config["envs"], config["hidden_size"], dtype=torch.float32, device=device)
+    hidden_states = torch.zeros(
+        config["envs"],
+        policy.recurrent_state_size,
+        dtype=torch.float32,
+        device=device,
+    )
     owns_run = run is None
     run = init_wandb(args, config, client, device, existing_run=run)
 
@@ -816,7 +820,13 @@ def parse_args():
         "--initialize-from-expert",
         help="load a validated expert-pretraining checkpoint's model weights only",
     )
-    parser.add_argument("--policy-type", type=str, default=None, choices=["gru", "transformer"], help="policy architecture: gru (recurrent) or transformer")
+    parser.add_argument(
+        "--policy-type",
+        type=str,
+        default=None,
+        choices=model_names(),
+        help="registered policy architecture",
+    )
     parser.add_argument("--rollout-workers", type=int, default=None, help="Java rollout worker override used for this run")
     parser.add_argument("--resume-from", default=None, help="path to a saved .pt checkpoint to resume from")
     parser.add_argument("--wandb", action="store_true", help="enable Weights & Biases logging")
@@ -996,7 +1006,7 @@ def build_sequence_minibatch(chunks, policy, device):
         batch_size, max_seq_len, policy.privileged_observation_size, dtype=torch.float32, device=device
     )
     initial_hidden = torch.zeros(
-        batch_size, policy.hidden_size, dtype=torch.float32, device=device
+        batch_size, policy.recurrent_state_size, dtype=torch.float32, device=device
     )
     action_masks = torch.ones(
         batch_size, max_seq_len, policy.action_size, dtype=torch.float32, device=device
