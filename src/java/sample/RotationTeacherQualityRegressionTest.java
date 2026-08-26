@@ -1,6 +1,10 @@
 package sample;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import mechanics.rotation.EvolutionaryRotationSearcher;
@@ -15,6 +19,11 @@ import mechanics.rotation.RotationScenario;
 import mechanics.rotation.RotationSearchConfig;
 import mechanics.rotation.RotationSearchStrategy;
 import mechanics.rotation.RotationStep;
+import mechanics.rotation.RotationTeacherQualityReport;
+import mechanics.rotation.RotationTeacherQualityReport.Arm;
+import mechanics.rotation.RotationTeacherQualityReport.RejectionReason;
+import mechanics.rotation.RotationTeacherQualityReport.ScenarioResult;
+import mechanics.rotation.RotationTeacherQualityReport.Trial;
 import mechanics.rotation.RotationTrajectoryRanker;
 import mechanics.rotation.TopKTrajectoryArchive;
 
@@ -23,7 +32,7 @@ public class RotationTeacherQualityRegressionTest {
     private static final int WAIT = PolicyAction.WAIT_SHORT.getId();
     private static final int ILLEGAL = PolicyAction.NORMAL.getId();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         assertFeasibilityFirstOrdering();
         assertStrictSeedRetained(new EvolutionaryRotationSearcher());
         assertStrictSeedRetained(new MctsRotationSearcher());
@@ -33,6 +42,14 @@ public class RotationTeacherQualityRegressionTest {
         assertFallbackNotPublished();
         assertIncompleteGenerationReported();
         assertDuplicateSeedRejected();
+        assertMatchedBudgetReportIsDeterministic();
+        assertMissingComparisonCellRejected();
+        assertUnequalBudgetRejected();
+        assertNonFiniteMetricRejected();
+        assertZeroCompleteGenerationRejected();
+        assertScenarioLocalRejectionIsNotHidden();
+        assertNonCyclicTeacherRejected();
+        assertCanonicalReportReadRejectsDerivedDrift();
         System.out.println("RotationTeacherQualityRegressionTest passed");
     }
 
@@ -134,6 +151,158 @@ public class RotationTeacherQualityRegressionTest {
     private static void assertDuplicateSeedRejected() {
         int[] seed = waits(2);
         expectFailure(() -> config(100, 2, 4, List.of(seed, seed)), "duplicate seed");
+    }
+
+    private static void assertMatchedBudgetReportIsDeterministic() {
+        List<Trial> trials = comparisonTrials(100.0, 110.0, 130.0, 120.0, true);
+        ScenarioResult beta = new ScenarioResult("scenario-beta", trials);
+        List<Trial> reversedTrials = new ArrayList<>(trials);
+        Collections.reverse(reversedTrials);
+        ScenarioResult alpha = new ScenarioResult("scenario-alpha", reversedTrials);
+        RotationTeacherQualityReport first = new RotationTeacherQualityReport(
+                List.of(beta, alpha));
+        RotationTeacherQualityReport second = new RotationTeacherQualityReport(
+                List.of(alpha, beta));
+        if (!first.allScenariosPublishable()
+                || !first.toJson().equals(second.toJson())
+                || first.getScenarios().get(0) != alpha
+                || alpha.getRetainedTeacher() != Arm.UNGUIDED_EVOLUTIONARY) {
+            throw new AssertionError("Matched-budget report was not deterministic");
+        }
+        first.requirePublishable("scenario-alpha");
+    }
+
+    private static void assertMissingComparisonCellRejected() {
+        List<Trial> trials = comparisonTrials(100.0, 110.0, 130.0, 120.0, true);
+        trials.remove(trials.size() - 1);
+        expectFailure(() -> new ScenarioResult("missing-cell", trials),
+                "missing comparison cell");
+    }
+
+    private static void assertUnequalBudgetRejected() {
+        List<Trial> trials = comparisonTrials(100.0, 110.0, 130.0, 120.0, true);
+        trials.set(5, trial(Arm.DETERMINISTIC_RANDOM, 1L, 4095, 110.0, true));
+        expectFailure(() -> new ScenarioResult("unequal-budget", trials),
+                "unequal simulator budget");
+    }
+
+    private static void assertNonFiniteMetricRejected() {
+        expectFailure(() -> trial(
+                Arm.HUMAN_SEED, 1L, 4096, Double.NaN, true), "NaN metric");
+    }
+
+    private static void assertZeroCompleteGenerationRejected() {
+        expectFailure(() -> new Trial(
+                Arm.UNGUIDED_EVOLUTIONARY,
+                1L,
+                4096,
+                100.0,
+                1,
+                0,
+                1,
+                true), "zero complete generation");
+    }
+
+    private static void assertScenarioLocalRejectionIsNotHidden() {
+        ScenarioResult passing = new ScenarioResult(
+                "passing",
+                comparisonTrials(100.0, 110.0, 130.0, 120.0, true));
+        ScenarioResult failing = new ScenarioResult(
+                "failing",
+                comparisonTrials(160.0, 155.0, 150.0, 120.0, false));
+        RotationTeacherQualityReport report = new RotationTeacherQualityReport(
+                List.of(passing, failing));
+        if (report.allScenariosPublishable()
+                || failing.isPublishable()
+                || !failing.getRejectionReasons().contains(
+                        RejectionReason.TEACHER_BELOW_HUMAN)
+                || !failing.getRejectionReasons().contains(
+                        RejectionReason.TEACHER_BELOW_RANDOM)) {
+            throw new AssertionError("Failed scenario was hidden by aggregate success");
+        }
+        expectFailure(() -> report.requirePublishable("failing"),
+                "rejected scenario publication");
+    }
+
+    private static void assertNonCyclicTeacherRejected() {
+        ScenarioResult result = new ScenarioResult(
+                "non-cyclic",
+                comparisonTrials(100.0, 110.0, 120.0, 140.0, false));
+        if (result.getRetainedTeacher() != Arm.UNGUIDED_MCTS
+                || result.isPublishable()
+                || !result.getRejectionReasons().contains(
+                        RejectionReason.TEACHER_NOT_CYCLIC)) {
+            throw new AssertionError("Non-cyclic retained teacher was published");
+        }
+    }
+
+    private static void assertCanonicalReportReadRejectsDerivedDrift()
+            throws Exception {
+        RotationTeacherQualityReport report = new RotationTeacherQualityReport(
+                List.of(new ScenarioResult(
+                        "canonical",
+                        comparisonTrials(100.0, 110.0, 130.0, 120.0, true))));
+        Path path = Files.createTempFile("rotation-teacher-quality", ".json");
+        try {
+            Files.writeString(path, report.toJson());
+            RotationTeacherQualityReport loaded =
+                    RotationTeacherQualityReport.read(path);
+            if (!loaded.toJson().equals(report.toJson())) {
+                throw new AssertionError("Canonical report did not round trip");
+            }
+            Files.writeString(
+                    path,
+                    report.toJson().replace(
+                            "\"publishable\": true",
+                            "\"publishable\": false"));
+            expectFailure(() -> readReport(path), "derived report drift");
+        } finally {
+            Files.deleteIfExists(path);
+        }
+    }
+
+    private static void readReport(Path path) {
+        try {
+            RotationTeacherQualityReport.read(path);
+        } catch (java.io.IOException exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
+    private static List<Trial> comparisonTrials(
+            double human,
+            double random,
+            double evolutionary,
+            double mcts,
+            boolean mctsCyclic) {
+        List<Trial> trials = new ArrayList<>();
+        for (long seed = 1L; seed <= 5L; seed++) {
+            trials.add(trial(Arm.HUMAN_SEED, seed, 4096, human + seed, true));
+            trials.add(trial(
+                    Arm.DETERMINISTIC_RANDOM, seed, 4096, random + seed, true));
+            trials.add(trial(
+                    Arm.UNGUIDED_EVOLUTIONARY, seed, 4096,
+                    evolutionary + seed, true));
+            trials.add(trial(Arm.UNGUIDED_MCTS, seed, 4096, mcts + seed, mctsCyclic));
+        }
+        return trials;
+    }
+
+    private static Trial trial(
+            Arm arm,
+            long seed,
+            int budget,
+            double objective,
+            boolean cyclicFeasible) {
+        return new Trial(
+                arm,
+                seed,
+                budget,
+                objective,
+                2,
+                arm == Arm.UNGUIDED_EVOLUTIONARY ? 1 : 0,
+                2,
+                cyclicFeasible);
     }
 
     private static RotationSearchConfig config(

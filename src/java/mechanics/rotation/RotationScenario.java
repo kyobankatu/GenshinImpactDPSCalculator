@@ -20,6 +20,7 @@ public final class RotationScenario {
     private final long seed;
     private final RotationObjective objective;
     private final RotationSnapshotSafety.Assessment snapshotSafety;
+    private final boolean scheduleKqmsEnemyParticles;
 
     /**
      * Creates a scenario around an already configured episode factory.
@@ -48,7 +49,8 @@ public final class RotationScenario {
                 cycleCount,
                 seed,
                 objective,
-                RotationSnapshotSafety.Assessment.unscoped(fingerprint));
+                RotationSnapshotSafety.Assessment.unscoped(fingerprint),
+                false);
     }
 
     private RotationScenario(
@@ -59,7 +61,8 @@ public final class RotationScenario {
             int cycleCount,
             long seed,
             RotationObjective objective,
-            RotationSnapshotSafety.Assessment snapshotSafety) {
+            RotationSnapshotSafety.Assessment snapshotSafety,
+            boolean scheduleKqmsEnemyParticles) {
         if (fingerprint == null || fingerprint.isBlank()) {
             throw new IllegalArgumentException("fingerprint must not be blank");
         }
@@ -86,6 +89,7 @@ public final class RotationScenario {
         this.seed = seed;
         this.objective = objective;
         this.snapshotSafety = snapshotSafety;
+        this.scheduleKqmsEnemyParticles = scheduleKqmsEnemyParticles;
     }
 
     /**
@@ -147,6 +151,7 @@ public final class RotationScenario {
         String fingerprint = definition.loadoutFingerprint() + ":cycles=" + cycleCount
                 + ":cycleSeconds=" + Double.toHexString(cycleDurationSeconds)
                 + ":build=" + build.getBuildFingerprint()
+                + ":kqmsEnemyParticles=true"
                 + ":fillEnergyOnReset=" + scenarioConfig.fillEnergyOnReset;
         return new RotationScenario(
                 fingerprint,
@@ -156,7 +161,8 @@ public final class RotationScenario {
                 cycleCount,
                 seed,
                 objective,
-                RotationSnapshotSafety.assess(definition));
+                RotationSnapshotSafety.assess(definition),
+                true);
     }
 
     public String getFingerprint() {
@@ -193,5 +199,10 @@ public final class RotationScenario {
 
     public RotationSnapshotSafety.Assessment getSnapshotSafety() {
         return snapshotSafety;
+    }
+
+    /** Returns whether reset schedules the KQMS enemy Energy model. */
+    public boolean schedulesKqmsEnemyParticles() {
+        return scheduleKqmsEnemyParticles;
     }
 }

@@ -77,8 +77,6 @@ public final class RotationSeedEvaluation {
         List<CycleResult> cycles = new ArrayList<>();
         try (BattleRotationEnvironment environment = new BattleRotationEnvironment(scenario)) {
             RotationStep step = environment.reset();
-            environment.getSimulator().getEnergyDistributor().scheduleKQMSEnemyParticles(
-                    definition.rotationCycleSeconds());
             List<Integer> pendingTrace = new ArrayList<>();
             step = executeActions(
                     environment,

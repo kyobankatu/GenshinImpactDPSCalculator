@@ -4664,3 +4664,16 @@ experiment record.
   default stays at run length one.
 - **Revisit gate:** only reconsider with matched multi-scenario evidence showing
   no median or per-scenario quality regression at equal simulator-call budget.
+
+### B-215 — Navia Double Hydro teacher quality
+
+- **Status:** rejected 2026-08-26 by TASKS.md Phase 19 quality gate
+- **Source:** five-seed, four-arm comparison at 16,384 simulator calls per cell.
+- **Evidence:** the retained Evolutionary median is 1,399,002.26 versus the
+  deterministic-random median of 1,456,478.46, a deficit of 57,476.20. The
+  human median is 1,332,504.71, so aggregate or human-only success must not
+  hide the random-baseline failure. The other five audited scenarios pass.
+- **Boundary:** `NaviaDoubleHydro` must not publish teacher labels or enter a
+  dataset campaign from this report.
+- **Revisit gate:** rerun the complete four-arm, five-seed matched-budget gate
+  after a search change; do not waive the scenario-local random comparison.

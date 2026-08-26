@@ -27,11 +27,12 @@ The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
 and pilot contracts. Phase 15 completed with 127 researched candidates and 73
-newly retained source-matched scenarios. Phases 16, 17, 17A, and 18 are complete.
+newly retained source-matched scenarios. Phases 16 through 19 are complete.
 The initial Phase 17 audit rejected all six production candidates, then Phase
 17A repaired pending particle, weapon, reaction, and timer state and admitted
 all six exact loadouts. Phase 18 retained direct restore but left Wait macros
-disabled after their quality gate failed. Phase 19 is the next active target. No dependent phase
+disabled after their quality gate failed. Phase 19 admitted five of six audited
+teachers under matched budgets. Phase 20 is the next active target. No dependent phase
 may bypass the preceding correctness or quality gate.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
@@ -27022,7 +27023,30 @@ Verification:
 
 ### Phase 19: Matched-Budget Teacher Comparison
 
-Status: Planned.
+Status: Done (2026-08-26); five scenarios admitted, one rejected.
+
+Completion:
+
+- Added a deterministic, canonicalized quality report requiring all four arms,
+  five identical search seeds, exact per-seed call budgets, finite metrics,
+  complete trajectories, and completed Evolutionary generations.
+- Compared source-seed-only, deterministic random, unguided Evolutionary, and
+  unguided MCTS at 16,384 simulator calls per cell on all six source-backed,
+  snapshot-admitted scenarios. Five scenarios pass both local baselines;
+  `NaviaDoubleHydro` is excluded because its retained teacher median is
+  57,476.20 below deterministic random.
+- Aligned search with source replay by scheduling and snapshot-reconstructing
+  KQMS enemy particles and comparing ending Energy to the prior equivalent
+  cycle phase. Fixed Ayato and Xilonen transient action-mask restrictions found
+  by the deterministic random arm.
+- Repeated the Hu Tao comparison with byte-identical SHA-256
+  `277809b116c89f8fe5648bcd607a4e628d2628a2a13e0e7124301897d6369043`.
+  Its retained Evolutionary median beats human by 52,981.05 and random by
+  308,606.30.
+- Dataset generation now requires a canonical quality report and rejects an
+  absent scenario, failed scenario, non-retained strategy, or mismatched call
+  budget before writing. A qualified Hu Tao run generated eight records;
+  Navia failed closed with `TEACHER_BELOW_RANDOM`.
 
 Why fourth:
 

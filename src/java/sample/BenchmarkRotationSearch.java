@@ -31,6 +31,7 @@ import com.google.gson.JsonParser;
 
 import mechanics.rl.EpisodeConfig;
 import mechanics.rl.ObservationEncoder;
+import mechanics.optimization.TotalOptimizationResult;
 import mechanics.rotation.BattleRotationEnvironment;
 import mechanics.rotation.EvolutionaryRotationSearcher;
 import mechanics.rotation.ExpertDatasetReader;
@@ -45,7 +46,15 @@ import mechanics.rotation.RotationObjective;
 import mechanics.rotation.RotationScenario;
 import mechanics.rotation.RotationSearchConfig;
 import mechanics.rotation.RotationSearchStrategy;
+import mechanics.rotation.RotationSeedEvaluation;
+import mechanics.rotation.RotationSourceCatalog;
 import mechanics.rotation.RotationStep;
+import mechanics.rotation.RotationTeacherQualityReport;
+import mechanics.rotation.RotationTeacherQualityReport.Arm;
+import mechanics.rotation.RotationTeacherQualityReport.ScenarioResult;
+import mechanics.rotation.RotationTeacherQualityReport.Trial;
+import mechanics.rotation.RotationTrajectoryRanker;
+import mechanics.rotation.SourcedRotationSeed;
 import simulation.party.DatasetSplit;
 import simulation.party.PartyCatalog;
 import simulation.party.PartyDefinition;
@@ -70,7 +79,12 @@ public final class BenchmarkRotationSearch {
     private static final int ELITE_COUNT = 3;
     private static final int RESTORE_REPETITIONS = 5;
     private static final int RESTORE_CALL_BUDGET = 4096;
+    private static final int TEACHER_QUALITY_CYCLES = 2;
+    private static final int TEACHER_QUALITY_DEFAULT_BUDGET = 16384;
     private static final long[] DEFAULT_SEEDS = {104729L, 130363L, 155921L};
+    private static final long[] TEACHER_QUALITY_SEEDS = {
+            104729L, 130363L, 155921L, 181081L, 206369L
+    };
     private static final Gson GSON = new GsonBuilder()
             .serializeNulls()
             .setPrettyPrinting()
@@ -93,6 +107,10 @@ public final class BenchmarkRotationSearch {
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
             runRestoreThroughputBenchmark();
+            return;
+        }
+        if ("--teacher-quality".equals(args[0])) {
+            runTeacherQualityBenchmark(args);
             return;
         }
         Options options = Options.parse(args);
@@ -163,6 +181,300 @@ public final class BenchmarkRotationSearch {
         System.out.println("report=" + options.output.toAbsolutePath().normalize());
         System.out.println("scenarios=" + definitions.size());
         System.out.println("measurements=" + metrics.size());
+    }
+
+    /** Runs the source-seeded four-arm quality gate without dataset artifacts. */
+    private static void runTeacherQualityBenchmark(String[] args) throws Exception {
+        if (args.length > 4) {
+            throw new IllegalArgumentException(
+                    "Usage: --teacher-quality [output] [party|all] [call-budget]");
+        }
+        Path output = Path.of(args.length > 1
+                ? args[1] : "output/rotation_teacher_quality.json");
+        String selectedParty = args.length > 2 ? args[2] : "all";
+        int callBudget = args.length > 3
+                ? Integer.parseInt(args[3]) : TEACHER_QUALITY_DEFAULT_BUDGET;
+        if (callBudget <= 0) {
+            throw new IllegalArgumentException("Teacher quality call budget must be positive");
+        }
+        List<SourcedRotationSeed> sourceSeeds = admittedSourceSeeds(selectedParty);
+        List<ScenarioResult> scenarios = new ArrayList<>();
+        for (SourcedRotationSeed sourceSeed : sourceSeeds) {
+            PartyDefinition definition = PartyCatalog.require(sourceSeed.getPartyName());
+            TotalOptimizationResult build = RotationSeedEvaluation.resolveBuild(sourceSeed);
+            List<Trial> trials = new ArrayList<>();
+            for (long searchSeed : TEACHER_QUALITY_SEEDS) {
+                RotationSeedEvaluation.Result humanReplay = RotationSeedEvaluation.evaluate(
+                        sourceSeed,
+                        definition,
+                        build,
+                        TEACHER_QUALITY_CYCLES,
+                        searchSeed);
+                int[] humanActions = flattenHumanTrace(humanReplay);
+                RotationScenario scenario = RotationScenario.forPartyBuild(
+                        definition,
+                        build,
+                        new EpisodeConfig(),
+                        definition.rotationCycleSeconds(),
+                        TEACHER_QUALITY_CYCLES,
+                        searchSeed,
+                        RotationObjective.cyclicDamage());
+                int maxActions = teacherQualityMaxActions(scenario, humanActions);
+                trials.add(runHumanTeacherTrial(
+                        scenario, searchSeed, callBudget, humanActions));
+                trials.add(runRandomTeacherTrial(
+                        scenario, searchSeed, callBudget, maxActions));
+                trials.add(runSearchTeacherTrial(
+                        Arm.UNGUIDED_EVOLUTIONARY,
+                        new EvolutionaryRotationSearcher(),
+                        scenario,
+                        searchSeed,
+                        callBudget,
+                        humanActions,
+                        maxActions));
+                trials.add(runSearchTeacherTrial(
+                        Arm.UNGUIDED_MCTS,
+                        new MctsRotationSearcher(),
+                        scenario,
+                        searchSeed,
+                        callBudget,
+                        humanActions,
+                        maxActions));
+            }
+            RotationScenario identity = RotationScenario.forPartyBuild(
+                    definition,
+                    build,
+                    new EpisodeConfig(),
+                    definition.rotationCycleSeconds(),
+                    TEACHER_QUALITY_CYCLES,
+                    0L,
+                    RotationObjective.cyclicDamage());
+            scenarios.add(new ScenarioResult(identity.getFingerprint(), trials));
+        }
+        RotationTeacherQualityReport report = new RotationTeacherQualityReport(scenarios);
+        writeAtomically(output, report.toJson() + System.lineSeparator());
+        System.out.println("report=" + output.toAbsolutePath().normalize());
+        System.out.println("scenarios=" + report.getScenarios().size());
+        System.out.println("publishable=" + report.getScenarios().stream()
+                .filter(ScenarioResult::isPublishable)
+                .count());
+    }
+
+    private static List<SourcedRotationSeed> admittedSourceSeeds(
+            String selectedParty) throws IOException {
+        RotationSourceCatalog catalog = RotationSourceCatalog.loadDefault();
+        List<SourcedRotationSeed> selected = new ArrayList<>();
+        Set<String> parties = new HashSet<>();
+        for (SourcedRotationSeed sourceSeed : catalog.getSeeds()) {
+            if (!sourceSeed.isUsable()) {
+                continue;
+            }
+            PartyDefinition definition = PartyCatalog.require(sourceSeed.getPartyName());
+            if (!definition.supportsExactSnapshotRestore()
+                    || !("all".equalsIgnoreCase(selectedParty)
+                            || definition.name().equals(selectedParty))) {
+                continue;
+            }
+            if (!parties.add(definition.name())) {
+                throw new IllegalStateException(
+                        "Multiple usable source seeds for admitted party " + definition.name());
+            }
+            selected.add(sourceSeed);
+        }
+        selected.sort(Comparator.comparing(SourcedRotationSeed::getPartyName));
+        if (selected.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "No source-seeded snapshot-admitted party matches " + selectedParty);
+        }
+        return selected;
+    }
+
+    private static int[] flattenHumanTrace(RotationSeedEvaluation.Result replay) {
+        List<Integer> actions = new ArrayList<>();
+        for (RotationSeedEvaluation.CycleResult cycle : replay.cycles) {
+            actions.addAll(cycle.executedActions);
+        }
+        if (actions.isEmpty()) {
+            throw new IllegalStateException("Human source replay produced an empty trace");
+        }
+        return toIntArray(actions);
+    }
+
+    private static int teacherQualityMaxActions(
+            RotationScenario scenario,
+            int[] humanActions) {
+        int waitBound = (int) Math.ceil(scenario.getHorizonSeconds() / 0.1) + 1;
+        return Math.max(humanActions.length, waitBound);
+    }
+
+    private static Trial runHumanTeacherTrial(
+            RotationScenario scenario,
+            long searchSeed,
+            int callBudget,
+            int[] humanActions) {
+        int calls = 0;
+        int completed = 0;
+        ExpertTrajectory best = null;
+        try (RotationEnvironment environment = new BattleRotationEnvironment(scenario)) {
+            while (calls < callBudget) {
+                RotationStep step = environment.reset();
+                List<Integer> executed = new ArrayList<>();
+                for (int actionId : humanActions) {
+                    if (step.done || calls >= callBudget) {
+                        break;
+                    }
+                    if (!isLegal(step, actionId)) {
+                        throw new IllegalStateException(
+                                "Human source trace became illegal at call " + calls
+                                        + " for " + scenario.getFingerprint());
+                    }
+                    step = environment.step(actionId);
+                    calls++;
+                    executed.add(actionId);
+                    if (!step.validAction) {
+                        throw new IllegalStateException("Human source trace was rejected");
+                    }
+                }
+                if (step.done) {
+                    completed++;
+                    ExpertTrajectory candidate = new ExpertTrajectory(
+                            toIntArray(executed),
+                            step.objective,
+                            step.stateHash,
+                            true,
+                            executed.size());
+                    if (best == null
+                            || RotationTrajectoryRanker.INSTANCE.compare(candidate, best) < 0) {
+                        best = candidate;
+                    }
+                }
+            }
+        }
+        if (calls != callBudget || best == null) {
+            throw new IllegalStateException(
+                    "Human baseline did not complete under the exact call budget");
+        }
+        return new Trial(
+                Arm.HUMAN_SEED,
+                searchSeed,
+                calls,
+                best.getObjective().objectiveScore,
+                completed,
+                0,
+                1,
+                RotationTrajectoryRanker.INSTANCE.isPublishable(best));
+    }
+
+    private static Trial runRandomTeacherTrial(
+            RotationScenario scenario,
+            long searchSeed,
+            int callBudget,
+            int maxActions) {
+        Random random = new Random(searchSeed);
+        int calls = 0;
+        int completed = 0;
+        ExpertTrajectory best = null;
+        Set<String> completeSequences = new HashSet<>();
+        try (RotationEnvironment environment = new BattleRotationEnvironment(scenario)) {
+            while (calls < callBudget) {
+                RotationStep step = environment.reset();
+                List<Integer> actions = new ArrayList<>();
+                while (!step.done && actions.size() < maxActions && calls < callBudget) {
+                    int actionId = randomLegalAction(step, random);
+                    step = environment.step(actionId);
+                    calls++;
+                    actions.add(actionId);
+                    if (!step.validAction) {
+                        throw new IllegalStateException("Random teacher arm executed an illegal action");
+                    }
+                }
+                if (step.done) {
+                    completed++;
+                    ExpertTrajectory candidate = new ExpertTrajectory(
+                            toIntArray(actions),
+                            step.objective,
+                            step.stateHash,
+                            true,
+                            actions.size());
+                    completeSequences.add(Arrays.toString(candidate.getActions()));
+                    if (best == null
+                            || RotationTrajectoryRanker.INSTANCE.compare(candidate, best) < 0) {
+                        best = candidate;
+                    }
+                }
+            }
+        }
+        if (calls != callBudget || best == null) {
+            throw new IllegalStateException(
+                    "Random baseline did not complete under the exact call budget");
+        }
+        return new Trial(
+                Arm.DETERMINISTIC_RANDOM,
+                searchSeed,
+                calls,
+                best.getObjective().objectiveScore,
+                completed,
+                0,
+                completeSequences.size(),
+                RotationTrajectoryRanker.INSTANCE.isPublishable(best));
+    }
+
+    private static Trial runSearchTeacherTrial(
+            Arm arm,
+            RotationSearchStrategy strategy,
+            RotationScenario scenario,
+            long searchSeed,
+            int callBudget,
+            int[] humanActions,
+            int maxActions) {
+        RotationSearchConfig config = new RotationSearchConfig(
+                callBudget,
+                maxActions,
+                DEFAULT_ARCHIVE_SIZE,
+                POPULATION_SIZE,
+                ELITE_COUNT,
+                Math.sqrt(2.0),
+                searchSeed,
+                ExpertPolicyPrior.uniform(),
+                () -> false,
+                List.of(humanActions));
+        RotationSearchStrategy.Result result = strategy.search(
+                () -> new BattleRotationEnvironment(scenario), config);
+        if (result.cancelled || result.simulatorCalls != callBudget || !result.publishable) {
+            throw new IllegalStateException(
+                    arm.getWireName() + " failed exact publishable search: calls="
+                            + result.simulatorCalls
+                            + ", budget=" + callBudget
+                            + ", cancelled=" + result.cancelled
+                            + ", complete=" + result.best.isComplete()
+                            + ", cyclic="
+                            + result.best.getObjective().cyclicEnergyFeasible
+                            + ", invalid="
+                            + result.best.getObjective().invalidActionCount
+                            + ", evaluatedSeeds="
+                            + result.statistics.evaluatedSeeds
+                            + ", generations="
+                            + result.statistics.completedGenerations);
+        }
+        Set<String> sequences = new HashSet<>();
+        for (ExpertTrajectory trajectory : result.archive) {
+            sequences.add(Arrays.toString(trajectory.getActions()));
+        }
+        return new Trial(
+                arm,
+                searchSeed,
+                result.simulatorCalls,
+                result.best.getObjective().objectiveScore,
+                result.statistics.completedTrajectories,
+                result.statistics.completedGenerations,
+                sequences.size(),
+                RotationTrajectoryRanker.INSTANCE.isPublishable(result.best));
+    }
+
+    private static boolean isLegal(RotationStep step, int actionId) {
+        return actionId >= 0
+                && actionId < step.legalActionMask.length
+                && step.legalActionMask[actionId] >= 0.5;
     }
 
     private static void runRestoreThroughputBenchmark() {

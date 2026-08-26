@@ -448,6 +448,25 @@ public final class Xilonen extends Character implements
         }
     }
 
+    /** Mirrors transient Blessing restrictions in the simulator action mask. */
+    @Override
+    public boolean canPerformAction(
+            CharacterActionRequest request,
+            double currentTime) {
+        if (request == null) {
+            throw new IllegalArgumentException("Xilonen action is required");
+        }
+        if (request.getKey() == CharacterActionKey.SKILL
+                && request.getSkillMode() != SkillActionMode.PRESS) {
+            return false;
+        }
+        if (request.getKey() == CharacterActionKey.CHARGE
+                && nightsoulBlessing) {
+            return false;
+        }
+        return super.canPerformAction(request, currentTime);
+    }
+
     /** Dispatches the bounded typed action set. */
     @Override
     public void onAction(

@@ -115,10 +115,33 @@ public class EnergyDistributor {
         if (!Double.isFinite(rotationSeconds) || rotationSeconds <= 0.0) {
             throw new IllegalArgumentException("KQMS rotation duration must be positive");
         }
+        scheduleKQMSEnemyParticlesAt(rotationSeconds, rotationSeconds / 2.0);
+    }
+
+    /** Reconstructs the next periodic KQMS enemy drop after snapshot restore. */
+    public void restoreKQMSEnemyParticles(
+            double rotationSeconds,
+            double restoredTime) {
+        if (!Double.isFinite(rotationSeconds) || rotationSeconds <= 0.0) {
+            throw new IllegalArgumentException("KQMS rotation duration must be positive");
+        }
+        if (!Double.isFinite(restoredTime) || restoredTime < 0.0) {
+            throw new IllegalArgumentException("KQMS restored time must be non-negative");
+        }
+        double nextDropTime = rotationSeconds / 2.0;
+        while (nextDropTime <= restoredTime) {
+            nextDropTime += rotationSeconds;
+        }
+        scheduleKQMSEnemyParticlesAt(rotationSeconds, nextDropTime);
+    }
+
+    private void scheduleKQMSEnemyParticlesAt(
+            double rotationSeconds,
+            double firstDropTime) {
         double clearOrbsPerRotation = rotationSeconds
                 / KQMS_CLEAR_ORB_INTERVAL_SECONDS;
         sim.registerEvent(new simulation.event.TimerEvent() {
-            double nextDropTime = rotationSeconds / 2.0;
+            double nextDropTime = firstDropTime;
 
             @Override
             public void tick(CombatSimulator s) {

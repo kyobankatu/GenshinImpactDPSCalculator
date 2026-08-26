@@ -1,6 +1,9 @@
 package mechanics.rotation;
 
+import java.util.Map;
+
 import model.entity.Character;
+import model.type.CharacterId;
 import simulation.CombatSimulator;
 
 /**
@@ -60,6 +63,32 @@ public final class RotationObjective {
         for (Character character : simulator.getPartyMembers()) {
             double requiredEnergy = character.getMaxEnergy() * requiredEndEnergyFraction;
             energyDeficit += Math.max(0.0, requiredEnergy - character.getCurrentEnergy());
+        }
+        return evaluate(
+                simulator.getTotalDamage(),
+                simulator.getCurrentTime(),
+                energyDeficit,
+                invalidActionCount);
+    }
+
+    /** Evaluates ending Energy against the prior equivalent cycle phase. */
+    public Score evaluateAgainstEnergyReference(
+            CombatSimulator simulator,
+            int invalidActionCount,
+            Map<CharacterId, Double> referenceEnergy) {
+        if (simulator == null || referenceEnergy == null || referenceEnergy.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Simulator and cyclic Energy reference are required");
+        }
+        double energyDeficit = 0.0;
+        for (Character character : simulator.getPartyMembers()) {
+            Double reference = referenceEnergy.get(character.getCharacterId());
+            if (reference == null || !Double.isFinite(reference) || reference < 0.0) {
+                throw new IllegalArgumentException(
+                        "Cyclic Energy reference does not cover "
+                                + character.getCharacterId());
+            }
+            energyDeficit += Math.max(0.0, reference - character.getCurrentEnergy());
         }
         return evaluate(
                 simulator.getTotalDamage(),

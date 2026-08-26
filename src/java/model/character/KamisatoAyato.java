@@ -297,6 +297,26 @@ public final class KamisatoAyato extends Character implements
         return false;
     }
 
+    /** Mirrors Soukai Kanka restrictions in the simulator action mask. */
+    @Override
+    public boolean canPerformAction(
+            CharacterActionRequest request,
+            double currentTime) {
+        if (request == null) {
+            throw new IllegalArgumentException("Kamisato Ayato action is required");
+        }
+        if (request.getKey() == CharacterActionKey.SKILL
+                && request.getSkillMode() != SkillActionMode.PRESS) {
+            return false;
+        }
+        if ((request.getKey() == CharacterActionKey.CHARGE
+                || request.getKey() == CharacterActionKey.PLUNGE)
+                && isSkillActive(currentTime)) {
+            return false;
+        }
+        return super.canPerformAction(request, currentTime);
+    }
+
     /** Dispatches Ayato's represented typed action set. */
     @Override
     public void onAction(

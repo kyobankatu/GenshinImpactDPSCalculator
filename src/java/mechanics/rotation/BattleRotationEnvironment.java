@@ -1,7 +1,9 @@
 package mechanics.rotation;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import mechanics.rl.ActionResult;
@@ -22,6 +24,8 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
     private final long ownerId;
     private final RestoreMode restoreMode;
     private final List<Integer> actionHistory = new ArrayList<>();
+    private final Map<CharacterId, Double> cyclicReferenceEnergy =
+            new EnumMap<>(CharacterId.class);
     private long resetGeneration;
     private int invalidActionCount;
     private RotationStep currentStep;
@@ -57,10 +61,10 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
     @Override
     public RotationStep reset() {
         ensureOpen();
-        BattleEnvironment.ResetResult result = battleEnvironment.reset(
-                false, scenario.getPreferredPartyId());
+        BattleEnvironment.ResetResult result = resetBattleEnvironment();
         resetGeneration++;
         invalidActionCount = 0;
+        cyclicReferenceEnergy.clear();
         actionHistory.clear();
         SimulatorSnapshot simulatorSnapshot = battleEnvironment.saveSnapshot();
         RotationObjective.Score score = scenario.getObjective().evaluate(
@@ -68,7 +72,8 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         long stateHash = hashState(
                 simulatorSnapshot,
                 battleEnvironment.saveBranchState(),
-                result.actionMask);
+                result.actionMask,
+                cyclicReferenceEnergy);
         currentStep = new RotationStep(
                 result.observation,
                 result.privilegedObservation,
@@ -97,15 +102,20 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
     }
 
     private RotationStep executeStep(int actionId, boolean recordAction) {
+        double previousTime = currentStep.objective.elapsedSeconds;
         ActionResult result = battleEnvironment.step(actionId);
         if (!result.validAction) {
             invalidActionCount++;
         }
         SimulatorSnapshot simulatorSnapshot = battleEnvironment.saveSnapshot();
         BattleEnvironment.BranchStateSnapshot branchState = battleEnvironment.saveBranchState();
-        RotationObjective.Score score = scenario.getObjective().evaluate(
-                battleEnvironment.getSimulator(), invalidActionCount);
-        long stateHash = hashState(simulatorSnapshot, branchState, result.actionMask);
+        captureCyclicReference(previousTime);
+        RotationObjective.Score score = currentObjective();
+        long stateHash = hashState(
+                simulatorSnapshot,
+                branchState,
+                result.actionMask,
+                cyclicReferenceEnergy);
         currentStep = new RotationStep(
                 result.observation,
                 result.privilegedObservation,
@@ -138,7 +148,11 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         ensureReady();
         SimulatorSnapshot simulatorSnapshot = battleEnvironment.saveSnapshot();
         BattleEnvironment.BranchStateSnapshot branchState = battleEnvironment.saveBranchState();
-        long stateHash = hashState(simulatorSnapshot, branchState, currentStep.legalActionMask);
+        long stateHash = hashState(
+                simulatorSnapshot,
+                branchState,
+                currentStep.legalActionMask,
+                cyclicReferenceEnergy);
         if (stateHash != currentStep.stateHash) {
             throw new IllegalStateException("current state changed outside the rotation environment");
         }
@@ -151,7 +165,8 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
                 currentStep.copy(),
                 stateHash,
                 simulatorSnapshot,
-                branchState);
+                branchState,
+                cyclicReferenceEnergy);
     }
 
     @Override
@@ -188,7 +203,8 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         long restoredHash = hashState(
                 battleEnvironment.saveSnapshot(),
                 battleEnvironment.saveBranchState(),
-                battleSnapshot.step.legalActionMask);
+                battleSnapshot.step.legalActionMask,
+                cyclicReferenceEnergy);
         if (restoredHash != battleSnapshot.stateHash) {
             throw new IllegalStateException("restored state hash mismatch");
         }
@@ -200,7 +216,15 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         battleEnvironment.restoreSnapshot(
                 battleSnapshot.simulatorSnapshot,
                 battleSnapshot.branchState);
+        if (scenario.schedulesKqmsEnemyParticles()) {
+            battleEnvironment.getSimulator().getEnergyDistributor()
+                    .restoreKQMSEnemyParticles(
+                            scenario.getCycleDurationSeconds(),
+                            battleSnapshot.simulatorSnapshot.currentTime);
+        }
         invalidActionCount = battleSnapshot.invalidActionCount;
+        cyclicReferenceEnergy.clear();
+        cyclicReferenceEnergy.putAll(battleSnapshot.cyclicReferenceEnergy);
         actionHistory.clear();
         for (int actionId : battleSnapshot.actionHistory) {
             actionHistory.add(actionId);
@@ -208,7 +232,8 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         long restoredHash = hashState(
                 battleEnvironment.saveSnapshot(),
                 battleEnvironment.saveBranchState(),
-                battleSnapshot.step.legalActionMask);
+                battleSnapshot.step.legalActionMask,
+                cyclicReferenceEnergy);
         if (restoredHash != battleSnapshot.stateHash) {
             throw new IllegalStateException("direct restored state hash mismatch");
         }
@@ -264,9 +289,9 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
     }
 
     private void rebuildFromHistory(int[] history) {
-        BattleEnvironment.ResetResult result = battleEnvironment.reset(
-                false, scenario.getPreferredPartyId());
+        BattleEnvironment.ResetResult result = resetBattleEnvironment();
         invalidActionCount = 0;
+        cyclicReferenceEnergy.clear();
         actionHistory.clear();
         SimulatorSnapshot simulatorSnapshot = battleEnvironment.saveSnapshot();
         RotationObjective.Score score = scenario.getObjective().evaluate(
@@ -274,7 +299,8 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         long stateHash = hashState(
                 simulatorSnapshot,
                 battleEnvironment.saveBranchState(),
-                result.actionMask);
+                result.actionMask,
+                cyclicReferenceEnergy);
         currentStep = new RotationStep(
                 result.observation,
                 result.privilegedObservation,
@@ -298,10 +324,46 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         }
     }
 
+    private BattleEnvironment.ResetResult resetBattleEnvironment() {
+        BattleEnvironment.ResetResult result = battleEnvironment.reset(
+                false, scenario.getPreferredPartyId());
+        if (scenario.schedulesKqmsEnemyParticles()) {
+            battleEnvironment.getSimulator().getEnergyDistributor()
+                    .scheduleKQMSEnemyParticles(scenario.getCycleDurationSeconds());
+        }
+        return result;
+    }
+
+    private void captureCyclicReference(double previousTime) {
+        if (scenario.getCycleCount() <= 1 || !cyclicReferenceEnergy.isEmpty()) {
+            return;
+        }
+        double boundary = scenario.getCycleDurationSeconds();
+        CombatSimulator simulator = battleEnvironment.getSimulator();
+        if (previousTime < boundary && simulator.getCurrentTime() >= boundary) {
+            for (model.entity.Character character : simulator.getPartyMembers()) {
+                cyclicReferenceEnergy.put(
+                        character.getCharacterId(), character.getCurrentEnergy());
+            }
+        }
+    }
+
+    private RotationObjective.Score currentObjective() {
+        if (cyclicReferenceEnergy.isEmpty()) {
+            return scenario.getObjective().evaluate(
+                    battleEnvironment.getSimulator(), invalidActionCount);
+        }
+        return scenario.getObjective().evaluateAgainstEnergyReference(
+                battleEnvironment.getSimulator(),
+                invalidActionCount,
+                cyclicReferenceEnergy);
+    }
+
     private static long hashState(
             SimulatorSnapshot simulatorSnapshot,
             BattleEnvironment.BranchStateSnapshot branchState,
-            double[] actionMask) {
+            double[] actionMask,
+            Map<CharacterId, Double> cyclicReferenceEnergy) {
         long hash = 0xcbf29ce484222325L;
         hash = mix(hash, Double.doubleToLongBits(simulatorSnapshot.currentTime));
         hash = mix(hash, Double.doubleToLongBits(simulatorSnapshot.rotationTime));
@@ -323,6 +385,13 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         }
         for (double maskValue : actionMask) {
             hash = mix(hash, Double.doubleToLongBits(maskValue));
+        }
+        for (CharacterId characterId : CharacterId.values()) {
+            Double reference = cyclicReferenceEnergy.get(characterId);
+            if (reference != null) {
+                hash = mix(hash, characterId.ordinal());
+                hash = mix(hash, Double.doubleToLongBits(reference));
+            }
         }
         return hash;
     }
@@ -350,6 +419,7 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         private final long stateHash;
         private final SimulatorSnapshot simulatorSnapshot;
         private final BattleEnvironment.BranchStateSnapshot branchState;
+        private final Map<CharacterId, Double> cyclicReferenceEnergy;
 
         private BattleSnapshot(
                 long ownerId,
@@ -360,7 +430,8 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
                 RotationStep step,
                 long stateHash,
                 SimulatorSnapshot simulatorSnapshot,
-                BattleEnvironment.BranchStateSnapshot branchState) {
+                BattleEnvironment.BranchStateSnapshot branchState,
+                Map<CharacterId, Double> cyclicReferenceEnergy) {
             this.ownerId = ownerId;
             this.resetGeneration = resetGeneration;
             this.scenarioFingerprint = scenarioFingerprint;
@@ -370,6 +441,7 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
             this.stateHash = stateHash;
             this.simulatorSnapshot = simulatorSnapshot;
             this.branchState = branchState;
+            this.cyclicReferenceEnergy = Map.copyOf(cyclicReferenceEnergy);
         }
 
         @Override
