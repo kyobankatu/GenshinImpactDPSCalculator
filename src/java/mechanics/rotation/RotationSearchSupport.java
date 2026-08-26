@@ -171,7 +171,7 @@ final class RotationSearchSupport {
         }
     }
 
-    /** Exact simulator-work budget including snapshot replay depth. */
+    /** Exact simulator action-call budget including only replayed actions. */
     static final class Budget {
         private final int limit;
         private int used;

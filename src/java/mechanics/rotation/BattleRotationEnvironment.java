@@ -20,6 +20,7 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
     private final RotationScenario scenario;
     private final BattleEnvironment battleEnvironment;
     private final long ownerId;
+    private final RestoreMode restoreMode;
     private final List<Integer> actionHistory = new ArrayList<>();
     private long resetGeneration;
     private int invalidActionCount;
@@ -28,12 +29,29 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
 
     /** Creates an adapter for one immutable scenario. */
     public BattleRotationEnvironment(RotationScenario scenario) {
+        this(scenario, scenario != null && scenario.getSnapshotSafety().admitted
+                ? RestoreMode.AUDITED_DIRECT : RestoreMode.REPLAY);
+    }
+
+    /** Creates an adapter with an explicit restore implementation for benchmarks. */
+    public BattleRotationEnvironment(
+            RotationScenario scenario,
+            RestoreMode restoreMode) {
         if (scenario == null) {
             throw new IllegalArgumentException("scenario must not be null");
+        }
+        if (restoreMode == null) {
+            throw new IllegalArgumentException("restoreMode must not be null");
+        }
+        if (restoreMode != RestoreMode.REPLAY
+                && !scenario.getSnapshotSafety().admitted) {
+            throw new IllegalArgumentException(
+                    "direct restore requires an admitted scenario");
         }
         this.scenario = scenario;
         this.battleEnvironment = new BattleEnvironment(scenario.getEpisodeFactory());
         this.ownerId = NEXT_OWNER_ID.getAndIncrement();
+        this.restoreMode = restoreMode;
     }
 
     @Override
@@ -140,10 +158,20 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
     public RotationStep restore(Snapshot snapshot) {
         ensureReady();
         BattleSnapshot battleSnapshot = requireOwnedSnapshot(snapshot);
-        if (!scenario.getSnapshotSafety().admitted) {
+        if (restoreMode == RestoreMode.REPLAY) {
             return restoreByReplay(battleSnapshot);
         }
         return restoreDirect(battleSnapshot);
+    }
+
+    @Override
+    public int restoreSimulatorCallCost(Snapshot snapshot) {
+        ensureReady();
+        BattleSnapshot battleSnapshot = requireOwnedSnapshot(snapshot);
+        if (restoreMode == RestoreMode.REPLAY) {
+            return battleSnapshot.actionHistory.length;
+        }
+        return 0;
     }
 
     /** Restores one branch by replay as a direct-restore correctness oracle. */
@@ -302,6 +330,14 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
     private static long mix(long hash, long value) {
         long mixed = hash ^ value;
         return mixed * 0x100000001b3L;
+    }
+
+    /** Branch restoration implementation selected by production or benchmark callers. */
+    public enum RestoreMode {
+        /** Typed direct restore allowed only for audited exact loadouts. */
+        AUDITED_DIRECT,
+        /** Reset and replay retained as the correctness and performance baseline. */
+        REPLAY
     }
 
     private static final class BattleSnapshot implements Snapshot {

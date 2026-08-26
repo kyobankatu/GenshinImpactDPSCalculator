@@ -19,6 +19,11 @@ public interface RotationEnvironment extends AutoCloseable {
     /** Restores a branch captured by this environment and reset generation. */
     RotationStep restore(Snapshot snapshot);
 
+    /** Returns simulator action calls required to restore this branch. */
+    default int restoreSimulatorCallCost(Snapshot snapshot) {
+        return 0;
+    }
+
     /** Returns this environment's immutable scenario. */
     RotationScenario scenario();
 

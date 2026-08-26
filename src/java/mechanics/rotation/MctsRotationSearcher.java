@@ -65,6 +65,7 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
                     environment.snapshot(),
                     0,
                     config.prior);
+            int consecutiveZeroCallIterations = 0;
             while (!cancelled && budget.remaining() > 0) {
                 int callsBefore = budget.used();
                 if (!restore(environment, root, budget)) {
@@ -109,14 +110,39 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
                 RotationStep rolloutStep = node.step;
                 while (!rolloutStep.done
                         && actions.size() < config.maxActions
-                        && budget.consume(1)) {
+                        && budget.remaining() > 0) {
                     int actionId = RotationSearchSupport.sampleLegal(
                             rolloutStep, config.prior, random);
-                    rolloutStep = environment.step(actionId);
-                    if (!rolloutStep.validAction) {
-                        throw new IllegalStateException("MCTS rollout executed an illegal action");
+                    int maximumRunLength = actionId == PolicyAction.WAIT_SHORT.getId()
+                            ? Math.min(
+                                    config.maxWaitRunLength,
+                                    Math.min(
+                                            config.maxActions - actions.size(),
+                                            budget.remaining()))
+                            : 1;
+                    int runLength = maximumRunLength > 1
+                            ? 1 + random.nextInt(maximumRunLength) : 1;
+                    RotationWaitGene gene = RotationWaitGene.of(
+                            actionId, runLength);
+                    for (int repeat = 0;
+                            repeat < gene.getRunLength()
+                                    && !rolloutStep.done
+                                    && actions.size() < config.maxActions;
+                            repeat++) {
+                        if (!RotationSearchSupport.isLegal(
+                                rolloutStep, gene.getActionId())) {
+                            break;
+                        }
+                        if (!budget.consume(1)) {
+                            break;
+                        }
+                        rolloutStep = environment.step(gene.getActionId());
+                        if (!rolloutStep.validAction) {
+                            throw new IllegalStateException(
+                                    "MCTS rollout executed an illegal action");
+                        }
+                        actions.add(gene.getActionId());
                     }
-                    actions.add(actionId);
                 }
                 if (!actions.isEmpty() && budget.used() > callsBefore) {
                     ExpertTrajectory trajectory = new ExpertTrajectory(
@@ -133,10 +159,49 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
                             diagnosticArchive,
                             statistics);
                     backpropagate(path, trajectory.getObjective().objectiveScore);
+                } else if (!actions.isEmpty()) {
+                    backpropagate(path, rolloutStep.objective.objectiveScore);
+                }
+                if (budget.used() == callsBefore) {
+                    consecutiveZeroCallIterations++;
+                    if (consecutiveZeroCallIterations
+                            >= config.maxActions) {
+                        break;
+                    }
+                } else {
+                    consecutiveZeroCallIterations = 0;
                 }
                 if (config.cancellation.getAsBoolean()) {
                     cancelled = true;
                     break;
+                }
+            }
+            while (!cancelled && budget.remaining() > 0) {
+                int length = Math.min(config.maxActions, budget.remaining());
+                int[] proposal = new int[length];
+                for (int index = 0; index < proposal.length; index++) {
+                    proposal[index] = random.nextInt(PolicyAction.SIZE);
+                }
+                RotationSearchSupport.Evaluation evaluation =
+                        RotationSearchSupport.evaluate(
+                                environment,
+                                proposal,
+                                config,
+                                random,
+                                budget,
+                                RotationEvaluationMode.REPAIR);
+                if (evaluation == null) {
+                    break;
+                }
+                recordEvaluation(
+                        evaluation.trajectory,
+                        evaluation.repairedActions,
+                        false,
+                        feasibleArchive,
+                        diagnosticArchive,
+                        statistics);
+                if (config.cancellation.getAsBoolean()) {
+                    cancelled = true;
                 }
             }
         }
@@ -167,7 +232,8 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
             RotationEnvironment environment,
             Node node,
             RotationSearchSupport.Budget budget) {
-        if (!budget.consume(node.depth)) {
+        if (!budget.consume(
+                environment.restoreSimulatorCallCost(node.snapshot))) {
             return false;
         }
         RotationStep restored = environment.restore(node.snapshot);

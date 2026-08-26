@@ -30,6 +30,10 @@ public class RotationEnvironmentRegressionTest {
             int firstAction = firstLegalAction(reset.legalActionMask);
             environment.step(firstAction);
             RotationEnvironment.Snapshot branch = environment.snapshot();
+            if (environment.restoreSimulatorCallCost(branch) != 1) {
+                throw new AssertionError(
+                        partyName + " replay restore cost should equal history depth");
+            }
             int branchAction = firstLegalAction(environment.current().legalActionMask);
             RotationStep firstResult = environment.step(branchAction);
 
@@ -82,6 +86,9 @@ public class RotationEnvironmentRegressionTest {
             second.reset();
             RotationEnvironment.Snapshot snapshot = first.snapshot();
             expectFailure(() -> second.restore(snapshot), "foreign environment snapshot");
+            expectFailure(
+                    () -> second.restoreSimulatorCallCost(snapshot),
+                    "foreign environment restore cost");
         }
     }
 
@@ -92,7 +99,15 @@ public class RotationEnvironmentRegressionTest {
             RotationEnvironment.Snapshot snapshot = environment.snapshot();
             environment.reset();
             expectFailure(() -> environment.restore(snapshot), "prior reset snapshot");
+            expectFailure(
+                    () -> environment.restoreSimulatorCallCost(snapshot),
+                    "prior reset restore cost");
         }
+        expectFailure(
+                () -> new BattleRotationEnvironment(
+                        scenario("RaidenParty", 20.0, 1),
+                        BattleRotationEnvironment.RestoreMode.AUDITED_DIRECT),
+                "unaudited direct restore mode");
     }
 
     private static void assertTerminalAndClosedAccessRejected() {

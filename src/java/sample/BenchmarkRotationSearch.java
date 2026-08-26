@@ -37,6 +37,7 @@ import mechanics.rotation.ExpertDatasetReader;
 import mechanics.rotation.ExpertDatasetRecord;
 import mechanics.rotation.ExpertPolicyPrior;
 import mechanics.rotation.ExpertTrajectory;
+import mechanics.rotation.MctsRotationSearcher;
 import mechanics.rotation.PolicyAction;
 import mechanics.rotation.RecordedExpertPolicyPrior;
 import mechanics.rotation.RotationEnvironment;
@@ -67,6 +68,8 @@ public final class BenchmarkRotationSearch {
     private static final int DEFAULT_ARCHIVE_SIZE = 8;
     private static final int POPULATION_SIZE = 12;
     private static final int ELITE_COUNT = 3;
+    private static final int RESTORE_REPETITIONS = 5;
+    private static final int RESTORE_CALL_BUDGET = 4096;
     private static final long[] DEFAULT_SEEDS = {104729L, 130363L, 155921L};
     private static final Gson GSON = new GsonBuilder()
             .serializeNulls()
@@ -88,6 +91,10 @@ public final class BenchmarkRotationSearch {
      *         publication contract is invalid
      */
     public static void main(String[] args) throws Exception {
+        if (args.length == 0) {
+            runRestoreThroughputBenchmark();
+            return;
+        }
         Options options = Options.parse(args);
         List<PartyDefinition> definitions = selectDefinitions(options.split);
         FingerprintSplits fingerprintSplits = FingerprintSplits.fromCatalog();
@@ -156,6 +163,218 @@ public final class BenchmarkRotationSearch {
         System.out.println("report=" + options.output.toAbsolutePath().normalize());
         System.out.println("scenarios=" + definitions.size());
         System.out.println("measurements=" + metrics.size());
+    }
+
+    private static void runRestoreThroughputBenchmark() {
+        PartyDefinition definition = PartyCatalog.require(
+                "HuTaoXianyunVaporize");
+        RotationScenario warmScenario = createScenario(
+                definition, DEFAULT_SEEDS[0]);
+        RotationSearchConfig warmConfig = restoreBenchmarkConfig(
+                definition, warmScenario);
+        runTimedMcts(
+                warmScenario,
+                warmConfig,
+                BattleRotationEnvironment.RestoreMode.AUDITED_DIRECT);
+        runTimedMcts(
+                warmScenario,
+                warmConfig,
+                BattleRotationEnvironment.RestoreMode.REPLAY);
+        long[] directNanos = new long[RESTORE_REPETITIONS];
+        long[] replayNanos = new long[RESTORE_REPETITIONS];
+        long[] macroNanos = new long[RESTORE_REPETITIONS];
+        int[] completedTrajectories = new int[RESTORE_REPETITIONS];
+        int[] completedMacro = new int[RESTORE_REPETITIONS];
+        int[] evaluatedDefault = new int[RESTORE_REPETITIONS];
+        int[] evaluatedMacro = new int[RESTORE_REPETITIONS];
+        double[] directCompletedPerSecond =
+                new double[RESTORE_REPETITIONS];
+        double[] replayCompletedPerSecond =
+                new double[RESTORE_REPETITIONS];
+        double[] defaultEvaluatedPerSecond =
+                new double[RESTORE_REPETITIONS];
+        double[] macroEvaluatedPerSecond =
+                new double[RESTORE_REPETITIONS];
+        double[] defaultObjectives = new double[RESTORE_REPETITIONS];
+        double[] macroObjectives = new double[RESTORE_REPETITIONS];
+        for (int repetition = 0; repetition < RESTORE_REPETITIONS; repetition++) {
+            RotationScenario scenario = createScenario(
+                    definition, DEFAULT_SEEDS[repetition % DEFAULT_SEEDS.length]);
+            RotationSearchConfig config = restoreBenchmarkConfig(
+                    definition, scenario);
+            TimedSearch direct;
+            TimedSearch replay;
+            if (repetition % 2 == 0) {
+                direct = runTimedMcts(
+                        scenario,
+                        config,
+                        BattleRotationEnvironment.RestoreMode.AUDITED_DIRECT);
+                replay = runTimedMcts(
+                        scenario,
+                        config,
+                        BattleRotationEnvironment.RestoreMode.REPLAY);
+            } else {
+                replay = runTimedMcts(
+                        scenario,
+                        config,
+                        BattleRotationEnvironment.RestoreMode.REPLAY);
+                direct = runTimedMcts(
+                        scenario,
+                        config,
+                        BattleRotationEnvironment.RestoreMode.AUDITED_DIRECT);
+            }
+            TimedSearch macro = runTimedMcts(
+                    scenario,
+                    config.withMaxWaitRunLength(10),
+                    BattleRotationEnvironment.RestoreMode.AUDITED_DIRECT);
+            requireMatchedBudgetAndQuality(direct.result, replay.result);
+            directNanos[repetition] = direct.elapsedNanos;
+            replayNanos[repetition] = replay.elapsedNanos;
+            macroNanos[repetition] = macro.elapsedNanos;
+            completedTrajectories[repetition] =
+                    direct.result.statistics.completedTrajectories;
+            completedMacro[repetition] =
+                    macro.result.statistics.completedTrajectories;
+            evaluatedDefault[repetition] =
+                    direct.result.statistics.evaluatedTrajectories;
+            evaluatedMacro[repetition] =
+                    macro.result.statistics.evaluatedTrajectories;
+            directCompletedPerSecond[repetition] = perSecond(
+                    completedTrajectories[repetition], direct.elapsedNanos);
+            replayCompletedPerSecond[repetition] = perSecond(
+                    completedTrajectories[repetition], replay.elapsedNanos);
+            defaultEvaluatedPerSecond[repetition] = perSecond(
+                    evaluatedDefault[repetition], direct.elapsedNanos);
+            macroEvaluatedPerSecond[repetition] = perSecond(
+                    evaluatedMacro[repetition], macro.elapsedNanos);
+            defaultObjectives[repetition] =
+                    direct.result.best.getObjective().objectiveScore;
+            macroObjectives[repetition] =
+                    macro.result.best.getObjective().objectiveScore;
+        }
+        long medianDirect = median(directNanos);
+        long medianReplay = median(replayNanos);
+        if (medianDirect >= medianReplay) {
+            throw new IllegalStateException(
+                    "Audited direct restore did not improve median throughput: direct="
+                            + medianDirect + "ns replay=" + medianReplay + "ns");
+        }
+        if (median(directCompletedPerSecond)
+                <= median(replayCompletedPerSecond)) {
+            throw new IllegalStateException(
+                    "Direct restore did not improve completed trajectory throughput");
+        }
+        boolean macroRetained = median(macroEvaluatedPerSecond)
+                > median(defaultEvaluatedPerSecond)
+                && median(macroObjectives) >= median(defaultObjectives);
+        System.out.println("restoreBenchmarkParty=" + definition.name());
+        System.out.println("repetitions=" + RESTORE_REPETITIONS);
+        System.out.println("simulatorCalls=" + RESTORE_CALL_BUDGET);
+        System.out.println("completedTrajectories="
+                + Arrays.toString(completedTrajectories));
+        System.out.println("completedMacro="
+                + Arrays.toString(completedMacro));
+        System.out.println("evaluatedDefault="
+                + Arrays.toString(evaluatedDefault));
+        System.out.println("evaluatedMacro=" + Arrays.toString(evaluatedMacro));
+        System.out.println("medianDirectNanos=" + medianDirect);
+        System.out.println("medianReplayNanos=" + medianReplay);
+        System.out.println("medianMacroNanos=" + median(macroNanos));
+        System.out.println("speedup="
+                + String.format(Locale.ROOT, "%.3f", (double) medianReplay / medianDirect));
+        System.out.println("medianDirectCompletedPerSecond="
+                + format(median(directCompletedPerSecond)));
+        System.out.println("medianReplayCompletedPerSecond="
+                + format(median(replayCompletedPerSecond)));
+        System.out.println("medianDefaultEvaluatedPerSecond="
+                + format(median(defaultEvaluatedPerSecond)));
+        System.out.println("medianMacroEvaluatedPerSecond="
+                + format(median(macroEvaluatedPerSecond)));
+        System.out.println("medianDefaultObjective="
+                + format(median(defaultObjectives)));
+        System.out.println("medianMacroObjective="
+                + format(median(macroObjectives)));
+        System.out.println("macroRetained=" + macroRetained);
+    }
+
+    private static RotationSearchConfig restoreBenchmarkConfig(
+            PartyDefinition definition,
+            RotationScenario scenario) {
+        return new RotationSearchConfig(
+                RESTORE_CALL_BUDGET,
+                Math.max(DEFAULT_MAX_ACTIONS,
+                        definition.baselinePolicyActions().length),
+                DEFAULT_ARCHIVE_SIZE,
+                POPULATION_SIZE,
+                ELITE_COUNT,
+                Math.sqrt(2.0),
+                scenario.getSeed(),
+                ExpertPolicyPrior.uniform(),
+                () -> false,
+                List.of(definition.baselinePolicyActions()));
+    }
+
+    private static TimedSearch runTimedMcts(
+            RotationScenario scenario,
+            RotationSearchConfig config,
+            BattleRotationEnvironment.RestoreMode restoreMode) {
+        long start = System.nanoTime();
+        RotationSearchStrategy.Result result = new MctsRotationSearcher().search(
+                () -> new BattleRotationEnvironment(scenario, restoreMode),
+                config);
+        long elapsedNanos = System.nanoTime() - start;
+        if (result.simulatorCalls != RESTORE_CALL_BUDGET) {
+            throw new IllegalStateException(
+                    "Restore benchmark did not consume the exact call budget");
+        }
+        return new TimedSearch(result, elapsedNanos);
+    }
+
+    private static void requireMatchedBudgetAndQuality(
+            RotationSearchStrategy.Result direct,
+            RotationSearchStrategy.Result replay) {
+        if (direct.simulatorCalls != replay.simulatorCalls
+                || direct.simulatorCalls != RESTORE_CALL_BUDGET) {
+            throw new IllegalStateException(
+                    "Direct and replay restore budgets diverged");
+        }
+        if (direct.best.getObjective().objectiveScore
+                < replay.best.getObjective().objectiveScore) {
+            throw new IllegalStateException(
+                    "Direct restore reduced best terminal objective quality");
+        }
+    }
+
+    private static long median(long[] values) {
+        long[] sorted = values.clone();
+        Arrays.sort(sorted);
+        return sorted[sorted.length / 2];
+    }
+
+    private static double median(double[] values) {
+        double[] sorted = values.clone();
+        Arrays.sort(sorted);
+        return sorted[sorted.length / 2];
+    }
+
+    private static double perSecond(int count, long elapsedNanos) {
+        return count * 1_000_000_000.0 / elapsedNanos;
+    }
+
+    private static String format(double value) {
+        return String.format(Locale.ROOT, "%.3f", value);
+    }
+
+    private static final class TimedSearch {
+        private final RotationSearchStrategy.Result result;
+        private final long elapsedNanos;
+
+        private TimedSearch(
+                RotationSearchStrategy.Result result,
+                long elapsedNanos) {
+            this.result = result;
+            this.elapsedNanos = elapsedNanos;
+        }
     }
 
     private static RotationScenario createScenario(PartyDefinition definition, long seed) {

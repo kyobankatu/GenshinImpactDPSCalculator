@@ -123,13 +123,20 @@ public class RotationSnapshotSafetyRegressionTest {
             int branchDepth,
             String partyName) {
         try (BattleRotationEnvironment environment =
-                new BattleRotationEnvironment(scenario)) {
+                new BattleRotationEnvironment(
+                        scenario,
+                        BattleRotationEnvironment.RestoreMode.AUDITED_DIRECT)) {
             RotationStep step = environment.reset();
             for (int index = 0; index < branchDepth; index++) {
                 requireLegal(step, actions[index], partyName, index);
                 step = environment.step(actions[index]);
             }
             RotationEnvironment.Snapshot snapshot = environment.snapshot();
+            if (environment.restoreSimulatorCallCost(snapshot) != 0) {
+                throw new AssertionError(
+                        "Audited direct restore consumed simulator calls for "
+                                + partyName);
+            }
             List<StepSignature> uninterrupted = executeSuffix(
                     environment, step, actions, branchDepth, partyName);
             RotationStep directBranch = environment.restore(snapshot);

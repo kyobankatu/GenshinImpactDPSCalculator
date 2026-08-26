@@ -15,6 +15,7 @@ import mechanics.rotation.RotationScenario;
 import mechanics.rotation.RotationSearchConfig;
 import mechanics.rotation.RotationSearchStrategy;
 import mechanics.rotation.RotationStep;
+import mechanics.rotation.RotationWaitGene;
 import mechanics.rotation.TopKTrajectoryArchive;
 
 /** Deterministic regression checks for bounded expert rotation search. */
@@ -27,6 +28,7 @@ public class RotationSearchRegressionTest {
         assertDeterministicDelayedReward(new MctsRotationSearcher());
         assertArchiveRetainsEqualScoreDiversity();
         assertPriorOnlySeedMarker();
+        assertWaitGeneRoundTrip();
         assertWaitOnlySearch();
         assertCancellationBounded();
         assertInvalidInputsRejected();
@@ -85,6 +87,70 @@ public class RotationSearchRegressionTest {
                 throw new AssertionError("WAIT-only search emitted action " + actionId);
             }
         }
+    }
+
+    private static void assertWaitGeneRoundTrip() {
+        int wait = PolicyAction.WAIT_SHORT.getId();
+        int[] actions = {
+                SETUP,
+                wait,
+                wait,
+                BURST,
+                wait,
+                wait,
+                wait,
+                wait,
+                wait,
+                wait,
+                wait,
+                wait,
+                wait,
+                wait,
+                wait,
+                wait
+        };
+        List<RotationWaitGene> genes = RotationWaitGene.compress(actions, 10);
+        assertArrayEquals(
+                actions,
+                RotationWaitGene.expand(genes, actions.length, 10),
+                "Wait gene round trip");
+        if (genes.get(1).getRunLength() != 2
+                || genes.get(3).getRunLength() != 10
+                || genes.get(4).getRunLength() != 2) {
+            throw new AssertionError("Wait runs were not split at the maximum");
+        }
+        assertArrayEquals(
+                new int[0],
+                RotationWaitGene.expand(
+                        RotationWaitGene.compress(new int[0], 10), 0, 10),
+                "empty Wait gene marker");
+        assertArrayEquals(
+                new int[] {wait},
+                RotationWaitGene.expand(
+                        List.of(RotationWaitGene.of(wait, 1)), 1, 1),
+                "single Wait gene");
+        expectFailure(
+                () -> RotationWaitGene.of(wait, 0),
+                "zero Wait run");
+        expectFailure(
+                () -> RotationWaitGene.of(SETUP, 2),
+                "non-Wait repeated gene");
+        expectFailure(
+                () -> RotationWaitGene.of(PolicyAction.SIZE, 1),
+                "unknown gene action");
+        expectFailure(
+                () -> RotationWaitGene.expand(genes, actions.length - 1, 10),
+                "Wait expansion above maxActions");
+        expectFailure(
+                () -> RotationWaitGene.expand(
+                        List.of(RotationWaitGene.of(wait, 2)), 2, 1),
+                "Wait run above configured maximum");
+        java.util.ArrayList<RotationWaitGene> nullGene =
+                new java.util.ArrayList<>();
+        nullGene.add(null);
+        expectFailure(
+                () -> RotationWaitGene.expand(nullGene, 1, 1),
+                "null Wait gene");
     }
 
     private static void assertCancellationBounded() {

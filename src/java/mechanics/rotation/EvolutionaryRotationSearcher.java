@@ -1,5 +1,6 @@
 package mechanics.rotation;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
@@ -99,7 +100,7 @@ public final class EvolutionaryRotationSearcher implements RotationSearchStrateg
                     int[] parent = parents.get(random.nextInt(parentLimit)).getActions();
                     RotationSearchSupport.Evaluation evaluation = RotationSearchSupport.evaluate(
                             environment,
-                            mutate(parent, random, config.maxActions),
+                            mutate(parent, random, config),
                             config,
                             random,
                             budget,
@@ -192,81 +193,135 @@ public final class EvolutionaryRotationSearcher implements RotationSearchStrateg
         return actions;
     }
 
-    private int[] mutate(int[] parent, Random random, int maxActions) {
-        int[] child = parent.clone();
-        switch (random.nextInt(5)) {
+    private int[] mutate(
+            int[] parent,
+            Random random,
+            RotationSearchConfig config) {
+        List<RotationWaitGene> child = new ArrayList<>(
+                RotationWaitGene.compress(
+                        parent, config.maxWaitRunLength));
+        switch (random.nextInt(6)) {
             case 0:
-                return insert(child, random, maxActions);
+                insert(child, random, config);
+                break;
             case 1:
-                return delete(child, random);
+                delete(child, random);
+                break;
             case 2:
-                child[random.nextInt(child.length)] = random.nextInt(PolicyAction.SIZE);
-                return child;
+                replace(child, random, config);
+                break;
             case 3:
-                return move(child, random);
+                move(child, random);
+                break;
+            case 4:
+                reverseSubsequence(child, random);
+                break;
             default:
-                return reverseSubsequence(child, random);
+                resizeWait(child, random, config);
+                break;
+        }
+        return RotationWaitGene.expand(
+                child, config.maxActions, config.maxWaitRunLength);
+    }
+
+    private void insert(
+            List<RotationWaitGene> genes,
+            Random random,
+            RotationSearchConfig config) {
+        int available = config.maxActions - expandedLength(genes);
+        if (available <= 0) {
+            replace(genes, random, config);
+            return;
+        }
+        genes.add(
+                random.nextInt(genes.size() + 1),
+                randomGene(random, config, available));
+    }
+
+    private void delete(List<RotationWaitGene> genes, Random random) {
+        if (genes.size() > 1) {
+            genes.remove(random.nextInt(genes.size()));
         }
     }
 
-    private int[] insert(int[] actions, Random random, int maxActions) {
-        if (actions.length >= maxActions) {
-            int[] replaced = actions.clone();
-            replaced[random.nextInt(replaced.length)] = random.nextInt(PolicyAction.SIZE);
-            return replaced;
-        }
-        int offset = random.nextInt(actions.length + 1);
-        int[] result = new int[actions.length + 1];
-        System.arraycopy(actions, 0, result, 0, offset);
-        result[offset] = random.nextInt(PolicyAction.SIZE);
-        System.arraycopy(actions, offset, result, offset + 1, actions.length - offset);
-        return result;
+    private void replace(
+            List<RotationWaitGene> genes,
+            Random random,
+            RotationSearchConfig config) {
+        int index = random.nextInt(genes.size());
+        int available = config.maxActions - expandedLength(genes)
+                + genes.get(index).getRunLength();
+        genes.set(index, randomGene(random, config, available));
     }
 
-    private int[] delete(int[] actions, Random random) {
-        if (actions.length == 1) {
-            return actions.clone();
+    private void move(List<RotationWaitGene> genes, Random random) {
+        if (genes.size() < 2) {
+            return;
         }
-        return deleteAt(actions, random.nextInt(actions.length));
+        RotationWaitGene gene = genes.remove(random.nextInt(genes.size()));
+        genes.add(random.nextInt(genes.size() + 1), gene);
     }
 
-    private int[] deleteAt(int[] actions, int offset) {
-        int[] result = new int[actions.length - 1];
-        System.arraycopy(actions, 0, result, 0, offset);
-        System.arraycopy(actions, offset + 1, result, offset, actions.length - offset - 1);
-        return result;
-    }
-
-    private int[] move(int[] actions, Random random) {
-        if (actions.length < 2) {
-            return actions.clone();
+    private void reverseSubsequence(
+            List<RotationWaitGene> genes,
+            Random random) {
+        if (genes.size() < 2) {
+            return;
         }
-        int from = random.nextInt(actions.length);
-        int to = random.nextInt(actions.length);
-        int value = actions[from];
-        int[] result = deleteAt(actions, from);
-        int[] expanded = new int[actions.length];
-        int insertion = Math.min(to, result.length);
-        System.arraycopy(result, 0, expanded, 0, insertion);
-        expanded[insertion] = value;
-        System.arraycopy(result, insertion, expanded, insertion + 1, result.length - insertion);
-        return expanded;
-    }
-
-    private int[] reverseSubsequence(int[] actions, Random random) {
-        int[] result = actions.clone();
-        if (result.length < 2) {
-            return result;
-        }
-        int first = random.nextInt(result.length);
-        int second = random.nextInt(result.length);
+        int first = random.nextInt(genes.size());
+        int second = random.nextInt(genes.size());
         int start = Math.min(first, second);
         int end = Math.max(first, second);
         while (start < end) {
-            int value = result[start];
-            result[start++] = result[end];
-            result[end--] = value;
+            RotationWaitGene value = genes.get(start);
+            genes.set(start++, genes.get(end));
+            genes.set(end--, value);
         }
-        return result;
+    }
+
+    private void resizeWait(
+            List<RotationWaitGene> genes,
+            Random random,
+            RotationSearchConfig config) {
+        List<Integer> waits = new ArrayList<>();
+        for (int index = 0; index < genes.size(); index++) {
+            if (genes.get(index).getActionId()
+                    == PolicyAction.WAIT_SHORT.getId()) {
+                waits.add(index);
+            }
+        }
+        if (waits.isEmpty()) {
+            replace(genes, random, config);
+            return;
+        }
+        int index = waits.get(random.nextInt(waits.size()));
+        RotationWaitGene current = genes.get(index);
+        int available = Math.min(
+                config.maxWaitRunLength,
+                config.maxActions - expandedLength(genes)
+                        + current.getRunLength());
+        int runLength = available == 1
+                ? 1 : 1 + random.nextInt(available);
+        genes.set(index, RotationWaitGene.of(
+                PolicyAction.WAIT_SHORT.getId(), runLength));
+    }
+
+    private RotationWaitGene randomGene(
+            Random random,
+            RotationSearchConfig config,
+            int available) {
+        int actionId = random.nextInt(PolicyAction.SIZE);
+        int maximum = Math.min(config.maxWaitRunLength, available);
+        int runLength = actionId == PolicyAction.WAIT_SHORT.getId()
+                && maximum > 1 ? 1 + random.nextInt(maximum) : 1;
+        return RotationWaitGene.of(actionId, runLength);
+    }
+
+    private int expandedLength(List<RotationWaitGene> genes) {
+        int length = 0;
+        for (RotationWaitGene gene : genes) {
+            length += gene.getRunLength();
+        }
+        return length;
     }
 }

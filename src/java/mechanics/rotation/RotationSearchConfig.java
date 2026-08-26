@@ -15,6 +15,7 @@ public final class RotationSearchConfig {
     public final int archiveSize;
     public final int populationSize;
     public final int eliteCount;
+    public final int maxWaitRunLength;
     public final double explorationConstant;
     public final long seed;
     public final ExpertPolicyPrior prior;
@@ -33,6 +34,33 @@ public final class RotationSearchConfig {
             ExpertPolicyPrior prior,
             BooleanSupplier cancellation,
             List<int[]> initialSeeds) {
+        this(
+                simulatorCallBudget,
+                maxActions,
+                archiveSize,
+                populationSize,
+                eliteCount,
+                explorationConstant,
+                seed,
+                prior,
+                cancellation,
+                initialSeeds,
+                1);
+    }
+
+    /** Creates a fully explicit search configuration including Wait macros. */
+    public RotationSearchConfig(
+            int simulatorCallBudget,
+            int maxActions,
+            int archiveSize,
+            int populationSize,
+            int eliteCount,
+            double explorationConstant,
+            long seed,
+            ExpertPolicyPrior prior,
+            BooleanSupplier cancellation,
+            List<int[]> initialSeeds,
+            int maxWaitRunLength) {
         if (simulatorCallBudget <= 0) {
             throw new IllegalArgumentException("simulatorCallBudget must be positive");
         }
@@ -47,6 +75,10 @@ public final class RotationSearchConfig {
         }
         if (eliteCount <= 0 || eliteCount >= populationSize) {
             throw new IllegalArgumentException("eliteCount must be within the population");
+        }
+        if (maxWaitRunLength <= 0 || maxWaitRunLength > maxActions) {
+            throw new IllegalArgumentException(
+                    "maxWaitRunLength must be within maxActions");
         }
         if (!Double.isFinite(explorationConstant) || explorationConstant < 0.0) {
             throw new IllegalArgumentException("explorationConstant must be finite and non-negative");
@@ -64,6 +96,7 @@ public final class RotationSearchConfig {
         this.archiveSize = archiveSize;
         this.populationSize = populationSize;
         this.eliteCount = eliteCount;
+        this.maxWaitRunLength = maxWaitRunLength;
         this.explorationConstant = explorationConstant;
         this.seed = seed;
         this.prior = prior;
@@ -98,7 +131,8 @@ public final class RotationSearchConfig {
                 seed,
                 prior,
                 cancellation,
-                seeds);
+                seeds,
+                maxWaitRunLength);
     }
 
     /** Returns a copy using a validated model or recorded policy prior. */
@@ -113,7 +147,24 @@ public final class RotationSearchConfig {
                 seed,
                 policyPrior,
                 cancellation,
-                initialSeeds);
+                initialSeeds,
+                maxWaitRunLength);
+    }
+
+    /** Returns a copy with one search-internal Wait run maximum. */
+    public RotationSearchConfig withMaxWaitRunLength(int waitRunLength) {
+        return new RotationSearchConfig(
+                simulatorCallBudget,
+                maxActions,
+                archiveSize,
+                populationSize,
+                eliteCount,
+                explorationConstant,
+                seed,
+                prior,
+                cancellation,
+                initialSeeds,
+                waitRunLength);
     }
 
     /** Returns defensive copies of optional human or prior-search seeds. */
