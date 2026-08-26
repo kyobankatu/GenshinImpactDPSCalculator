@@ -58,7 +58,9 @@ def test_tiny_fixture_overfits_policy_and_value(tmp_path):
     for name, value in policy.state_dict().items():
         assert torch.equal(value, initialized.state_dict()[name])
     payload = torch.load(output, weights_only=False)
-    assert payload["pretraining_revision"] == 2
+    assert payload["pretraining_revision"] == 3
+    assert payload["pretraining_seed"] == 4321
+    assert payload["pretraining_config"]["policyType"] == "gru"
     assert payload["simulator_revision"] == SIMULATOR_REVISION
     assert payload["training_fingerprints"] == [record.scenario_fingerprint]
     assert payload["normalization_fingerprints"] == [

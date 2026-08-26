@@ -142,7 +142,7 @@ def load_expert_initialization(policy, checkpoint_path, device="cpu"):
         raise ValueError(
             f"Expert initialization checkpoint is missing provenance: {missing}"
         )
-    if payload["pretraining_revision"] != 2:
+    if payload["pretraining_revision"] != 3:
         raise ValueError("Expert initialization revision mismatch")
     if not payload["dataset_source_hash"] or not payload["dataset_record_hashes"]:
         raise ValueError("Expert initialization dataset provenance is empty")

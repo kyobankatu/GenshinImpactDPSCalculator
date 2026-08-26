@@ -25377,6 +25377,7 @@ Why seventh:
 Target files:
 
 - `src/python/rl/pretrain_expert_policy.py`
+- new `src/python/rl/evaluate_rotation_checkpoint.py`
 - `src/python/rl/expert_dataset.py`
 - `src/python/rl/recurrent_ppo.py`
 - `src/python/rl/train_recurrent_ppo.py`
@@ -27438,10 +27439,14 @@ Progress evidence:
   metrics, and deterministic champion selection. Missing or duplicated cells,
   split contamination, unmatched budgets, unknown models, and NaN metrics fail
   closed.
-- All 87 Python RL tests passed. One-epoch fixed-seed debug training and restore
+- All 88 Python RL tests passed. One-epoch fixed-seed debug training and restore
   completed for all four candidates. Full multi-seed training, live guided
   search evaluation, tournament report publication, and champion qualification
   remain pending; Phase 25 is therefore still blocked.
+- Pretraining schema v3 now freezes seed and model/epoch/sequence/batch/optimizer
+  budget in every checkpoint. The offline evaluator verifies this metadata and
+  frozen dataset hash before publishing split-wise policy top-1/top-3, value
+  rank/calibration, checkpoint fingerprint, and median inference latency.
 
 ### Phase 25: Transactional Expert Iteration
 

@@ -12,6 +12,8 @@ import torch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from recurrent_ppo import build_policy, load_policy
+from evaluate_rotation_checkpoint import evaluate_checkpoint
+from pretrain_expert_policy import PretrainingConfig, run_pretraining
 from rotation_model_registry import (
     REQUIRED_METRICS,
     evaluate_tournament_manifest,
@@ -91,6 +93,38 @@ def test_tournament_rejects_unmatched_or_invalid_cells(mutate, message):
 def test_unknown_registered_model_fails_closed():
     with pytest.raises(ValueError, match="unknown policy_type"):
         build_policy("unknown", 287, 8, 11)
+
+
+def test_offline_checkpoint_metrics_preserve_frozen_provenance(tmp_path):
+    fixture = os.path.join(
+        os.path.dirname(__file__), "fixtures", "expert_dataset_v2.jsonl"
+    )
+    checkpoint = tmp_path / "policy.pt"
+    run_pretraining(
+        PretrainingConfig(
+            dataset_path=fixture,
+            output_path=str(checkpoint),
+            epochs=1,
+            hidden_size=8,
+            sequence_length=4,
+            batch_size=2,
+            policy_type="lstm",
+            seed=19,
+        )
+    )
+    result = evaluate_checkpoint(fixture, checkpoint)
+    assert result["model"] == "lstm"
+    assert result["seed"] == 19
+    assert len(result["datasetSourceHash"]) == 64
+    assert result["splitMetrics"]["train"]["decisions"] > 0
+    assert result["splitMetrics"]["train"]["policyTop3Accuracy"] >= 0.0
+    assert result["inferenceLatencyMillis"] >= 0.0
+
+    payload = torch.load(checkpoint, weights_only=False)
+    payload["dataset_source_hash"] = "f" * 64
+    torch.save(payload, checkpoint)
+    with pytest.raises(ValueError, match="stale"):
+        evaluate_checkpoint(fixture, checkpoint)
 
 
 def _manifest():

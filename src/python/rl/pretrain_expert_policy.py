@@ -34,7 +34,7 @@ from recurrent_ppo import (
 from rotation_model_registry import model_names
 
 
-PRETRAINING_REVISION = 2
+PRETRAINING_REVISION = 3
 DEFAULT_OUTPUT = "output/expert_pretrain/latest-model.pt"
 PRESETS = {
     "debug": {
@@ -288,6 +288,17 @@ def _save_checkpoint(
         optimizer,
         extra_state={
             "pretraining_revision": PRETRAINING_REVISION,
+            "pretraining_seed": config.seed,
+            "pretraining_config": {
+                "epochs": config.epochs,
+                "hiddenSize": config.hidden_size,
+                "sequenceLength": config.sequence_length,
+                "batchSize": config.batch_size,
+                "learningRate": config.learning_rate,
+                "valueCoefficient": config.value_coefficient,
+                "schedulerGamma": config.scheduler_gamma,
+                "policyType": config.policy_type,
+            },
             "pretraining_epoch": epoch,
             "dataset_source_hash": dataset.source_hash,
             "dataset_record_hashes": [
@@ -314,6 +325,8 @@ def _restore_checkpoint(config, dataset, policy, optimizer, scheduler, device):
     validate_checkpoint_payload(payload, checkpoint)
     required = (
         "pretraining_revision",
+        "pretraining_seed",
+        "pretraining_config",
         "pretraining_epoch",
         "dataset_source_hash",
         "dataset_record_hashes",
@@ -333,6 +346,22 @@ def _restore_checkpoint(config, dataset, policy, optimizer, scheduler, device):
         raise ValueError(f"Pretraining checkpoint is missing metadata: {missing}")
     if payload["pretraining_revision"] != PRETRAINING_REVISION:
         raise ValueError("Pretraining checkpoint revision mismatch")
+    if payload["pretraining_seed"] != config.seed:
+        raise ValueError("Pretraining checkpoint seed mismatch")
+    expected_config = {
+        "epochs": config.epochs,
+        "hiddenSize": config.hidden_size,
+        "sequenceLength": config.sequence_length,
+        "batchSize": config.batch_size,
+        "learningRate": config.learning_rate,
+        "valueCoefficient": config.value_coefficient,
+        "schedulerGamma": config.scheduler_gamma,
+        "policyType": config.policy_type,
+    }
+    checkpoint_config = dict(payload["pretraining_config"])
+    checkpoint_config["epochs"] = config.epochs
+    if checkpoint_config != expected_config:
+        raise ValueError("Pretraining checkpoint configuration mismatch")
     if payload["simulator_revision"] != SIMULATOR_REVISION:
         raise ValueError("Pretraining checkpoint simulator revision mismatch")
     if payload["dataset_source_hash"] != dataset.source_hash:
