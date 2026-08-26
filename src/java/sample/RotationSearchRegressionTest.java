@@ -26,6 +26,7 @@ public class RotationSearchRegressionTest {
         assertDeterministicDelayedReward(new EvolutionaryRotationSearcher());
         assertDeterministicDelayedReward(new MctsRotationSearcher());
         assertArchiveRetainsEqualScoreDiversity();
+        assertPriorOnlySeedMarker();
         assertWaitOnlySearch();
         assertCancellationBounded();
         assertInvalidInputsRejected();
@@ -40,8 +41,21 @@ public class RotationSearchRegressionTest {
         assertResultEquals(first, second);
         assertArrayEquals(new int[] {SETUP, BURST}, first.best.getActions(), "delayed optimum");
         assertClose(1000.0, first.best.getObjective().objectiveScore, "delayed objective");
-        if (first.simulatorCalls > config.simulatorCallBudget) {
-            throw new AssertionError("Search exceeded its simulator-call budget");
+        if (first.simulatorCalls != config.simulatorCallBudget) {
+            throw new AssertionError("Search did not consume its exact simulator-call budget");
+        }
+    }
+
+    private static void assertPriorOnlySeedMarker() {
+        RotationSearchConfig config = config(40, 2, 12L, () -> false)
+                .withInitialSeeds(List.<int[]>of(new int[0]));
+        RotationSearchStrategy.Result result = new EvolutionaryRotationSearcher().search(
+                DelayedRewardEnvironment::new,
+                config);
+        if (result.statistics.evaluatedSeeds != 1
+                || result.best.getEvaluationMode()
+                        != mechanics.rotation.RotationEvaluationMode.REPAIR) {
+            throw new AssertionError("Empty prior-only seed marker was not repaired");
         }
     }
 
@@ -140,7 +154,18 @@ public class RotationSearchRegressionTest {
             RotationSearchStrategy.Result expected,
             RotationSearchStrategy.Result actual) {
         if (expected.simulatorCalls != actual.simulatorCalls
-                || expected.archive.size() != actual.archive.size()) {
+                || expected.archive.size() != actual.archive.size()
+                || expected.publishable != actual.publishable
+                || expected.statistics.evaluatedTrajectories
+                        != actual.statistics.evaluatedTrajectories
+                || expected.statistics.completedTrajectories
+                        != actual.statistics.completedTrajectories
+                || expected.statistics.completedPopulations
+                        != actual.statistics.completedPopulations
+                || expected.statistics.completedGenerations
+                        != actual.statistics.completedGenerations
+                || expected.statistics.repairedActions
+                        != actual.statistics.repairedActions) {
             throw new AssertionError("Seeded search result metadata changed");
         }
         for (int index = 0; index < expected.archive.size(); index++) {

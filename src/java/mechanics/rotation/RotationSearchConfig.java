@@ -1,8 +1,11 @@
 package mechanics.rotation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 /** Immutable bounded search configuration shared by teacher strategies. */
@@ -51,8 +54,13 @@ public final class RotationSearchConfig {
         if (prior == null || cancellation == null || initialSeeds == null) {
             throw new IllegalArgumentException("prior, cancellation, and initialSeeds are required");
         }
+        List<int[]> seedCopy = copySeeds(initialSeeds);
+        int longestSeed = 0;
+        for (int[] seedActions : seedCopy) {
+            longestSeed = Math.max(longestSeed, seedActions.length);
+        }
         this.simulatorCallBudget = simulatorCallBudget;
-        this.maxActions = maxActions;
+        this.maxActions = Math.max(maxActions, longestSeed);
         this.archiveSize = archiveSize;
         this.populationSize = populationSize;
         this.eliteCount = eliteCount;
@@ -60,7 +68,7 @@ public final class RotationSearchConfig {
         this.seed = seed;
         this.prior = prior;
         this.cancellation = cancellation;
-        this.initialSeeds = copySeeds(initialSeeds);
+        this.initialSeeds = seedCopy;
     }
 
     /** Returns a practical deterministic configuration for bounded local search. */
@@ -115,6 +123,7 @@ public final class RotationSearchConfig {
 
     private static List<int[]> copySeeds(List<int[]> seeds) {
         List<int[]> copy = new ArrayList<>();
+        Set<String> sequenceKeys = new HashSet<>();
         for (int[] seedActions : seeds) {
             if (seedActions == null) {
                 throw new IllegalArgumentException("initial seed must not be null");
@@ -122,6 +131,9 @@ public final class RotationSearchConfig {
             int[] cloned = seedActions.clone();
             for (int actionId : cloned) {
                 PolicyAction.fromId(actionId);
+            }
+            if (!sequenceKeys.add(Arrays.toString(cloned))) {
+                throw new IllegalArgumentException("initial seeds must be unique");
             }
             copy.add(cloned);
         }

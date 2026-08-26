@@ -15,48 +15,162 @@ public final class EvolutionaryRotationSearcher implements RotationSearchStrateg
         }
         RotationSearchSupport.Budget budget = new RotationSearchSupport.Budget(
                 config.simulatorCallBudget);
-        TopKTrajectoryArchive archive = new TopKTrajectoryArchive(config.archiveSize);
+        TopKTrajectoryArchive feasibleArchive = new TopKTrajectoryArchive(config.archiveSize);
+        TopKTrajectoryArchive diagnosticArchive = new TopKTrajectoryArchive(config.archiveSize);
+        RotationSearchStatistics.Mutable statistics = new RotationSearchStatistics.Mutable();
         Random random = new Random(config.seed);
         boolean cancelled = false;
         List<int[]> initialSeeds = config.getInitialSeeds();
 
         try (RotationEnvironment environment = requireEnvironment(environmentFactory)) {
-            int seedIndex = 0;
-            int candidateIndex = 0;
-            while (budget.remaining() > 0) {
-                int[] candidate;
-                if (seedIndex < initialSeeds.size()) {
-                    candidate = initialSeeds.get(seedIndex++).clone();
-                } else if (archive.size() == 0
-                        || candidateIndex % config.populationSize == 0) {
-                    candidate = randomSequence(random, config.maxActions);
-                } else {
-                    List<ExpertTrajectory> parents = archive.trajectories();
-                    int parentLimit = Math.min(
-                            Math.min(config.populationSize, parents.size()),
-                            Math.max(1, config.eliteCount));
-                    int[] parent = parents.get(random.nextInt(parentLimit)).getActions();
-                    candidate = mutate(parent, random, config.maxActions);
+            for (int[] initialSeed : initialSeeds) {
+                RotationSearchSupport.Evaluation evaluation;
+                RotationEvaluationMode mode = initialSeed.length == 0
+                        ? RotationEvaluationMode.REPAIR : RotationEvaluationMode.STRICT;
+                try {
+                    evaluation = RotationSearchSupport.evaluate(
+                            environment,
+                            initialSeed,
+                            config,
+                            random,
+                            budget,
+                            mode);
+                } catch (IllegalArgumentException exception) {
+                    statistics.recordRejectedTrajectory();
+                    throw exception;
                 }
-                ExpertTrajectory trajectory = RotationSearchSupport.evaluate(
-                        environment,
-                        candidate,
-                        config,
-                        random,
-                        budget);
-                candidateIndex++;
-                archive.add(trajectory);
+                if (evaluation == null) {
+                    break;
+                }
+                recordEvaluation(
+                        evaluation,
+                        true,
+                        feasibleArchive,
+                        diagnosticArchive,
+                        statistics);
                 if (config.cancellation.getAsBoolean()) {
                     cancelled = true;
                     break;
                 }
             }
+            int initialCandidates = 0;
+            boolean initialPopulationComplete = true;
+            while (!cancelled && initialCandidates < config.populationSize) {
+                RotationSearchSupport.Evaluation evaluation = RotationSearchSupport.evaluate(
+                        environment,
+                        randomSequence(random, config.maxActions),
+                        config,
+                        random,
+                        budget,
+                        RotationEvaluationMode.REPAIR);
+                if (evaluation == null) {
+                    break;
+                }
+                initialCandidates++;
+                initialPopulationComplete &= evaluation.trajectory.isComplete();
+                recordEvaluation(
+                        evaluation,
+                        false,
+                        feasibleArchive,
+                        diagnosticArchive,
+                        statistics);
+                if (config.cancellation.getAsBoolean()) {
+                    cancelled = true;
+                }
+            }
+            if (initialCandidates == config.populationSize && initialPopulationComplete) {
+                statistics.recordCompletedPopulation();
+            }
+            while (!cancelled
+                    && initialCandidates == config.populationSize
+                    && initialPopulationComplete) {
+                List<ExpertTrajectory> parents = feasibleArchive.size() > 0
+                        ? feasibleArchive.trajectories() : diagnosticArchive.trajectories();
+                if (parents.isEmpty()) {
+                    break;
+                }
+                int generationCandidates = 0;
+                boolean generationComplete = true;
+                while (generationCandidates < config.populationSize) {
+                    int parentLimit = Math.min(
+                            Math.min(config.populationSize, parents.size()),
+                            Math.max(1, config.eliteCount));
+                    int[] parent = parents.get(random.nextInt(parentLimit)).getActions();
+                    RotationSearchSupport.Evaluation evaluation = RotationSearchSupport.evaluate(
+                            environment,
+                            mutate(parent, random, config.maxActions),
+                            config,
+                            random,
+                            budget,
+                            RotationEvaluationMode.REPAIR);
+                    if (evaluation == null) {
+                        break;
+                    }
+                    generationCandidates++;
+                    generationComplete &= evaluation.trajectory.isComplete();
+                    recordEvaluation(
+                            evaluation,
+                            false,
+                            feasibleArchive,
+                            diagnosticArchive,
+                            statistics);
+                    if (config.cancellation.getAsBoolean()) {
+                        cancelled = true;
+                        break;
+                    }
+                }
+                if (generationCandidates != config.populationSize || !generationComplete) {
+                    break;
+                }
+                statistics.recordCompletedGeneration();
+            }
+            while (!cancelled && budget.remaining() > 0) {
+                RotationSearchSupport.Evaluation evaluation = RotationSearchSupport.evaluate(
+                        environment,
+                        randomSequence(random, config.maxActions),
+                        config,
+                        random,
+                        budget,
+                        RotationEvaluationMode.REPAIR);
+                if (evaluation == null) {
+                    break;
+                }
+                recordEvaluation(
+                        evaluation,
+                        false,
+                        feasibleArchive,
+                        diagnosticArchive,
+                        statistics);
+                if (config.cancellation.getAsBoolean()) {
+                    cancelled = true;
+                }
+            }
         }
         return new Result(
-                archive.best(),
-                archive.trajectories(),
-                budget.used(),
+                feasibleArchive.trajectories(),
+                diagnosticArchive.trajectories(),
+                statistics.freeze(budget.used()),
                 cancelled);
+    }
+
+    private void recordEvaluation(
+            RotationSearchSupport.Evaluation evaluation,
+            boolean seed,
+            TopKTrajectoryArchive feasibleArchive,
+            TopKTrajectoryArchive diagnosticArchive,
+            RotationSearchStatistics.Mutable statistics) {
+        boolean diagnostic = !RotationTrajectoryRanker.INSTANCE.isPublishable(
+                evaluation.trajectory);
+        if (diagnostic) {
+            diagnosticArchive.add(evaluation.trajectory);
+        } else {
+            feasibleArchive.add(evaluation.trajectory);
+        }
+        statistics.recordEvaluation(
+                evaluation.trajectory,
+                evaluation.repairedActions,
+                seed,
+                diagnostic);
     }
 
     private RotationEnvironment requireEnvironment(

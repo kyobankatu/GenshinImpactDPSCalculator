@@ -18,11 +18,44 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
         }
         RotationSearchSupport.Budget budget = new RotationSearchSupport.Budget(
                 config.simulatorCallBudget);
-        TopKTrajectoryArchive archive = new TopKTrajectoryArchive(config.archiveSize);
+        TopKTrajectoryArchive feasibleArchive = new TopKTrajectoryArchive(config.archiveSize);
+        TopKTrajectoryArchive diagnosticArchive = new TopKTrajectoryArchive(config.archiveSize);
+        RotationSearchStatistics.Mutable statistics = new RotationSearchStatistics.Mutable();
         Random random = new Random(config.seed);
         boolean cancelled = false;
 
         try (RotationEnvironment environment = requireEnvironment(environmentFactory)) {
+            for (int[] initialSeed : config.getInitialSeeds()) {
+                RotationSearchSupport.Evaluation evaluation;
+                RotationEvaluationMode mode = initialSeed.length == 0
+                        ? RotationEvaluationMode.REPAIR : RotationEvaluationMode.STRICT;
+                try {
+                    evaluation = RotationSearchSupport.evaluate(
+                            environment,
+                            initialSeed,
+                            config,
+                            random,
+                            budget,
+                            mode);
+                } catch (IllegalArgumentException exception) {
+                    statistics.recordRejectedTrajectory();
+                    throw exception;
+                }
+                if (evaluation == null) {
+                    break;
+                }
+                recordEvaluation(
+                        evaluation.trajectory,
+                        evaluation.repairedActions,
+                        true,
+                        feasibleArchive,
+                        diagnosticArchive,
+                        statistics);
+                if (config.cancellation.getAsBoolean()) {
+                    cancelled = true;
+                    break;
+                }
+            }
             RotationStep rootStep = environment.reset();
             Node root = new Node(
                     null,
@@ -31,7 +64,7 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
                     environment.snapshot(),
                     0,
                     config.prior);
-            while (budget.remaining() > 0) {
+            while (!cancelled && budget.remaining() > 0) {
                 int callsBefore = budget.used();
                 if (!restore(environment, root, budget)) {
                     break;
@@ -91,7 +124,13 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
                             rolloutStep.stateHash,
                             rolloutStep.done,
                             budget.used() - callsBefore);
-                    archive.add(trajectory);
+                    recordEvaluation(
+                            trajectory,
+                            0,
+                            false,
+                            feasibleArchive,
+                            diagnosticArchive,
+                            statistics);
                     backpropagate(path, trajectory.getObjective().objectiveScore);
                 }
                 if (config.cancellation.getAsBoolean()) {
@@ -101,10 +140,26 @@ public final class MctsRotationSearcher implements RotationSearchStrategy {
             }
         }
         return new Result(
-                archive.best(),
-                archive.trajectories(),
-                budget.used(),
+                feasibleArchive.trajectories(),
+                diagnosticArchive.trajectories(),
+                statistics.freeze(budget.used()),
                 cancelled);
+    }
+
+    private void recordEvaluation(
+            ExpertTrajectory trajectory,
+            int repairs,
+            boolean seed,
+            TopKTrajectoryArchive feasibleArchive,
+            TopKTrajectoryArchive diagnosticArchive,
+            RotationSearchStatistics.Mutable statistics) {
+        boolean diagnostic = !RotationTrajectoryRanker.INSTANCE.isPublishable(trajectory);
+        if (diagnostic) {
+            diagnosticArchive.add(trajectory);
+        } else {
+            feasibleArchive.add(trajectory);
+        }
+        statistics.recordEvaluation(trajectory, repairs, seed, diagnostic);
     }
 
     private boolean restore(

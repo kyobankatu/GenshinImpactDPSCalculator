@@ -1,32 +1,12 @@
 package mechanics.rotation;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 /** Deterministic score-ordered archive with exact duplicate suppression. */
 public final class TopKTrajectoryArchive {
-    private static final Comparator<ExpertTrajectory> ORDER = (left, right) -> {
-        int score = Double.compare(
-                right.getObjective().objectiveScore,
-                left.getObjective().objectiveScore);
-        if (score != 0) {
-            return score;
-        }
-        int[] leftActions = left.getActions();
-        int[] rightActions = right.getActions();
-        int length = Math.min(leftActions.length, rightActions.length);
-        for (int index = 0; index < length; index++) {
-            int action = Integer.compare(leftActions[index], rightActions[index]);
-            if (action != 0) {
-                return action;
-            }
-        }
-        return Integer.compare(leftActions.length, rightActions.length);
-    };
-
     private final int capacity;
     private final List<ExpertTrajectory> trajectories = new ArrayList<>();
     private final Set<String> sequenceKeys = new HashSet<>();
@@ -48,7 +28,7 @@ public final class TopKTrajectoryArchive {
             return false;
         }
         trajectories.add(trajectory);
-        trajectories.sort(ORDER);
+        trajectories.sort(RotationTrajectoryRanker.INSTANCE);
         if (trajectories.size() > capacity) {
             ExpertTrajectory removed = trajectories.remove(trajectories.size() - 1);
             sequenceKeys.remove(removed.sequenceKey());

@@ -14,24 +14,32 @@ public interface RotationSearchStrategy {
     final class Result {
         public final ExpertTrajectory best;
         public final List<ExpertTrajectory> archive;
+        public final List<ExpertTrajectory> diagnosticArchive;
         public final int simulatorCalls;
         public final boolean cancelled;
+        public final boolean publishable;
+        public final RotationSearchStatistics statistics;
 
-        /** Creates one search result with a non-empty archive. */
+        /** Creates one search result with feasible labels or a diagnostic fallback. */
         public Result(
-                ExpertTrajectory best,
-                List<ExpertTrajectory> archive,
-                int simulatorCalls,
+                List<ExpertTrajectory> feasibleArchive,
+                List<ExpertTrajectory> diagnosticArchive,
+                RotationSearchStatistics statistics,
                 boolean cancelled) {
-            if (best == null || archive == null || archive.isEmpty()) {
-                throw new IllegalArgumentException("best and non-empty archive are required");
+            if (feasibleArchive == null
+                    || diagnosticArchive == null
+                    || statistics == null) {
+                throw new IllegalArgumentException("archives and statistics are required");
             }
-            if (simulatorCalls <= 0) {
-                throw new IllegalArgumentException("simulatorCalls must be positive");
+            if (feasibleArchive.isEmpty() && diagnosticArchive.isEmpty()) {
+                throw new IllegalArgumentException("at least one search trajectory is required");
             }
-            this.best = best;
-            this.archive = List.copyOf(archive);
-            this.simulatorCalls = simulatorCalls;
+            this.publishable = !feasibleArchive.isEmpty();
+            this.archive = List.copyOf(feasibleArchive);
+            this.diagnosticArchive = List.copyOf(diagnosticArchive);
+            this.best = publishable ? this.archive.get(0) : this.diagnosticArchive.get(0);
+            this.statistics = statistics;
+            this.simulatorCalls = statistics.simulatorCalls;
             this.cancelled = cancelled;
         }
     }
