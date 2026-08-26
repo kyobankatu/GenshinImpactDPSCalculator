@@ -27,10 +27,11 @@ The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
 and pilot contracts. Phase 15 completed with 127 researched candidates and 73
-newly retained source-matched scenarios. Phases 16, 17, and 17A are complete.
+newly retained source-matched scenarios. Phases 16, 17, 17A, and 18 are complete.
 The initial Phase 17 audit rejected all six production candidates, then Phase
 17A repaired pending particle, weapon, reaction, and timer state and admitted
-all six exact loadouts. Phase 18 is the next active target. No dependent phase
+all six exact loadouts. Phase 18 retained direct restore but left Wait macros
+disabled after their quality gate failed. Phase 19 is the next active target. No dependent phase
 may bypass the preceding correctness or quality gate.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
@@ -26955,7 +26956,20 @@ Verification:
 
 ### Phase 18: Direct Restore And Wait-Macro Throughput
 
-Status: Planned; Phase 17A admission gate satisfied.
+Status: Done (2026-08-26); direct restore retained, Wait macro default rejected.
+
+Completion:
+
+- Search-admitted loadouts now restore simulator and branch state directly;
+  replay remains the oracle and the fallback for unaudited scenarios.
+- MCTS charges actual simulator action calls, handles exhausted zero-call trees,
+  and fills the exact remaining budget with deterministic legal evaluations.
+- Added lossless Wait run genes and opt-in Evolutionary/MCTS support while
+  preserving expanded `PolicyAction` sequences at every external boundary.
+- Five matched 4096-call repetitions improved median wall time from 166.98 ms
+  to 150.43 ms and completed-trajectory throughput from 204.36/s to 216.30/s.
+  Wait runs above one increased raw throughput but reduced median objective from
+  552497.52 to 493468.49, so the configured default remains one.
 
 Why third:
 

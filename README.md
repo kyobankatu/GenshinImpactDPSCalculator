@@ -143,10 +143,11 @@ python3 src/python/rl/evaluate_rotation_optimizer.py \
   --java-report output/rotation_generalization/java-benchmark.json
 ```
 
-`BenchmarkRotationSearch` requires explicit dataset, train prior, evaluation
-probe prior, and model-trace artifacts. Outputs are best-found rotations, not
-claims of global optimality. A failed holdout criterion keeps the optimizer
-backlog item open.
+Without arguments, `BenchmarkRotationSearch` runs the self-contained direct
+restore and Wait-macro performance gate. The full generalization report still
+requires explicit dataset, train prior, evaluation probe prior, and model-trace
+artifacts. Outputs are best-found rotations, not claims of global optimality. A
+failed holdout criterion keeps the optimizer backlog item open.
 
 #### Manual multi-process or remote rollout setups
 

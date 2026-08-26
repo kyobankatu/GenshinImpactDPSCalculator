@@ -4653,3 +4653,14 @@ experiment record.
   cross-cutting simulator state.
 - **Boundary:** do not serialize closures, globally trust snapshot-aware marker
   interfaces, or enable direct search restore before full-cycle equivalence.
+
+### B-214 — Wait-macro default activation
+
+- **Status:** rejected 2026-08-26 by TASKS.md Phase 18 quality gate
+- **Source:** five-repetition matched 4096-call Hu Tao/Xianyun search benchmark.
+- **Evidence:** a maximum Wait run of ten improved evaluated-trajectory
+  throughput but reduced median terminal objective from 552497.52 to 493468.49.
+  Lossless gene encoding and opt-in configuration remain tested; the production
+  default stays at run length one.
+- **Revisit gate:** only reconsider with matched multi-scenario evidence showing
+  no median or per-scenario quality regression at equal simulator-call budget.
