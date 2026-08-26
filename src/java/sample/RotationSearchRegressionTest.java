@@ -27,6 +27,7 @@ public class RotationSearchRegressionTest {
     private static final int BURST = PolicyAction.CHARGE.getId();
 
     public static void main(String[] args) {
+        BenchmarkRotationSearch.assertLiveOptionContractForRegression();
         assertDeterministicDelayedReward(new EvolutionaryRotationSearcher());
         assertDeterministicDelayedReward(new MctsRotationSearcher());
         assertUniformAdvisorReproducesUnguided();

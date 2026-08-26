@@ -25377,8 +25377,6 @@ Why seventh:
 Target files:
 
 - `src/python/rl/pretrain_expert_policy.py`
-- new `src/python/rl/evaluate_rotation_checkpoint.py`
-- new `src/python/rl/assemble_rotation_tournament.py`
 - `src/python/rl/expert_dataset.py`
 - `src/python/rl/recurrent_ppo.py`
 - `src/python/rl/train_recurrent_ppo.py`
@@ -27389,7 +27387,10 @@ Target files:
 - new `src/python/rl/rotation_model_registry.py`
 - `src/python/rl/recurrent_ppo.py`
 - `src/python/rl/pretrain_expert_policy.py`
+- new `src/python/rl/evaluate_rotation_checkpoint.py`
+- new `src/python/rl/assemble_rotation_tournament.py`
 - `src/python/rl/evaluate_rotation_optimizer.py`
+- new `src/python/rl/run_rotation_live_search.py`
 - `src/python/rl/expert_iteration.py`
 - new `src/python/rl/tests/test_rotation_model_registry.py`
 - `src/python/rl/tests/test_behavior_cloning.py`
@@ -27425,7 +27426,7 @@ Test cases to add or update:
 Verification:
 
 - `python -m pytest src/python/rl/tests`
-- `python3 src/python/rl/pretrain_expert_policy.py --preset debug --dataset src/python/rl/tests/fixtures/expert_dataset_v1.jsonl`
+- `python3 src/python/rl/pretrain_expert_policy.py --preset debug --dataset src/python/rl/tests/fixtures/expert_dataset_v2.jsonl`
 - `python3 src/python/rl/evaluate_rotation_optimizer.py --preset benchmark`
 - `python scripts/preflight.py --run`
 
@@ -27440,7 +27441,7 @@ Progress evidence:
   metrics, and deterministic champion selection. Missing or duplicated cells,
   split contamination, unmatched budgets, unknown models, and NaN metrics fail
   closed.
-- All 93 Python RL tests passed. One-epoch fixed-seed debug training and restore
+- All 94 Python RL tests passed. One-epoch fixed-seed debug training and restore
   completed for all four candidates. Full multi-seed training, live guided
   search evaluation, tournament report publication, and champion qualification
   remain pending; Phase 25 is therefore still blocked.
@@ -27452,6 +27453,10 @@ Progress evidence:
   dataset, simulator, scenario, call budget, completion, legality, and feasible
   ER evidence match. Human deltas come from frozen record provenance; missing
   holdout or feasible comparisons abort instead of producing a partial report.
+- Live Java benchmarks no longer require stale recorded priors or model-only
+  traces: they retain exact random/unguided/guided call budgets and publish
+  checkpoint/dataset provenance directly. The Python runner owns service
+  readiness, Gradle execution, report validation, and guaranteed shutdown.
 
 ### Phase 25: Transactional Expert Iteration
 

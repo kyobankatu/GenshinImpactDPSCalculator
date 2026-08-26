@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import json
 import os
 import sys
 
@@ -15,6 +16,10 @@ from recurrent_ppo import build_policy, load_policy
 from assemble_rotation_tournament import combine_cell
 from evaluate_rotation_checkpoint import evaluate_checkpoint
 from pretrain_expert_policy import PretrainingConfig, run_pretraining
+from run_rotation_live_search import (
+    build_benchmark_arguments,
+    validate_live_report,
+)
 from rotation_model_registry import (
     REQUIRED_METRICS,
     evaluate_tournament_manifest,
@@ -168,6 +173,44 @@ def test_live_search_cell_rejects_unmatched_measurements(mutate, message):
     mutate(offline, search)
     with pytest.raises(ValueError, match=message):
         combine_cell("gru", 11, "a" * 64, offline, search, human, 128)
+
+
+def test_live_search_command_and_report_require_three_matched_arms(tmp_path):
+    arguments = build_benchmark_arguments(
+        "dataset.json",
+        "report.json",
+        "b" * 64,
+        "127.0.0.1",
+        18761,
+        (11, 13),
+        128,
+        "all",
+    )
+    assert arguments[0] == "BenchmarkRotationSearch"
+    assert "--training-prior" not in arguments
+    assert arguments[arguments.index("--guidance-mode") + 1] == "live"
+
+    report = {
+        "checkpointProvenance": {
+            "checkpointRevision": f"sha256:{'b' * 64}",
+            "datasetSourceHash": "a" * 64,
+        },
+        "metrics": [
+            {"method": method, "simulatorCalls": 128}
+            for method in (
+                "deterministic-random",
+                "unguided-evolutionary",
+                "policy-guided",
+            )
+        ],
+    }
+    path = tmp_path / "live.json"
+    path.write_text(json.dumps(report), encoding="utf-8")
+    assert len(validate_live_report(path, "a" * 64, "b" * 64, 128)["metrics"]) == 3
+    report["metrics"].pop()
+    path.write_text(json.dumps(report), encoding="utf-8")
+    with pytest.raises(ValueError, match="coverage"):
+        validate_live_report(path, "a" * 64, "b" * 64, 128)
 
 
 def _manifest():

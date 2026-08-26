@@ -97,6 +97,39 @@ public final class BenchmarkRotationSearch {
     private BenchmarkRotationSearch() {
     }
 
+    /** Verifies live-mode option and provenance behavior without running a search. */
+    static void assertLiveOptionContractForRegression() {
+        String checkpoint = "a".repeat(64);
+        Options live = Options.parse(new String[]{
+                "--dataset", "dataset.json",
+                "--guidance-mode", "live",
+                "--policy-value-host", "127.0.0.1",
+                "--policy-value-port", "18761",
+                "--checkpoint-fingerprint", checkpoint
+        });
+        if (!"live".equals(live.guidanceMode)
+                || live.trainingPrior != null
+                || live.evaluationPrior != null
+                || live.modelTraces != null) {
+            throw new AssertionError("Live benchmark retained recorded-only artifacts");
+        }
+        CheckpointProvenance provenance = CheckpointProvenance.live(
+                checkpoint,
+                "b".repeat(64),
+                Set.of("training-b", "training-a"));
+        if (!("sha256:" + checkpoint).equals(provenance.checkpointRevision)
+                || !provenance.trainingFingerprints.equals(
+                        List.of("training-a", "training-b"))) {
+            throw new AssertionError("Live checkpoint provenance is unstable");
+        }
+        try {
+            Options.parse(new String[]{"--dataset", "dataset.json"});
+            throw new AssertionError("Recorded benchmark accepted missing artifacts");
+        } catch (IllegalArgumentException expected) {
+            // Missing recorded artifacts must fail before any benchmark work.
+        }
+    }
+
     /**
      * Runs the catalog benchmark and atomically publishes one JSON report.
      *
@@ -125,14 +158,15 @@ public final class BenchmarkRotationSearch {
         FingerprintSplits fingerprintSplits = FingerprintSplits.fromCatalog();
         DatasetReplay datasetReplay = replayDataset(
                 options.datasetManifest, PartyCatalog.rlEnabled());
-        ModelTraceArtifact modelTraces = ModelTraceArtifact.load(
+        boolean liveGuidance = "live".equals(options.guidanceMode);
+        ModelTraceArtifact modelTraces = liveGuidance ? null : ModelTraceArtifact.load(
                 options.modelTraces, datasetReplay.sourceHash, fingerprintSplits);
-        PriorArtifact trainingPrior = PriorArtifact.load(
+        PriorArtifact trainingPrior = liveGuidance ? null : PriorArtifact.load(
                 options.trainingPrior,
                 RecordedExpertPolicyPrior.TRAINING_DATASET_STATES,
                 datasetReplay.sourceHash,
                 fingerprintSplits);
-        PriorArtifact evaluationPrior = PriorArtifact.load(
+        PriorArtifact evaluationPrior = liveGuidance ? null : PriorArtifact.load(
                 options.evaluationPrior,
                 RecordedExpertPolicyPrior.EVALUATION_PROBE_STATES,
                 datasetReplay.sourceHash,
@@ -153,7 +187,6 @@ public final class BenchmarkRotationSearch {
                         options,
                         datasetReplay.sourceHash,
                         artifact);
-                SearchOutcome modelOnly = runModelTrace(scenario, modelTraces);
                 requireEqualBudget(
                         random, evolutionary, guided.outcome, options.callBudget);
                 metrics.add(BenchmarkMetric.from(
@@ -165,20 +198,31 @@ public final class BenchmarkRotationSearch {
                 metrics.add(BenchmarkMetric.from(
                         "policy-guided", definition, scenario, guided.outcome,
                         datasetReplay, guided.priorRevision));
-                metrics.add(BenchmarkMetric.from(
-                        "model-only", definition, scenario, modelOnly,
-                        datasetReplay, modelTraces.revision()));
+                if (!liveGuidance) {
+                    SearchOutcome modelOnly = runModelTrace(scenario, modelTraces);
+                    metrics.add(BenchmarkMetric.from(
+                            "model-only", definition, scenario, modelOnly,
+                            datasetReplay, modelTraces.revision()));
+                }
             }
         }
 
-        modelTraces.requireUnchanged();
+        if (modelTraces != null) {
+            modelTraces.requireUnchanged();
+        }
+        CheckpointProvenance checkpointProvenance = liveGuidance
+                ? CheckpointProvenance.live(
+                        options.checkpointFingerprint,
+                        datasetReplay.sourceHash,
+                        fingerprintSplits.fingerprints(DatasetSplit.TRAIN))
+                : modelTraces.checkpointProvenance();
         BenchmarkReport report = new BenchmarkReport(
                 repository,
                 options,
                 datasetReplay,
                 fingerprintSplits,
                 definitions,
-                modelTraces.checkpointProvenance(),
+                checkpointProvenance,
                 metrics,
                 List.of());
         report.validate();
@@ -1443,11 +1487,15 @@ public final class BenchmarkRotationSearch {
                         throw new IllegalArgumentException("Unknown benchmark flag: " + flag);
                 }
             }
-            if (dataset == null || trainingPrior == null || evaluationPrior == null
-                    || modelTraces == null) {
+            if (dataset == null) {
+                throw new IllegalArgumentException("--dataset is required");
+            }
+            if ("recorded".equals(guidanceMode)
+                    && (trainingPrior == null || evaluationPrior == null
+                            || modelTraces == null)) {
                 throw new IllegalArgumentException(
-                        "--dataset, --training-prior, --evaluation-prior, and "
-                                + "--model-traces are required");
+                        "Recorded guidance requires training/evaluation priors "
+                                + "and model traces");
             }
             if ("live".equals(guidanceMode)
                     && (policyValueHost == null || policyValueHost.isBlank()
@@ -1899,6 +1947,19 @@ public final class BenchmarkRotationSearch {
             this.trainingFingerprints = List.copyOf(trainingFingerprints);
             this.normalizationFingerprints = List.copyOf(normalizationFingerprints);
         }
+
+        private static CheckpointProvenance live(
+                String checkpointFingerprint,
+                String datasetSourceHash,
+                Set<String> trainingFingerprints) {
+            List<String> ordered = new ArrayList<>(trainingFingerprints);
+            ordered.sort(String::compareTo);
+            return new CheckpointProvenance(
+                    "sha256:" + checkpointFingerprint,
+                    datasetSourceHash,
+                    ordered,
+                    ordered);
+        }
     }
 
     /** Validated split-specific recorded prior and its immutable provenance. */
@@ -2306,6 +2367,7 @@ public final class BenchmarkRotationSearch {
         private final String generatedAt = Instant.now().toString();
         private final RepositoryState repository;
         private final String selectedSplit;
+        private final String guidanceMode;
         private final long[] seeds;
         private final int simulatorCallBudgetPerMethod;
         private final int maxActionsPerTrajectory;
@@ -2331,6 +2393,7 @@ public final class BenchmarkRotationSearch {
                 List<String> unsupportedComparisons) {
             this.repository = repository;
             this.selectedSplit = options.split;
+            this.guidanceMode = options.guidanceMode;
             this.seeds = options.seeds.clone();
             this.simulatorCallBudgetPerMethod = options.callBudget;
             this.maxActionsPerTrajectory = options.maxActions;
@@ -2348,7 +2411,8 @@ public final class BenchmarkRotationSearch {
         }
 
         private void validate() {
-            if (repository == null || selectedSplit == null || seeds.length == 0
+            if (repository == null || selectedSplit == null || guidanceMode == null
+                    || seeds.length == 0
                     || simulatorCallBudgetPerMethod <= 0 || maxActionsPerTrajectory <= 0
                     || archiveCapacity <= 0 || datasetReplay == null
                     || fingerprintSplits == null || selectedScenarioFingerprints.isEmpty()
@@ -2386,11 +2450,16 @@ public final class BenchmarkRotationSearch {
                     throw new IllegalStateException("Report contains an unequal simulator-call budget");
                 }
             }
-            Set<String> expectedMethods = Set.of(
-                    "deterministic-random",
-                    "unguided-evolutionary",
-                    "policy-guided",
-                    "model-only");
+            Set<String> expectedMethods = "live".equals(guidanceMode)
+                    ? Set.of(
+                            "deterministic-random",
+                            "unguided-evolutionary",
+                            "policy-guided")
+                    : Set.of(
+                            "deterministic-random",
+                            "unguided-evolutionary",
+                            "policy-guided",
+                            "model-only");
             if (!methods.equals(expectedMethods) || !unsupportedComparisons.isEmpty()) {
                 throw new IllegalStateException("Benchmark method coverage is incomplete");
             }
