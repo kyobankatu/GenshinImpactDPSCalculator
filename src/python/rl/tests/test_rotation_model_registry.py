@@ -12,6 +12,7 @@ import torch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from recurrent_ppo import build_policy, load_policy
+from assemble_rotation_tournament import combine_cell
 from evaluate_rotation_checkpoint import evaluate_checkpoint
 from pretrain_expert_policy import PretrainingConfig, run_pretraining
 from rotation_model_registry import (
@@ -127,6 +128,48 @@ def test_offline_checkpoint_metrics_preserve_frozen_provenance(tmp_path):
         evaluate_checkpoint(fixture, checkpoint)
 
 
+def test_live_search_cell_combines_only_matched_measurements():
+    offline, search, human = _combined_inputs()
+    result = combine_cell(
+        "gru", 11, "a" * 64, offline, search, human, 128
+    )
+    assert result["metrics"]["publishableMedianDelta"] == 5.0
+    assert result["metrics"]["unguidedMedianDelta"] == 2.0
+    assert result["metrics"]["holdoutTeacherAdvantage"] == 2.0
+    assert result["metrics"]["feasibleImprovementPerCall"] == 2.0 / 128.0
+
+
+@pytest.mark.parametrize(
+    ("mutate", "message"),
+    (
+        (lambda offline, search: search["metrics"].pop(), "incomplete"),
+        (
+            lambda offline, search: search["metrics"][0].__setitem__(
+                "simulatorCalls", 127
+            ),
+            "unequal call budget",
+        ),
+        (
+            lambda offline, search: search["metrics"][2].__setitem__(
+                "priorRevision", "stale"
+            ),
+            "checkpoint fingerprint",
+        ),
+        (
+            lambda offline, search: search["metrics"][2].__setitem__(
+                "cyclicEnergyFeasible", False
+            ),
+            "lacks holdout or feasible",
+        ),
+    ),
+)
+def test_live_search_cell_rejects_unmatched_measurements(mutate, message):
+    offline, search, human = _combined_inputs()
+    mutate(offline, search)
+    with pytest.raises(ValueError, match=message):
+        combine_cell("gru", 11, "a" * 64, offline, search, human, 128)
+
+
 def _manifest():
     runs = []
     advantages = {"mlp": 0.5, "gru": 1.0, "lstm": 2.0, "transformer": -0.5}
@@ -156,3 +199,53 @@ def _manifest():
         "seeds": [11, 13],
         "runs": runs,
     }
+
+
+def _combined_inputs():
+    fingerprint = "holdout-scenario"
+    checkpoint = "b" * 64
+    offline = {
+        "schemaVersion": 1,
+        "model": "gru",
+        "seed": 11,
+        "datasetSourceHash": "a" * 64,
+        "trainingFingerprints": ["train"],
+        "holdoutFingerprints": [fingerprint],
+        "checkpointFingerprint": checkpoint,
+        "checkpointSelectionRule": "final-matched-epoch",
+        "optimizationSteps": 10,
+        "inferenceLatencyMillis": 0.5,
+        "splitMetrics": {
+            "holdout": {
+                "decisions": 3,
+                "policyTop1Accuracy": 0.5,
+                "policyTop3Accuracy": 1.0,
+                "valueRankCorrelation": 0.25,
+                "valueCalibrationError": 2.0,
+            }
+        },
+    }
+    common = {
+        "split": "holdout",
+        "scenarioFingerprint": fingerprint,
+        "seed": 104729,
+        "simulatorCalls": 128,
+        "simulatorRevision": "rotation-simulator-v4",
+        "datasetRevision": f"schema=2:sha256={'a' * 64}",
+        "complete": True,
+        "invalidActionCount": 0,
+        "cyclicEnergyFeasible": True,
+    }
+    search = {
+        "metrics": [
+            {**common, "method": "deterministic-random", "objectiveScore": 8.0},
+            {**common, "method": "unguided-evolutionary", "objectiveScore": 13.0},
+            {
+                **common,
+                "method": "policy-guided",
+                "objectiveScore": 15.0,
+                "priorRevision": f"live:{checkpoint}",
+            },
+        ]
+    }
+    return offline, search, {fingerprint: 10.0}

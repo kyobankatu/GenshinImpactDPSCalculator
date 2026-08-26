@@ -199,7 +199,9 @@ def _train_epoch(policy, optimizer, chunks, config, device):
         updates += 1
     if updates == 0:
         raise ValueError("Expert training produced no minibatches")
-    return {name: value / updates for name, value in totals.items()}
+    metrics = {name: value / updates for name, value in totals.items()}
+    metrics["optimizer_steps"] = float(updates)
+    return metrics
 
 
 def _evaluate_split(policy, dataset, split, config, mean, scale, device):

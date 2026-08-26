@@ -25378,6 +25378,7 @@ Target files:
 
 - `src/python/rl/pretrain_expert_policy.py`
 - new `src/python/rl/evaluate_rotation_checkpoint.py`
+- new `src/python/rl/assemble_rotation_tournament.py`
 - `src/python/rl/expert_dataset.py`
 - `src/python/rl/recurrent_ppo.py`
 - `src/python/rl/train_recurrent_ppo.py`
@@ -27439,7 +27440,7 @@ Progress evidence:
   metrics, and deterministic champion selection. Missing or duplicated cells,
   split contamination, unmatched budgets, unknown models, and NaN metrics fail
   closed.
-- All 88 Python RL tests passed. One-epoch fixed-seed debug training and restore
+- All 93 Python RL tests passed. One-epoch fixed-seed debug training and restore
   completed for all four candidates. Full multi-seed training, live guided
   search evaluation, tournament report publication, and champion qualification
   remain pending; Phase 25 is therefore still blocked.
@@ -27447,6 +27448,10 @@ Progress evidence:
   budget in every checkpoint. The offline evaluator verifies this metadata and
   frozen dataset hash before publishing split-wise policy top-1/top-3, value
   rank/calibration, checkpoint fingerprint, and median inference latency.
+- The assembler joins offline and live-search cells only when checkpoint,
+  dataset, simulator, scenario, call budget, completion, legality, and feasible
+  ER evidence match. Human deltas come from frozen record provenance; missing
+  holdout or feasible comparisons abort instead of producing a partial report.
 
 ### Phase 25: Transactional Expert Iteration
 

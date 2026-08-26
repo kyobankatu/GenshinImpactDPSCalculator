@@ -64,6 +64,10 @@ def evaluate_checkpoint(dataset_path, checkpoint_path, device="cpu"):
         "holdoutFingerprints": list(fingerprints_by_split(dataset)["holdout"]),
         "checkpointFingerprint": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
         "checkpointSelectionRule": "final-matched-epoch",
+        "optimizationSteps": sum(
+            int(item["optimizer_steps"])
+            for item in payload["pretraining_history"]
+        ),
         "trainingConfig": config,
         "splitMetrics": split_metrics,
         "inferenceLatencyMillis": (
