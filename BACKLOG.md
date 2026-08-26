@@ -4642,6 +4642,13 @@ experiment record.
   simulator replay before publication or consumption. The qualified Hu Tao
   teacher reproduced eight records at 16,384 calls and all replayed exactly;
   Phase 21 split breadth and leakage gates remain open.
+- **Dataset-quality checkpoint (2026-08-26):** Phase 21 admitted 58 sourced
+  scenarios under five-seed matched human/random/evolutionary/MCTS budgets and
+  retained 131 replay-exact records after suppressing 315 near duplicates.
+  Train/validation/holdout contain 56/1/1 scenarios with canonical source URLs
+  disjoint and three shared supports within the bound. Manifest
+  `1b57a2f27296dd66e5f0336dddf6ad4a9d3b0020c60290705f5adece0c0a6495`
+  is frozen for Phase 22; the failed Phase 10 dataset is not evidence.
 
 ### B-213 — Pending-event snapshot completeness for rotation search
 

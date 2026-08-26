@@ -143,6 +143,14 @@ python3 src/python/rl/evaluate_rotation_optimizer.py \
   --java-report output/rotation_generalization/java-benchmark.json
 ```
 
+The accepted expert dataset is separately pinned by manifest and source-catalog
+hashes. Replay and re-run its split, leakage, diversity, and teacher gates with:
+
+```bash
+./gradlew ReplayRotationDataset --args="ReplayRotationDataset output/rotation_dataset/manifest.json"
+python3 src/python/rl/evaluate_teacher_dataset.py --preset benchmark
+```
+
 Without arguments, `BenchmarkRotationSearch` runs the self-contained direct
 restore and Wait-macro performance gate. The full generalization report still
 requires explicit dataset, train prior, evaluation probe prior, and model-trace

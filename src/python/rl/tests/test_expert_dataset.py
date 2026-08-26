@@ -13,6 +13,9 @@ from expert_dataset import load_expert_dataset
 
 
 FIXTURE = os.path.join(
+    os.path.dirname(__file__), "fixtures", "expert_dataset_v2.jsonl"
+)
+V1_FIXTURE = os.path.join(
     os.path.dirname(__file__), "fixtures", "expert_dataset_v1.jsonl"
 )
 
@@ -33,11 +36,13 @@ def test_compressed_multi_shard_manifest_round_trip(tmp_path):
     second = _fixture_payload()
     second["recordId"] = "fixture-train-1"
     second["trajectoryRank"] = 1
+    second["provenance"]["feasibilityRank"] = 1
+    second["provenance"]["parentRecordIds"] = ["fixture-train-0"]
     _seal(second)
     shards = [_write_shard(tmp_path, [first]), _write_shard(tmp_path, [second])]
     manifest = {
-        "schemaVersion": 1,
-        "simulatorRevision": "rotation-simulator-v2",
+        "schemaVersion": 2,
+        "simulatorRevision": "rotation-simulator-v4",
         "totalRecords": 2,
         "shards": shards,
     }
@@ -53,7 +58,7 @@ def test_compressed_multi_shard_manifest_round_trip(tmp_path):
 @pytest.mark.parametrize(
     ("mutation", "message"),
     [
-        (lambda record: record.__setitem__("schemaVersion", 2), "schemaVersion"),
+        (lambda record: record.__setitem__("schemaVersion", 1), "schemaVersion"),
         (
             lambda record: record["decisions"][0].__setitem__("actionId", 5),
             "invalid or masked",
@@ -91,8 +96,8 @@ def test_record_hash_and_truncated_shard_fail_closed(tmp_path):
     shard_path = tmp_path / shard["fileName"]
     shard_path.write_bytes(shard_path.read_bytes()[:8])
     manifest = {
-        "schemaVersion": 1,
-        "simulatorRevision": "rotation-simulator-v2",
+        "schemaVersion": 2,
+        "simulatorRevision": "rotation-simulator-v4",
         "totalRecords": 1,
         "shards": [shard],
     }
@@ -122,6 +127,19 @@ def test_duplicate_id_and_cross_split_fingerprint_fail_closed(tmp_path):
         encoding="utf-8",
     )
     with pytest.raises(ValueError, match="multiple splits"):
+        load_expert_dataset(path)
+
+
+def test_v1_and_incomplete_provenance_fail_closed(tmp_path):
+    with pytest.raises(ValueError, match="schemaVersion"):
+        load_expert_dataset(V1_FIXTURE)
+
+    record = _fixture_payload()
+    del record["provenance"]["sourceContentHash"]
+    _seal(record)
+    path = tmp_path / "missing-provenance.jsonl"
+    path.write_text(_canonical(record), encoding="utf-8")
+    with pytest.raises(ValueError, match="sourceContentHash"):
         load_expert_dataset(path)
 
 

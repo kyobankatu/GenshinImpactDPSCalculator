@@ -39,8 +39,9 @@ public class RotationSnapshotSafetyRegressionTest {
         for (String partyName : REJECTED_PARTIES) {
             assertRejected(PartyCatalog.require(partyName));
         }
-        assertSearchAdmission("HuTaoXianyunVaporize", true);
-        assertSearchAdmission("RaidenParty", false);
+        assertSearchAdmission("HuTaoXianyunVaporize");
+        assertSearchAdmission("RaidenParty");
+        assertUnauditedDirectRestoreRejected();
         System.out.println("RotationSnapshotSafetyRegressionTest passed");
     }
 
@@ -62,9 +63,7 @@ public class RotationSnapshotSafetyRegressionTest {
         }
     }
 
-    private static void assertSearchAdmission(
-            String partyName,
-            boolean admitted) {
+    private static void assertSearchAdmission(String partyName) {
         PartyDefinition definition = PartyCatalog.require(partyName);
         RotationScenario scenario = RotationScenario.forParty(
                 definition,
@@ -73,27 +72,31 @@ public class RotationSnapshotSafetyRegressionTest {
                 1,
                 7788L,
                 RotationObjective.cyclicDamage());
-        Runnable search = admitted
-                ? () -> new EvolutionaryRotationSearcher().search(
-                        () -> new BattleRotationEnvironment(scenario),
-                        RotationSearchConfig.defaults(7788L, 64))
-                : () -> new MctsRotationSearcher().search(
-                        () -> new BattleRotationEnvironment(scenario),
-                        RotationSearchConfig.defaults(7788L, 64));
-        if (admitted) {
-            search.run();
-            return;
-        }
+        new EvolutionaryRotationSearcher().search(
+                () -> new BattleRotationEnvironment(scenario),
+                RotationSearchConfig.defaults(7788L, 64));
+        new MctsRotationSearcher().search(
+                () -> new BattleRotationEnvironment(scenario),
+                RotationSearchConfig.defaults(7788L, 64));
+    }
+
+    private static void assertUnauditedDirectRestoreRejected() {
+        PartyDefinition definition = PartyCatalog.require("RaidenParty");
+        RotationScenario scenario = RotationScenario.forParty(
+                definition,
+                new EpisodeConfig(),
+                definition.rotationCycleSeconds(),
+                1,
+                7788L,
+                RotationObjective.cyclicDamage());
         try {
-            search.run();
+            new BattleRotationEnvironment(
+                    scenario,
+                    BattleRotationEnvironment.RestoreMode.AUDITED_DIRECT);
             throw new AssertionError(
-                    "Expected snapshot-search rejection for " + partyName);
-        } catch (IllegalStateException expected) {
-            if (!expected.getMessage().contains("snapshot admission rejected")) {
-                throw new AssertionError(
-                        "Unexpected search rejection for " + partyName,
-                        expected);
-            }
+                    "Expected unaudited direct-restore rejection");
+        } catch (IllegalArgumentException expected) {
+            // Expected; MCTS uses exact history replay for this loadout.
         }
     }
 

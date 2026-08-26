@@ -289,6 +289,21 @@ public final class Wanderer extends Character implements
         return false;
     }
 
+    /** Keeps policy action legality aligned with Windfavored restrictions. */
+    @Override
+    public boolean canPerformAction(
+            CharacterActionRequest request,
+            double currentTime) {
+        if (request == null) {
+            throw new IllegalArgumentException("Wanderer action is required");
+        }
+        if (request.getKey() == CharacterActionKey.PLUNGE
+                && isWindfavoredActive(currentTime)) {
+            return false;
+        }
+        return super.canPerformAction(request, currentTime);
+    }
+
     /** Dispatches Wanderer's represented typed action set. */
     @Override
     public void onAction(

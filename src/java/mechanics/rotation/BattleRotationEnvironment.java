@@ -189,6 +189,13 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         return 0;
     }
 
+    /** Replay is exact by reconstruction; direct restore additionally requires audit. */
+    @Override
+    public boolean supportsExactBranchRestore() {
+        return restoreMode == RestoreMode.REPLAY
+                || scenario.getSnapshotSafety().admitted;
+    }
+
     /** Restores one branch by replay as a direct-restore correctness oracle. */
     public RotationStep restoreByReplayForAudit(Snapshot snapshot) {
         ensureReady();
@@ -338,7 +345,8 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
         if (scenario.getCycleCount() <= 1 || !cyclicReferenceEnergy.isEmpty()) {
             return;
         }
-        double boundary = scenario.getCycleDurationSeconds();
+        double boundary = scenario.getCycleDurationSeconds()
+                * (scenario.getCycleCount() - 1);
         CombatSimulator simulator = battleEnvironment.getSimulator();
         if (previousTime < boundary && simulator.getCurrentTime() >= boundary) {
             for (model.entity.Character character : simulator.getPartyMembers()) {

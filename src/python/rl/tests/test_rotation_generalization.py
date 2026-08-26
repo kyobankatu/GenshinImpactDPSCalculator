@@ -42,7 +42,7 @@ def test_complete_equal_budget_generalization_report_passes(tmp_path):
 
 def test_model_trace_artifact_preserves_train_only_provenance(tmp_path):
     fixture = os.path.join(
-        os.path.dirname(__file__), "fixtures", "expert_dataset_v1.jsonl"
+        os.path.dirname(__file__), "fixtures", "expert_dataset_v2.jsonl"
     )
     dataset = load_expert_dataset(fixture)
     fingerprint = dataset.records[0].scenario_fingerprint

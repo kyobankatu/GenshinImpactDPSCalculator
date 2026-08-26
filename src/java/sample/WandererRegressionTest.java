@@ -173,12 +173,20 @@ public final class WandererRegressionTest {
         CombatSimulator simulator = simulatorWith(wanderer);
         List<ActionRecord> records = captureActions(simulator);
         List<ParticleRecord> particles = captureAnemoParticles(simulator);
+        CharacterActionRequest plunge = CharacterActionRequest.of(
+                CharacterActionKey.PLUNGE);
+        assertTrue(wanderer.canPerformAction(
+                plunge, simulator.getCurrentTime()),
+                "High Plunge is legal before Windfavored");
         performSkill(simulator);
         assertTrue(wanderer.isWindfavoredActive(
                 simulator.getCurrentTime()),
                 "Skill enters Windfavored immediately");
         assertEquals(96, wanderer.getSkydwellerPoints(),
                 "Four depletion ticks occur during Skill recovery");
+        assertTrue(!wanderer.canPerformAction(
+                plunge, simulator.getCurrentTime()),
+                "High Plunge mask closes during Windfavored");
         ActionRecord skill = named(records,
                 "Hanega: Song of the Wind").get(0);
         assertClose(2.0 * FRAME, skill.time,

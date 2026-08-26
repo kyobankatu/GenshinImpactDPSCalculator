@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "datasetSchemaVersion": 2,
+  "simulatorRevision": "rotation-simulator-v4",
+  "datasetHash": "1b57a2f27296dd66e5f0336dddf6ad4a9d3b0020c60290705f5adece0c0a6495",
+  "sourceCatalogHash": "f0973f950ffecae319ce2d7597ed353b438057e14406f8dcc0f3257f4a7a6d68",
+  "minimumSourceSeeds": 40,
+  "maximumSharedSupports": 8
+}

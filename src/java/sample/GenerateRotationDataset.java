@@ -22,6 +22,8 @@ import mechanics.rotation.RotationSearchStrategy;
 import mechanics.rotation.RotationSeedEvaluation;
 import mechanics.rotation.RotationSourceCatalog;
 import mechanics.rotation.RotationTeacherQualityReport;
+import mechanics.rotation.RotationTraceCompletion;
+import mechanics.rotation.RotationTraceDeduplicator;
 import mechanics.rotation.RotationTeacherQualityReport.Arm;
 import mechanics.rotation.RotationTeacherQualityReport.ScenarioResult;
 import mechanics.rotation.SourcedRotationSeed;
@@ -49,6 +51,7 @@ public class GenerateRotationDataset {
                 : List.of(PartyCatalog.require(partyName));
         List<ExpertDatasetRecord> records = new ArrayList<>();
         int totalSimulatorCalls = 0;
+        int suppressedNearDuplicates = 0;
         int scenarioIndex = 0;
         for (PartyDefinition definition : definitions) {
             long scenarioSeed = seed + scenarioIndex++;
@@ -65,7 +68,7 @@ public class GenerateRotationDataset {
                     build,
                     new EpisodeConfig(),
                     definition.rotationCycleSeconds(),
-                    2,
+                    RotationTeacherQualityReport.TEACHER_CYCLE_COUNT,
                     scenarioSeed,
                     RotationObjective.cyclicDamage());
             ScenarioResult quality = qualityReport.findScenario(scenario.getFingerprint());
@@ -75,7 +78,8 @@ public class GenerateRotationDataset {
                 }
                 quality = qualityReport.requirePublishable(scenario.getFingerprint());
             }
-            Arm requestedArm = teacherArm(strategyName);
+            Arm requestedArm = campaign && "auto".equalsIgnoreCase(strategyName)
+                    ? quality.getRetainedTeacher() : teacherArm(strategyName);
             if (quality.getRetainedTeacher() != requestedArm) {
                 throw new IllegalArgumentException(
                         "Requested strategy does not match retained teacher for "
@@ -87,9 +91,15 @@ public class GenerateRotationDataset {
                         "Requested call budget does not match teacher evidence for "
                                 + definition.name());
             }
-            int[] humanActions = humanActions(
+            int[] sourceActions = humanActions(
                     RotationSeedEvaluation.evaluate(
-                            sourceSeed, definition, build, 2, scenarioSeed));
+                            sourceSeed,
+                            definition,
+                            build,
+                            RotationTeacherQualityReport.TEACHER_CYCLE_COUNT,
+                            scenarioSeed));
+            int[] humanActions = RotationTraceCompletion.complete(
+                    scenario, sourceActions);
             int maxActions = Math.max(
                     humanActions.length,
                     (int) Math.ceil(scenario.getHorizonSeconds() / 0.1) + 1);
@@ -104,7 +114,7 @@ public class GenerateRotationDataset {
                     ExpertPolicyPrior.uniform(),
                     () -> false,
                     List.of(humanActions));
-            RotationSearchStrategy.Result result = strategy(strategyName).search(
+            RotationSearchStrategy.Result result = strategy(requestedArm).search(
                     () -> new BattleRotationEnvironment(scenario),
                     searchConfig);
             if (!result.publishable || result.simulatorCalls != callBudget) {
@@ -112,8 +122,14 @@ public class GenerateRotationDataset {
                         "Qualified teacher did not reproduce a publishable exact-budget result");
             }
             totalSimulatorCalls += result.simulatorCalls;
+            RotationTraceDeduplicator deduplicator = new RotationTraceDeduplicator();
             for (int rank = 0; rank < result.archive.size(); rank++) {
                 ExpertTrajectory trajectory = result.archive.get(rank);
+                int[] actions = trajectory.getActions();
+                if (!deduplicator.tryRetain(actions)) {
+                    suppressedNearDuplicates++;
+                    continue;
+                }
                 String recordId = definition.name() + "-" + scenarioSeed + "-" + rank;
                 ExpertDatasetProvenance provenance =
                         ExpertDatasetProvenance.capture(
@@ -136,7 +152,7 @@ public class GenerateRotationDataset {
                         callBudget,
                         rank,
                         provenance,
-                        trajectory.getActions()));
+                        actions));
             }
         }
         if (records.isEmpty()) {
@@ -147,16 +163,17 @@ public class GenerateRotationDataset {
         System.out.println("dataset=" + output.resolve(ExpertDatasetWriter.MANIFEST_FILE));
         System.out.println("records=" + records.size());
         System.out.println("simulatorCalls=" + totalSimulatorCalls);
+        System.out.println("suppressedNearDuplicates=" + suppressedNearDuplicates);
     }
 
-    private static RotationSearchStrategy strategy(String name) {
-        if ("evolution".equalsIgnoreCase(name)) {
+    private static RotationSearchStrategy strategy(Arm arm) {
+        if (arm == Arm.UNGUIDED_EVOLUTIONARY) {
             return new EvolutionaryRotationSearcher();
         }
-        if ("mcts".equalsIgnoreCase(name)) {
+        if (arm == Arm.UNGUIDED_MCTS) {
             return new MctsRotationSearcher();
         }
-        throw new IllegalArgumentException("Unknown search strategy: " + name);
+        throw new IllegalArgumentException("Unsupported teacher arm: " + arm);
     }
 
     private static Arm teacherArm(String name) {
@@ -176,8 +193,7 @@ public class GenerateRotationDataset {
         SourcedRotationSeed found = null;
         for (SourcedRotationSeed sourceSeed : catalog.getSeeds()) {
             if (!sourceSeed.isUsable()
-                    || !sourceSeed.getPartyName().equals(definition.name())
-                    || !definition.supportsExactSnapshotRestore()) {
+                    || !sourceSeed.getPartyName().equals(definition.name())) {
                 continue;
             }
             if (found != null) {
@@ -200,4 +216,5 @@ public class GenerateRotationDataset {
         }
         return actions.stream().mapToInt(Integer::intValue).toArray();
     }
+
 }

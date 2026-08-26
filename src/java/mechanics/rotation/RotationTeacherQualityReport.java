@@ -29,19 +29,31 @@ import com.google.gson.JsonParser;
  * receives explicit rejection reasons and cannot publish dataset labels.
  */
 public final class RotationTeacherQualityReport {
-    public static final int SCHEMA_VERSION = 1;
+    public static final int SCHEMA_VERSION = 2;
     public static final int MINIMUM_SEARCH_SEEDS = 5;
+    public static final int TEACHER_CYCLE_COUNT = 3;
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .create();
 
     private final int schemaVersion;
     private final List<ScenarioResult> scenarios;
+    private final List<SourceRejection> sourceRejections;
 
     /** Creates and validates one deterministically ordered report. */
     public RotationTeacherQualityReport(List<ScenarioResult> scenarios) {
-        if (scenarios == null || scenarios.isEmpty()) {
-            throw new IllegalArgumentException("At least one scenario result is required");
+        this(scenarios, List.of());
+    }
+
+    /** Creates a report with explicit source seeds rejected before search. */
+    public RotationTeacherQualityReport(
+            List<ScenarioResult> scenarios,
+            List<SourceRejection> sourceRejections) {
+        if (scenarios == null
+                || sourceRejections == null
+                || (scenarios.isEmpty() && sourceRejections.isEmpty())) {
+            throw new IllegalArgumentException(
+                    "At least one scenario or source rejection is required");
         }
         List<ScenarioResult> sorted = new ArrayList<>(scenarios);
         sorted.sort(Comparator.comparing(ScenarioResult::getScenarioFingerprint));
@@ -55,8 +67,21 @@ public final class RotationTeacherQualityReport {
                         "Duplicate scenario result: " + scenario.getScenarioFingerprint());
             }
         }
+        List<SourceRejection> sortedRejections = new ArrayList<>(sourceRejections);
+        sortedRejections.sort(Comparator
+                .comparing(SourceRejection::getPartyName)
+                .thenComparing(SourceRejection::getSourceSeedId));
+        Set<String> rejectedSeeds = new LinkedHashSet<>();
+        for (SourceRejection rejection : sortedRejections) {
+            if (rejection == null
+                    || !rejectedSeeds.add(rejection.getSourceSeedId())) {
+                throw new IllegalArgumentException(
+                        "Duplicate or null source rejection");
+            }
+        }
         this.schemaVersion = SCHEMA_VERSION;
         this.scenarios = Collections.unmodifiableList(sorted);
+        this.sourceRejections = Collections.unmodifiableList(sortedRejections);
     }
 
     /** Reads, reconstructs, and canonicalizes a report before accepting it. */
@@ -98,7 +123,21 @@ public final class RotationTeacherQualityReport {
             scenarios.add(new ScenarioResult(
                     scenario.get("scenarioFingerprint").getAsString(), trials));
         }
-        RotationTeacherQualityReport report = new RotationTeacherQualityReport(scenarios);
+        JsonArray rejectionPayloads = root.getAsJsonArray("sourceRejections");
+        if (rejectionPayloads == null) {
+            throw new IllegalArgumentException("Teacher source rejections are required");
+        }
+        List<SourceRejection> sourceRejections = new ArrayList<>();
+        for (JsonElement rejectionElement : rejectionPayloads) {
+            JsonObject rejection = rejectionElement.getAsJsonObject();
+            sourceRejections.add(new SourceRejection(
+                    rejection.get("partyName").getAsString(),
+                    rejection.get("sourceSeedId").getAsString(),
+                    rejection.get("searchSeed").getAsLong(),
+                    rejection.get("reason").getAsString()));
+        }
+        RotationTeacherQualityReport report = new RotationTeacherQualityReport(
+                scenarios, sourceRejections);
         JsonElement canonicalInput = JsonParser.parseString(Files.readString(path));
         JsonElement canonicalReport = JsonParser.parseString(report.toJson());
         if (!canonicalReport.equals(canonicalInput)) {
@@ -118,8 +157,16 @@ public final class RotationTeacherQualityReport {
         return scenarios;
     }
 
+    /** Returns source seeds rejected by the multi-seed cyclic preflight. */
+    public List<SourceRejection> getSourceRejections() {
+        return sourceRejections;
+    }
+
     /** Returns whether every reported scenario passed its local quality gate. */
     public boolean allScenariosPublishable() {
+        if (!sourceRejections.isEmpty()) {
+            return false;
+        }
         for (ScenarioResult scenario : scenarios) {
             if (!scenario.isPublishable()) {
                 return false;
@@ -158,7 +205,53 @@ public final class RotationTeacherQualityReport {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("schemaVersion", schemaVersion);
         payload.put("scenarios", scenarios);
+        payload.put("sourceRejections", sourceRejections);
         return GSON.toJson(payload);
+    }
+
+    /** One source seed rejected before any teacher search calls are consumed. */
+    public static final class SourceRejection {
+        private final String partyName;
+        private final String sourceSeedId;
+        private final long searchSeed;
+        private final String reason;
+
+        /** Creates one deterministic source preflight rejection. */
+        public SourceRejection(
+                String partyName,
+                String sourceSeedId,
+                long searchSeed,
+                String reason) {
+            if (partyName == null
+                    || partyName.isBlank()
+                    || sourceSeedId == null
+                    || sourceSeedId.isBlank()
+                    || reason == null
+                    || reason.isBlank()) {
+                throw new IllegalArgumentException(
+                        "Source rejection fields must not be blank");
+            }
+            this.partyName = partyName;
+            this.sourceSeedId = sourceSeedId;
+            this.searchSeed = searchSeed;
+            this.reason = reason;
+        }
+
+        public String getPartyName() {
+            return partyName;
+        }
+
+        public String getSourceSeedId() {
+            return sourceSeedId;
+        }
+
+        public long getSearchSeed() {
+            return searchSeed;
+        }
+
+        public String getReason() {
+            return reason;
+        }
     }
 
     /** Comparison arms required for every scenario and search seed. */
@@ -470,6 +563,13 @@ public final class RotationTeacherQualityReport {
             ArmSummary evolutionary = summaries.get(
                     Arm.UNGUIDED_EVOLUTIONARY.ordinal());
             ArmSummary mcts = summaries.get(Arm.UNGUIDED_MCTS.ordinal());
+            boolean evolutionaryCyclic = evolutionary.cyclicFeasibleTrials
+                    == evolutionary.trialCount;
+            boolean mctsCyclic = mcts.cyclicFeasibleTrials == mcts.trialCount;
+            if (evolutionaryCyclic != mctsCyclic) {
+                return evolutionaryCyclic
+                        ? Arm.UNGUIDED_EVOLUTIONARY : Arm.UNGUIDED_MCTS;
+            }
             return mcts.medianObjective > evolutionary.medianObjective
                     ? Arm.UNGUIDED_MCTS : Arm.UNGUIDED_EVOLUTIONARY;
         }

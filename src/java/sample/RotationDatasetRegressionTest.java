@@ -10,6 +10,7 @@ import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -27,6 +28,8 @@ import mechanics.rotation.PolicyAction;
 import mechanics.rotation.RotationObjective;
 import mechanics.rotation.RotationScenario;
 import mechanics.rotation.RotationStep;
+import mechanics.rotation.RotationTraceCompletion;
+import mechanics.rotation.RotationTraceDeduplicator;
 import model.type.CharacterId;
 import model.type.StatType;
 import simulation.party.PartyCatalog;
@@ -67,7 +70,50 @@ public class RotationDatasetRegressionTest {
         assertBrokenLineageRejected(second);
         assertCorruptionRejected(first);
         assertInvalidRecordsRejected(first, scenario, build, actions);
+        assertTraceCompletion(scenario, build, actions);
+        assertTraceDeduplication();
         System.out.println("RotationDatasetRegressionTest passed");
+    }
+
+    private static void assertTraceCompletion(
+            RotationScenario scenario,
+            TotalOptimizationResult build,
+            int[] terminalActions) {
+        int[] partial = Arrays.copyOf(terminalActions, terminalActions.length - 1);
+        int[] completed = RotationTraceCompletion.complete(scenario, partial);
+        if (completed.length <= partial.length) {
+            throw new AssertionError("Trace completion did not append terminal waits");
+        }
+        ExpertDatasetRecord.capture(
+                "completed-trace",
+                scenario,
+                "RaidenParty",
+                "train",
+                16,
+                0,
+                provenance(scenario, build, 0),
+                completed).replayAndValidate();
+        expectFailure(
+                () -> RotationTraceCompletion.complete(scenario, new int[0]),
+                "empty trace completion");
+    }
+
+    private static void assertTraceDeduplication() {
+        RotationTraceDeduplicator deduplicator = new RotationTraceDeduplicator();
+        int[] root = new int[20];
+        if (!deduplicator.tryRetain(root)) {
+            throw new AssertionError("Trace deduplicator rejected its root");
+        }
+        root[0] = 1;
+        if (deduplicator.tryRetain(root)) {
+            throw new AssertionError("Trace deduplicator leaked its retained array");
+        }
+        int[] distinct = root.clone();
+        distinct[1] = 1;
+        if (!deduplicator.tryRetain(distinct)) {
+            throw new AssertionError("Trace deduplicator rejected a distinct trace");
+        }
+        expectFailure(() -> deduplicator.tryRetain(new int[0]), "empty trace");
     }
 
     private static void assertCompressedMultiShardRoundTrip(
@@ -331,6 +377,7 @@ public class RotationDatasetRegressionTest {
         return new ExpertDatasetProvenance(
                 "fixture-source",
                 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                List.of("fixture-reference"),
                 "accepted",
                 rank == 0 ? List.of() : List.of("tiny-0"),
                 "unguided-mcts",
@@ -347,6 +394,10 @@ public class RotationDatasetRegressionTest {
                 build.getBuildFingerprint(),
                 rollHash(partyRolls),
                 definition.loadoutFingerprint(),
+                Arrays.stream(definition.partyOrder())
+                        .map(CharacterId::name)
+                        .collect(Collectors.toList()),
+                "primary:" + definition.partyOrder()[0].name(),
                 scenarioFingerprint,
                 erTargets,
                 partyRolls);

@@ -23,6 +23,7 @@ import mechanics.rotation.RotationTeacherQualityReport;
 import mechanics.rotation.RotationTeacherQualityReport.Arm;
 import mechanics.rotation.RotationTeacherQualityReport.RejectionReason;
 import mechanics.rotation.RotationTeacherQualityReport.ScenarioResult;
+import mechanics.rotation.RotationTeacherQualityReport.SourceRejection;
 import mechanics.rotation.RotationTeacherQualityReport.Trial;
 import mechanics.rotation.RotationTrajectoryRanker;
 import mechanics.rotation.TopKTrajectoryArchive;
@@ -48,7 +49,7 @@ public class RotationTeacherQualityRegressionTest {
         assertNonFiniteMetricRejected();
         assertZeroCompleteGenerationRejected();
         assertScenarioLocalRejectionIsNotHidden();
-        assertNonCyclicTeacherRejected();
+        assertCyclicTeacherPreferred();
         assertCanonicalReportReadRejectsDerivedDrift();
         System.out.println("RotationTeacherQualityRegressionTest passed");
     }
@@ -224,15 +225,33 @@ public class RotationTeacherQualityRegressionTest {
                 "rejected scenario publication");
     }
 
-    private static void assertNonCyclicTeacherRejected() {
-        ScenarioResult result = new ScenarioResult(
+    private static void assertCyclicTeacherPreferred() {
+        ScenarioResult preferred = new ScenarioResult(
                 "non-cyclic",
                 comparisonTrials(100.0, 110.0, 120.0, 140.0, false));
-        if (result.getRetainedTeacher() != Arm.UNGUIDED_MCTS
-                || result.isPublishable()
-                || !result.getRejectionReasons().contains(
+        if (preferred.getRetainedTeacher() != Arm.UNGUIDED_EVOLUTIONARY
+                || !preferred.isPublishable()) {
+            throw new AssertionError("Non-cyclic teacher displaced a cyclic teacher");
+        }
+
+        List<Trial> trials = comparisonTrials(
+                100.0, 110.0, 120.0, 140.0, false);
+        for (int index = 0; index < trials.size(); index++) {
+            Trial trial = trials.get(index);
+            if (trial.getArm() == Arm.UNGUIDED_EVOLUTIONARY) {
+                trials.set(index, trial(
+                        Arm.UNGUIDED_EVOLUTIONARY,
+                        trial.getSearchSeed(),
+                        trial.getSimulatorCalls(),
+                        trial.getBestObjective(),
+                        false));
+            }
+        }
+        ScenarioResult rejected = new ScenarioResult("all-non-cyclic", trials);
+        if (rejected.isPublishable()
+                || !rejected.getRejectionReasons().contains(
                         RejectionReason.TEACHER_NOT_CYCLIC)) {
-            throw new AssertionError("Non-cyclic retained teacher was published");
+            throw new AssertionError("All-non-cyclic teachers were published");
         }
     }
 
@@ -241,7 +260,12 @@ public class RotationTeacherQualityRegressionTest {
         RotationTeacherQualityReport report = new RotationTeacherQualityReport(
                 List.of(new ScenarioResult(
                         "canonical",
-                        comparisonTrials(100.0, 110.0, 130.0, 120.0, true))));
+                        comparisonTrials(100.0, 110.0, 130.0, 120.0, true))),
+                List.of(new SourceRejection(
+                        "RejectedParty",
+                        "rejected-source-seed",
+                        104729L,
+                        "cyclic preflight failed")));
         Path path = Files.createTempFile("rotation-teacher-quality", ".json");
         try {
             Files.writeString(path, report.toJson());

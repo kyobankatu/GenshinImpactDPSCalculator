@@ -17,8 +17,8 @@ from binary_protocol import (
     OBSERVATION_SCHEMA_REVISION,
     PRIVILEGED_SCHEMA_REVISION,
 )
-SCHEMA_VERSION = 1
-SIMULATOR_REVISION = "rotation-simulator-v2"
+SCHEMA_VERSION = 2
+SIMULATOR_REVISION = "rotation-simulator-v4"
 ACTION_SIZE = 11
 OBSERVATION_SIZE = 287
 VALID_SPLITS = frozenset(("train", "validation", "holdout"))
@@ -38,6 +38,36 @@ class ExpertDecision:
 
 
 @dataclass(frozen=True)
+class ExpertProvenance:
+    """Frozen source, search, quality, and exact-build provenance."""
+
+    source_seed_id: str
+    source_content_hash: str
+    source_ids: tuple[str, ...]
+    source_adaptation_status: str
+    parent_record_ids: tuple[str, ...]
+    search_mode: str
+    feasibility_rank: int
+    completed_candidates: int
+    completed_generations: int
+    human_median_objective: float
+    random_median_objective: float
+    teacher_median_objective: float
+    quality_search_seeds: tuple[int, ...]
+    search_seed: int
+    build_mode: str
+    artifact_standard_revision: str
+    build_fingerprint: str
+    roll_hash: str
+    party_loadout_fingerprint: str
+    party_characters: tuple[str, ...]
+    party_archetype: str
+    scenario_build_fingerprint: str
+    er_targets: dict[str, float]
+    party_rolls: dict[str, dict[str, int]]
+
+
+@dataclass(frozen=True)
 class ExpertRecord:
     """One hash-validated expert trajectory and its provenance."""
 
@@ -49,6 +79,7 @@ class ExpertRecord:
     seed: int
     search_budget: int
     trajectory_rank: int
+    provenance: ExpertProvenance
     decisions: tuple[ExpertDecision, ...]
     terminal_objective: dict[str, Any]
 
@@ -256,7 +287,8 @@ def _validate_record(payload: dict[str, Any], source_line: str) -> ExpertRecord:
     hash_source, substitutions = re.subn(
         r'"recordHash":"[0-9a-f]{64}",', "", source_line, count=1
     )
-    if substitutions != 1 or hashlib.sha256(hash_source.encode("utf-8")).hexdigest() != record_hash:
+    actual_record_hash = hashlib.sha256(hash_source.encode("utf-8")).hexdigest()
+    if substitutions != 1 or actual_record_hash != record_hash:
         raise ValueError(f"Dataset record hash mismatch: {record_id}")
     split = _require_text(payload, "split")
     if split not in VALID_SPLITS:
@@ -266,7 +298,10 @@ def _validate_record(payload: dict[str, Any], source_line: str) -> ExpertRecord:
     for name in ("cycleCount", "searchBudget"):
         if not isinstance(payload.get(name), int) or payload[name] <= 0:
             raise ValueError(f"Invalid {name}: {record_id}")
-    if not isinstance(payload.get("trajectoryRank"), int) or payload["trajectoryRank"] < 0:
+    if (
+        not isinstance(payload.get("trajectoryRank"), int)
+        or payload["trajectoryRank"] < 0
+    ):
         raise ValueError(f"Invalid trajectory rank: {record_id}")
     raw_decisions = payload.get("decisions")
     if not isinstance(raw_decisions, list) or not raw_decisions:
@@ -277,15 +312,33 @@ def _validate_record(payload: dict[str, Any], source_line: str) -> ExpertRecord:
     )
     terminal = payload.get("terminalObjective")
     _validate_terminal(terminal, record_id)
+    provenance = _validate_provenance(payload.get("provenance"), record_id)
+    scenario_fingerprint = _require_text(payload, "scenarioFingerprint")
+    seed = _require_int(payload, "seed")
+    trajectory_rank = payload["trajectoryRank"]
+    if (
+        provenance.feasibility_rank != trajectory_rank
+        or provenance.search_seed != seed
+        or provenance.scenario_build_fingerprint != scenario_fingerprint
+    ):
+        raise ValueError(f"Dataset provenance identity mismatch: {record_id}")
+    if (
+        terminal["elapsedSeconds"] + 1.0e-6
+        < float(payload["cycleDurationSeconds"]) * payload["cycleCount"]
+        or terminal["invalidActionCount"] != 0
+        or not terminal["cyclicEnergyFeasible"]
+    ):
+        raise ValueError(f"Dataset trajectory is not terminal and cyclic: {record_id}")
     return ExpertRecord(
         record_id=record_id,
         record_hash=record_hash,
-        scenario_fingerprint=_require_text(payload, "scenarioFingerprint"),
+        scenario_fingerprint=scenario_fingerprint,
         party_name=_require_text(payload, "partyName"),
         split=split,
-        seed=_require_int(payload, "seed"),
+        seed=seed,
         search_budget=payload["searchBudget"],
-        trajectory_rank=payload["trajectoryRank"],
+        trajectory_rank=trajectory_rank,
+        provenance=provenance,
         decisions=decisions,
         terminal_objective=dict(terminal),
     )
@@ -296,14 +349,18 @@ def _validate_decision(
 ) -> ExpertDecision:
     if not isinstance(payload, dict):
         raise ValueError(f"Invalid decision object: {record_id}")
-    observation = _finite_vector(payload.get("observation"), OBSERVATION_SIZE, "observation")
+    observation = _finite_vector(
+        payload.get("observation"), OBSERVATION_SIZE, "observation"
+    )
     legal_mask = _finite_vector(
         payload.get("legalActionMask"), ACTION_SIZE, "legalActionMask"
     )
     policy = _finite_vector(
         payload.get("visitPolicyTarget"), ACTION_SIZE, "visitPolicyTarget"
     )
-    q_estimates = _finite_vector(payload.get("qEstimates"), ACTION_SIZE, "qEstimates")
+    q_estimates = _finite_vector(
+        payload.get("qEstimates"), ACTION_SIZE, "qEstimates"
+    )
     action_id = _require_int(payload, "actionId")
     if action_id < 0 or action_id >= ACTION_SIZE or legal_mask[action_id] <= 0.5:
         raise ValueError(f"Dataset action is invalid or masked: {record_id}")
@@ -311,7 +368,12 @@ def _validate_decision(
         sum(policy), 1.0, rel_tol=0.0, abs_tol=1e-9
     ):
         raise ValueError(f"Invalid visit policy target: {record_id}")
-    if any(policy[action] != 0.0 for action in range(ACTION_SIZE) if legal_mask[action] <= 0.5):
+    masked_probability = any(
+        policy[action] != 0.0
+        for action in range(ACTION_SIZE)
+        if legal_mask[action] <= 0.5
+    )
+    if masked_probability:
         raise ValueError(f"Policy target assigns a masked action: {record_id}")
     recurrent_boundary = payload.get("recurrentBoundary")
     if not isinstance(recurrent_boundary, bool) or recurrent_boundary != (index == 0):
@@ -346,13 +408,98 @@ def _validate_terminal(payload: Any, record_id: str) -> None:
         raise ValueError(f"Invalid terminal cyclicEnergyFeasible: {record_id}")
 
 
+def _validate_provenance(payload: Any, record_id: str) -> ExpertProvenance:
+    if not isinstance(payload, dict):
+        raise ValueError(f"Missing dataset provenance: {record_id}")
+    source_seed_id = _require_text(payload, "sourceSeedId")
+    source_content_hash = _require_hash(payload, "sourceContentHash")
+    source_ids = _text_tuple(payload.get("sourceIds"), "sourceIds")
+    adaptation = _require_text(payload, "sourceAdaptationStatus")
+    if adaptation not in {"accepted", "adapted"}:
+        raise ValueError(f"Unusable source adaptation: {record_id}")
+    parents = _text_tuple(
+        payload.get("parentRecordIds"), "parentRecordIds", allow_empty=True
+    )
+    search_mode = _require_text(payload, "searchMode")
+    if search_mode not in {"unguided-evolutionary", "unguided-mcts"}:
+        raise ValueError(f"Invalid teacher search mode: {record_id}")
+    rank = _nonnegative_int(payload, "feasibilityRank")
+    completed = _positive_int(payload, "completedCandidates")
+    generations = _nonnegative_int(payload, "completedGenerations")
+    if search_mode == "unguided-evolutionary" and generations == 0:
+        raise ValueError(f"Incomplete evolutionary provenance: {record_id}")
+    if (rank == 0) != (len(parents) == 0):
+        raise ValueError(f"Invalid dataset parent lineage: {record_id}")
+    human = _finite_number(payload, "humanMedianObjective")
+    random_baseline = _finite_number(payload, "randomMedianObjective")
+    teacher = _finite_number(payload, "teacherMedianObjective")
+    if teacher < human or teacher < random_baseline:
+        raise ValueError(f"Teacher baseline provenance failed: {record_id}")
+    quality_seeds = _int_tuple(payload.get("qualitySearchSeeds"), "qualitySearchSeeds")
+    if len(quality_seeds) < 5 or tuple(sorted(set(quality_seeds))) != quality_seeds:
+        raise ValueError(f"Teacher quality seeds are incomplete: {record_id}")
+    search_seed = _require_int(payload, "searchSeed")
+    if payload.get("buildMode") != "optimized-kqms-v1":
+        raise ValueError(f"Dataset build mode mismatch: {record_id}")
+    if payload.get("artifactStandardRevision") != "artifact-kqms-generic-v1":
+        raise ValueError(f"Dataset artifact revision mismatch: {record_id}")
+    build_fingerprint = _require_text(payload, "buildFingerprint")
+    if not build_fingerprint.startswith("optimized-kqms-v1:"):
+        raise ValueError(f"Invalid build fingerprint: {record_id}")
+    roll_hash = _require_hash(payload, "rollHash")
+    loadout = _require_text(payload, "partyLoadoutFingerprint")
+    if "artifact-none" in loadout:
+        raise ValueError(f"Dataset loadout omits artifact standard: {record_id}")
+    characters = _text_tuple(payload.get("partyCharacters"), "partyCharacters")
+    if len(characters) != 4 or len(set(characters)) != 4:
+        raise ValueError(f"Invalid party character provenance: {record_id}")
+    archetype = _require_text(payload, "partyArchetype")
+    if archetype != f"primary:{characters[0]}":
+        raise ValueError(f"Invalid party archetype provenance: {record_id}")
+    scenario_build = _require_text(payload, "scenarioBuildFingerprint")
+    er_targets = _er_targets(payload.get("erTargets"), record_id)
+    party_rolls = _party_rolls(payload.get("partyRolls"), record_id)
+    if set(er_targets) != set(party_rolls) or set(er_targets) != set(characters):
+        raise ValueError(f"Dataset frozen build character mismatch: {record_id}")
+    if _roll_hash(party_rolls) != roll_hash:
+        raise ValueError(f"Dataset frozen roll hash mismatch: {record_id}")
+    return ExpertProvenance(
+        source_seed_id=source_seed_id,
+        source_content_hash=source_content_hash,
+        source_ids=source_ids,
+        source_adaptation_status=adaptation,
+        parent_record_ids=parents,
+        search_mode=search_mode,
+        feasibility_rank=rank,
+        completed_candidates=completed,
+        completed_generations=generations,
+        human_median_objective=human,
+        random_median_objective=random_baseline,
+        teacher_median_objective=teacher,
+        quality_search_seeds=quality_seeds,
+        search_seed=search_seed,
+        build_mode="optimized-kqms-v1",
+        artifact_standard_revision="artifact-kqms-generic-v1",
+        build_fingerprint=build_fingerprint,
+        roll_hash=roll_hash,
+        party_loadout_fingerprint=loadout,
+        party_characters=characters,
+        party_archetype=archetype,
+        scenario_build_fingerprint=scenario_build,
+        er_targets=er_targets,
+        party_rolls=party_rolls,
+    )
+
+
 def _validate_dataset(records: list[ExpertRecord]) -> None:
     seen_ids: set[str] = set()
     fingerprint_splits: dict[str, str] = {}
-    for record in records:
+    indexes: dict[str, int] = {}
+    for index, record in enumerate(records):
         if record.record_id in seen_ids:
             raise ValueError(f"Duplicate dataset record ID: {record.record_id}")
         seen_ids.add(record.record_id)
+        indexes[record.record_id] = index
         previous = fingerprint_splits.setdefault(
             record.scenario_fingerprint, record.split
         )
@@ -361,14 +508,130 @@ def _validate_dataset(records: list[ExpertRecord]) -> None:
                 "Scenario fingerprint appears in multiple splits: "
                 f"{record.scenario_fingerprint}"
             )
+    for index, record in enumerate(records):
+        for parent_id in record.provenance.parent_record_ids:
+            parent_index = indexes.get(parent_id)
+            if parent_index is None or parent_index >= index:
+                raise ValueError(f"Dataset parent must precede child: {parent_id}")
+            parent = records[parent_index]
+            if (
+                parent.scenario_fingerprint != record.scenario_fingerprint
+                or parent.provenance.source_content_hash
+                != record.provenance.source_content_hash
+            ):
+                raise ValueError("Dataset lineage crosses source or scenario")
 
 
 def _finite_vector(value: Any, size: int, name: str) -> tuple[float, ...]:
     if not isinstance(value, list) or len(value) != size:
         raise ValueError(f"{name} dimension mismatch")
-    if any(not isinstance(item, (int, float)) or not math.isfinite(item) for item in value):
+    if any(
+        not isinstance(item, (int, float)) or not math.isfinite(item)
+        for item in value
+    ):
         raise ValueError(f"{name} contains a non-finite value")
     return tuple(float(item) for item in value)
+
+
+def _text_tuple(value: Any, name: str, allow_empty: bool = False) -> tuple[str, ...]:
+    if not isinstance(value, list) or (not allow_empty and not value):
+        raise ValueError(f"Dataset {name} must be an array")
+    if any(not isinstance(item, str) or not item.strip() for item in value):
+        raise ValueError(f"Dataset {name} contains invalid text")
+    if len(set(value)) != len(value):
+        raise ValueError(f"Dataset {name} contains duplicates")
+    return tuple(value)
+
+
+def _int_tuple(value: Any, name: str) -> tuple[int, ...]:
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"Dataset {name} must be a non-empty array")
+    if any(not isinstance(item, int) or isinstance(item, bool) for item in value):
+        raise ValueError(f"Dataset {name} contains a non-integer")
+    return tuple(value)
+
+
+def _er_targets(value: Any, record_id: str) -> dict[str, float]:
+    if not isinstance(value, dict) or not value:
+        raise ValueError(f"Dataset ER targets are missing: {record_id}")
+    targets: dict[str, float] = {}
+    for character, target in value.items():
+        if (
+            not isinstance(character, str)
+            or not character
+            or not isinstance(target, (int, float))
+            or isinstance(target, bool)
+            or not math.isfinite(target)
+            or target < 1.0
+        ):
+            raise ValueError(f"Invalid dataset ER target: {record_id}")
+        targets[character] = float(target)
+    return targets
+
+
+def _party_rolls(value: Any, record_id: str) -> dict[str, dict[str, int]]:
+    if not isinstance(value, dict) or not value:
+        raise ValueError(f"Dataset party rolls are missing: {record_id}")
+    party_rolls: dict[str, dict[str, int]] = {}
+    for character, raw_rolls in value.items():
+        if (
+            not isinstance(character, str)
+            or not character
+            or not isinstance(raw_rolls, dict)
+        ):
+            raise ValueError(f"Invalid dataset party rolls: {record_id}")
+        rolls: dict[str, int] = {}
+        for stat, count in raw_rolls.items():
+            if (
+                not isinstance(stat, str)
+                or not stat
+                or not isinstance(count, int)
+                or isinstance(count, bool)
+                or count < 0
+            ):
+                raise ValueError(f"Invalid dataset artifact roll: {record_id}")
+            rolls[stat] = count
+        party_rolls[character] = rolls
+    return party_rolls
+
+
+def _roll_hash(party_rolls: dict[str, dict[str, int]]) -> str:
+    canonical = "".join(
+        character
+        + "{"
+        + "".join(
+            f"{stat}={party_rolls[character][stat]};"
+            for stat in sorted(party_rolls[character])
+        )
+        + "}"
+        for character in sorted(party_rolls)
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _finite_number(payload: dict[str, Any], name: str) -> float:
+    value = payload.get(name)
+    if (
+        not isinstance(value, (int, float))
+        or isinstance(value, bool)
+        or not math.isfinite(value)
+    ):
+        raise ValueError(f"Dataset {name} must be finite")
+    return float(value)
+
+
+def _positive_int(payload: dict[str, Any], name: str) -> int:
+    value = _require_int(payload, name)
+    if value <= 0:
+        raise ValueError(f"Dataset {name} must be positive")
+    return value
+
+
+def _nonnegative_int(payload: dict[str, Any], name: str) -> int:
+    value = _require_int(payload, name)
+    if value < 0:
+        raise ValueError(f"Dataset {name} must be non-negative")
+    return value
 
 
 def _require_revision(payload: dict[str, Any], name: str, expected: Any) -> None:
@@ -380,6 +643,13 @@ def _require_text(payload: dict[str, Any], name: str) -> str:
     value = payload.get(name)
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"Dataset {name} must not be blank")
+    return value
+
+
+def _require_hash(payload: dict[str, Any], name: str) -> str:
+    value = _require_text(payload, name)
+    if re.fullmatch(r"[0-9a-f]{64}", value) is None:
+        raise ValueError(f"Dataset {name} must be SHA-256")
     return value
 
 

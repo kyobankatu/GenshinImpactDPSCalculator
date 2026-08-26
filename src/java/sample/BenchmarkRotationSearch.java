@@ -31,6 +31,7 @@ import com.google.gson.JsonParser;
 
 import mechanics.rl.EpisodeConfig;
 import mechanics.rl.ObservationEncoder;
+import mechanics.rl.QuietExecution;
 import mechanics.optimization.TotalOptimizationResult;
 import mechanics.rotation.BattleRotationEnvironment;
 import mechanics.rotation.EvolutionaryRotationSearcher;
@@ -50,8 +51,10 @@ import mechanics.rotation.RotationSeedEvaluation;
 import mechanics.rotation.RotationSourceCatalog;
 import mechanics.rotation.RotationStep;
 import mechanics.rotation.RotationTeacherQualityReport;
+import mechanics.rotation.RotationTraceCompletion;
 import mechanics.rotation.RotationTeacherQualityReport.Arm;
 import mechanics.rotation.RotationTeacherQualityReport.ScenarioResult;
+import mechanics.rotation.RotationTeacherQualityReport.SourceRejection;
 import mechanics.rotation.RotationTeacherQualityReport.Trial;
 import mechanics.rotation.RotationTrajectoryRanker;
 import mechanics.rotation.SourcedRotationSeed;
@@ -79,7 +82,6 @@ public final class BenchmarkRotationSearch {
     private static final int ELITE_COUNT = 3;
     private static final int RESTORE_REPETITIONS = 5;
     private static final int RESTORE_CALL_BUDGET = 4096;
-    private static final int TEACHER_QUALITY_CYCLES = 2;
     private static final int TEACHER_QUALITY_DEFAULT_BUDGET = 16384;
     private static final long[] DEFAULT_SEEDS = {104729L, 130363L, 155921L};
     private static final long[] TEACHER_QUALITY_SEEDS = {
@@ -197,70 +199,122 @@ public final class BenchmarkRotationSearch {
         if (callBudget <= 0) {
             throw new IllegalArgumentException("Teacher quality call budget must be positive");
         }
-        List<SourcedRotationSeed> sourceSeeds = admittedSourceSeeds(selectedParty);
+        List<SourcedRotationSeed> sourceSeeds = sourcedSeeds(selectedParty);
         List<ScenarioResult> scenarios = new ArrayList<>();
+        List<SourceRejection> sourceRejections = new ArrayList<>();
         for (SourcedRotationSeed sourceSeed : sourceSeeds) {
-            PartyDefinition definition = PartyCatalog.require(sourceSeed.getPartyName());
-            TotalOptimizationResult build = RotationSeedEvaluation.resolveBuild(sourceSeed);
-            List<Trial> trials = new ArrayList<>();
-            for (long searchSeed : TEACHER_QUALITY_SEEDS) {
-                RotationSeedEvaluation.Result humanReplay = RotationSeedEvaluation.evaluate(
-                        sourceSeed,
-                        definition,
-                        build,
-                        TEACHER_QUALITY_CYCLES,
-                        searchSeed);
-                int[] humanActions = flattenHumanTrace(humanReplay);
-                RotationScenario scenario = RotationScenario.forPartyBuild(
-                        definition,
-                        build,
-                        new EpisodeConfig(),
-                        definition.rotationCycleSeconds(),
-                        TEACHER_QUALITY_CYCLES,
-                        searchSeed,
-                        RotationObjective.cyclicDamage());
-                int maxActions = teacherQualityMaxActions(scenario, humanActions);
-                trials.add(runHumanTeacherTrial(
-                        scenario, searchSeed, callBudget, humanActions));
-                trials.add(runRandomTeacherTrial(
-                        scenario, searchSeed, callBudget, maxActions));
-                trials.add(runSearchTeacherTrial(
-                        Arm.UNGUIDED_EVOLUTIONARY,
-                        new EvolutionaryRotationSearcher(),
-                        scenario,
-                        searchSeed,
-                        callBudget,
-                        humanActions,
-                        maxActions));
-                trials.add(runSearchTeacherTrial(
-                        Arm.UNGUIDED_MCTS,
-                        new MctsRotationSearcher(),
-                        scenario,
-                        searchSeed,
-                        callBudget,
-                        humanActions,
-                        maxActions));
+            TeacherSourceResult sourceResult = QuietExecution.call(
+                    () -> runTeacherSource(sourceSeed, callBudget));
+            if (sourceResult.rejection != null) {
+                sourceRejections.add(sourceResult.rejection);
+            } else {
+                scenarios.add(sourceResult.scenario);
             }
-            RotationScenario identity = RotationScenario.forPartyBuild(
-                    definition,
-                    build,
-                    new EpisodeConfig(),
-                    definition.rotationCycleSeconds(),
-                    TEACHER_QUALITY_CYCLES,
-                    0L,
-                    RotationObjective.cyclicDamage());
-            scenarios.add(new ScenarioResult(identity.getFingerprint(), trials));
         }
-        RotationTeacherQualityReport report = new RotationTeacherQualityReport(scenarios);
+        RotationTeacherQualityReport report = new RotationTeacherQualityReport(
+                scenarios, sourceRejections);
         writeAtomically(output, report.toJson() + System.lineSeparator());
         System.out.println("report=" + output.toAbsolutePath().normalize());
         System.out.println("scenarios=" + report.getScenarios().size());
         System.out.println("publishable=" + report.getScenarios().stream()
                 .filter(ScenarioResult::isPublishable)
                 .count());
+        System.out.println("sourceRejections=" + report.getSourceRejections().size());
     }
 
-    private static List<SourcedRotationSeed> admittedSourceSeeds(
+    private static TeacherSourceResult runTeacherSource(
+            SourcedRotationSeed sourceSeed,
+            int callBudget) {
+        PartyDefinition definition = PartyCatalog.require(sourceSeed.getPartyName());
+        TotalOptimizationResult build = RotationSeedEvaluation.resolveBuild(sourceSeed);
+        List<PreparedTeacherTrial> preparedTrials = new ArrayList<>();
+        long rejectedSearchSeed = TEACHER_QUALITY_SEEDS[0];
+        try {
+            for (long searchSeed : TEACHER_QUALITY_SEEDS) {
+                rejectedSearchSeed = searchSeed;
+                preparedTrials.add(prepareTeacherTrial(
+                        sourceSeed, definition, build, searchSeed));
+            }
+        } catch (RuntimeException exception) {
+            String reason = exception.getMessage() == null
+                    ? exception.getClass().getSimpleName()
+                    : exception.getMessage();
+            return TeacherSourceResult.rejected(new SourceRejection(
+                    definition.name(),
+                    sourceSeed.getSeedId(),
+                    rejectedSearchSeed,
+                    reason));
+        }
+        List<Trial> trials = new ArrayList<>();
+        for (PreparedTeacherTrial prepared : preparedTrials) {
+            trials.add(runHumanTeacherTrial(
+                    prepared.scenario,
+                    prepared.searchSeed,
+                    callBudget,
+                    prepared.humanActions));
+            trials.add(runRandomTeacherTrial(
+                    prepared.scenario,
+                    prepared.searchSeed,
+                    callBudget,
+                    prepared.maxActions));
+            trials.add(runSearchTeacherTrial(
+                    Arm.UNGUIDED_EVOLUTIONARY,
+                    new EvolutionaryRotationSearcher(),
+                    prepared.scenario,
+                    prepared.searchSeed,
+                    callBudget,
+                    prepared.humanActions,
+                    prepared.maxActions));
+            trials.add(runSearchTeacherTrial(
+                    Arm.UNGUIDED_MCTS,
+                    new MctsRotationSearcher(),
+                    prepared.scenario,
+                    prepared.searchSeed,
+                    callBudget,
+                    prepared.humanActions,
+                    prepared.maxActions));
+        }
+        RotationScenario identity = RotationScenario.forPartyBuild(
+                definition,
+                build,
+                new EpisodeConfig(),
+                definition.rotationCycleSeconds(),
+                RotationTeacherQualityReport.TEACHER_CYCLE_COUNT,
+                0L,
+                RotationObjective.cyclicDamage());
+        return TeacherSourceResult.accepted(
+                new ScenarioResult(identity.getFingerprint(), trials));
+    }
+
+    private static PreparedTeacherTrial prepareTeacherTrial(
+            SourcedRotationSeed sourceSeed,
+            PartyDefinition definition,
+            TotalOptimizationResult build,
+            long searchSeed) {
+        RotationSeedEvaluation.Result humanReplay = RotationSeedEvaluation.evaluate(
+                sourceSeed,
+                definition,
+                build,
+                RotationTeacherQualityReport.TEACHER_CYCLE_COUNT,
+                searchSeed);
+        RotationScenario scenario = RotationScenario.forPartyBuild(
+                definition,
+                build,
+                new EpisodeConfig(),
+                definition.rotationCycleSeconds(),
+                RotationTeacherQualityReport.TEACHER_CYCLE_COUNT,
+                searchSeed,
+                RotationObjective.cyclicDamage());
+        int[] humanActions = RotationTraceCompletion.complete(
+                scenario, flattenHumanTrace(humanReplay));
+        return new PreparedTeacherTrial(
+                searchSeed,
+                scenario,
+                humanActions,
+                teacherQualityMaxActions(scenario, humanActions));
+    }
+
+    private static List<SourcedRotationSeed> sourcedSeeds(
             String selectedParty) throws IOException {
         RotationSourceCatalog catalog = RotationSourceCatalog.loadDefault();
         List<SourcedRotationSeed> selected = new ArrayList<>();
@@ -270,21 +324,20 @@ public final class BenchmarkRotationSearch {
                 continue;
             }
             PartyDefinition definition = PartyCatalog.require(sourceSeed.getPartyName());
-            if (!definition.supportsExactSnapshotRestore()
-                    || !("all".equalsIgnoreCase(selectedParty)
+            if (!("all".equalsIgnoreCase(selectedParty)
                             || definition.name().equals(selectedParty))) {
                 continue;
             }
             if (!parties.add(definition.name())) {
                 throw new IllegalStateException(
-                        "Multiple usable source seeds for admitted party " + definition.name());
+                        "Multiple usable source seeds for party " + definition.name());
             }
             selected.add(sourceSeed);
         }
         selected.sort(Comparator.comparing(SourcedRotationSeed::getPartyName));
         if (selected.isEmpty()) {
             throw new IllegalArgumentException(
-                    "No source-seeded snapshot-admitted party matches " + selectedParty);
+                    "No usable source-seeded party matches " + selectedParty);
         }
         return selected;
     }
@@ -440,9 +493,10 @@ public final class BenchmarkRotationSearch {
                 List.of(humanActions));
         RotationSearchStrategy.Result result = strategy.search(
                 () -> new BattleRotationEnvironment(scenario), config);
-        if (result.cancelled || result.simulatorCalls != callBudget || !result.publishable) {
+        if (result.cancelled || result.simulatorCalls != callBudget) {
             throw new IllegalStateException(
-                    arm.getWireName() + " failed exact publishable search: calls="
+                    arm.getWireName() + " failed exact search accounting for "
+                            + scenario.getFingerprint() + ": calls="
                             + result.simulatorCalls
                             + ", budget=" + callBudget
                             + ", cancelled=" + result.cancelled
@@ -458,6 +512,9 @@ public final class BenchmarkRotationSearch {
         }
         Set<String> sequences = new HashSet<>();
         for (ExpertTrajectory trajectory : result.archive) {
+            sequences.add(Arrays.toString(trajectory.getActions()));
+        }
+        for (ExpertTrajectory trajectory : result.diagnosticArchive) {
             sequences.add(Arrays.toString(trajectory.getActions()));
         }
         return new Trial(
@@ -675,6 +732,48 @@ public final class BenchmarkRotationSearch {
 
     private static String format(double value) {
         return String.format(Locale.ROOT, "%.3f", value);
+    }
+
+    private static final class PreparedTeacherTrial {
+        private final long searchSeed;
+        private final RotationScenario scenario;
+        private final int[] humanActions;
+        private final int maxActions;
+
+        private PreparedTeacherTrial(
+                long searchSeed,
+                RotationScenario scenario,
+                int[] humanActions,
+                int maxActions) {
+            this.searchSeed = searchSeed;
+            this.scenario = scenario;
+            this.humanActions = humanActions.clone();
+            this.maxActions = maxActions;
+        }
+    }
+
+    private static final class TeacherSourceResult {
+        private final ScenarioResult scenario;
+        private final SourceRejection rejection;
+
+        private TeacherSourceResult(
+                ScenarioResult scenario,
+                SourceRejection rejection) {
+            if ((scenario == null) == (rejection == null)) {
+                throw new IllegalArgumentException(
+                        "Teacher source result requires exactly one outcome");
+            }
+            this.scenario = scenario;
+            this.rejection = rejection;
+        }
+
+        private static TeacherSourceResult accepted(ScenarioResult scenario) {
+            return new TeacherSourceResult(scenario, null);
+        }
+
+        private static TeacherSourceResult rejected(SourceRejection rejection) {
+            return new TeacherSourceResult(null, rejection);
+        }
     }
 
     private static final class TimedSearch {

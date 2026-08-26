@@ -19,7 +19,7 @@ import simulation.party.PartyCatalog;
 /** Versioned, hash-protected expert trajectory with per-decision labels. */
 public final class ExpertDatasetRecord {
     public static final int SCHEMA_VERSION = 2;
-    public static final String SIMULATOR_REVISION = "rotation-simulator-v3";
+    public static final String SIMULATOR_REVISION = "rotation-simulator-v4";
 
     private static final Gson GSON = new Gson();
 

@@ -2,7 +2,6 @@ package sample;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import mechanics.rotation.RotationObjective;
 import mechanics.rotation.RotationScenario;
 import mechanics.rotation.RotationSearchConfig;
 import mechanics.rotation.RotationSearchStrategy;
-import mechanics.rotation.RotationSnapshotSafety;
 import mechanics.rotation.RotationStep;
 import model.entity.ArtifactSet;
 import model.entity.Character;
@@ -61,7 +59,6 @@ public class PartyCatalogRegressionTest {
         }
         Set<String> names = new HashSet<>();
         Set<String> fingerprints = new HashSet<>();
-        Map<CharacterId, DatasetSplit> characterSplits = new EnumMap<>(CharacterId.class);
         for (PartyDefinition definition : definitions) {
             if (!names.add(definition.name())
                     || !fingerprints.add(definition.loadoutFingerprint())) {
@@ -72,14 +69,6 @@ public class PartyCatalogRegressionTest {
             }
             if (definition.baselinePolicyActions().length == 0) {
                 throw new AssertionError("Missing baseline policy actions for " + definition.name());
-            }
-            for (CharacterId characterId : definition.partyOrder()) {
-                DatasetSplit previous = characterSplits.putIfAbsent(
-                        characterId, definition.datasetSplit());
-                if (previous != null && previous != definition.datasetSplit()) {
-                    throw new AssertionError(
-                            "Character profile crosses dataset splits: " + characterId);
-                }
             }
             assertRlRegistryContains(definition.name());
         }
@@ -92,7 +81,7 @@ public class PartyCatalogRegressionTest {
         assertEquals(expectedTrainingNames, trainingNames, "default train split");
         assertEquals(1, PartyCatalog.rlEnabled(DatasetSplit.VALIDATION).size(),
                 "validation scenario count");
-        assertEquals(2, PartyCatalog.rlEnabled(DatasetSplit.HOLDOUT).size(),
+        assertEquals(3, PartyCatalog.rlEnabled(DatasetSplit.HOLDOUT).size(),
                 "holdout scenario count");
     }
 
@@ -146,28 +135,12 @@ public class PartyCatalogRegressionTest {
                 mechanics.rotation.ExpertPolicyPrior.uniform(),
                 () -> false,
                 List.of());
-        RotationSnapshotSafety.Assessment assessment = scenario.getSnapshotSafety();
-        if (assessment.admitted) {
-            RotationSearchStrategy.Result result = new EvolutionaryRotationSearcher().search(
-                    () -> new BattleRotationEnvironment(scenario), config);
-            if (result.simulatorCalls != config.simulatorCallBudget
-                    || result.best.getObjective().invalidActionCount != 0) {
-                throw new AssertionError("Unseeded search contract failed for " + definition.name());
-            }
-        } else {
-            expectSnapshotSearchRejection(() -> new EvolutionaryRotationSearcher().search(
-                    () -> new BattleRotationEnvironment(scenario), config), definition.name());
-        }
-    }
-
-    private static void expectSnapshotSearchRejection(Runnable search, String partyName) {
-        try {
-            search.run();
-            throw new AssertionError("Expected snapshot-search rejection for " + partyName);
-        } catch (IllegalStateException expected) {
-            if (!expected.getMessage().contains("snapshot admission rejected")) {
-                throw new AssertionError("Unexpected search rejection for " + partyName, expected);
-            }
+        RotationSearchStrategy.Result result = new EvolutionaryRotationSearcher().search(
+                () -> new BattleRotationEnvironment(scenario), config);
+        if (result.simulatorCalls != config.simulatorCallBudget
+                || result.best.getObjective().invalidActionCount != 0) {
+            throw new AssertionError(
+                    "Unseeded search contract failed for " + definition.name());
         }
     }
 

@@ -28,7 +28,7 @@ from train_recurrent_ppo import scheduled_sil_weight, train_sil_auxiliary
 
 
 FIXTURE = os.path.join(
-    os.path.dirname(__file__), "fixtures", "expert_dataset_v1.jsonl"
+    os.path.dirname(__file__), "fixtures", "expert_dataset_v2.jsonl"
 )
 
 

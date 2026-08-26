@@ -5,13 +5,13 @@ import java.util.List;
 import mechanics.rotation.PolicyAction;
 import model.type.CharacterId;
 
-/** Train-split Alhaitham split-field Spread scenario. */
+/** Holdout-split Alhaitham split-field Spread scenario. */
 public final class AlhaithamSpreadPartyDefinition extends CuratedPartyDefinition {
     /** Creates the deterministic source-matched loadout scenario. */
     public AlhaithamSpreadPartyDefinition() {
         super(
                 "AlhaithamSpread",
-                DatasetSplit.TRAIN,
+                DatasetSplit.HOLDOUT,
                 26.0,
                 List.of(
                         CuratedCharacters::alhaitham,

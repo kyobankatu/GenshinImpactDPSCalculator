@@ -154,10 +154,16 @@ final class RotationSearchSupport {
     }
 
     static void requireSearchAdmission(RotationEnvironment environment) {
+        if (environment.supportsExactBranchRestore()) {
+            return;
+        }
         RotationScenario scenario = environment.scenario();
         if (scenario != null) {
             scenario.getSnapshotSafety().requireSearchAdmission();
+            return;
         }
+        throw new IllegalStateException(
+                "Rotation search environment has no exact branch restore contract");
     }
 
     /** One completed proposal evaluation and its repair accounting. */

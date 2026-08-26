@@ -24,6 +24,11 @@ public interface RotationEnvironment extends AutoCloseable {
         return 0;
     }
 
+    /** Returns whether branch restore is exact for search in this environment. */
+    default boolean supportsExactBranchRestore() {
+        return scenario() == null;
+    }
+
     /** Returns this environment's immutable scenario. */
     RotationScenario scenario();
 

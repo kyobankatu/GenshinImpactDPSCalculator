@@ -34,7 +34,9 @@ all six exact loadouts. Phase 18 retained direct restore but left Wait macros
 disabled after their quality gate failed. Phase 19 admitted five of six audited
 teachers under matched budgets. Phase 20 froze complete source, search, build,
 and lineage provenance in schema v2 and requires exact replay before
-publication. Phase 21 is the next active target. No dependent phase may bypass
+publication. Phase 21 froze a replay-complete 58-seed, 131-record three-way
+dataset after canonical source-leakage and matched-baseline gates. Phase 22 is
+the next active target. No dependent phase may bypass
 the preceding correctness or quality gate.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
@@ -24869,9 +24871,9 @@ Completion evidence:
 
 ## Implementation Order: Expert-Iteration Rotation Optimization Model B-212
 
-Status: In progress (2026-08-26). Phases 1-15 are implemented; the local
-quality gate failed. Phases 16-25 are now ordered from deterministic teacher
-correctness through expert iteration; Phase 16 is the next active target. The
+Status: In progress (2026-08-26). Phases 1-21 are implemented. Phases 22-25
+continue from the frozen teacher dataset through neural guidance and expert
+iteration; Phase 22 is the next active target. The
 cross-phase responsibility and NN-integration decisions are recorded in
 `ROTATION_SEARCH_ARCHITECTURE.md`.
 
@@ -27162,7 +27164,7 @@ Completion evidence:
 
 ### Phase 21: Dataset Split And Final Quality Gate
 
-Status: Planned.
+Status: Done (2026-08-26).
 
 Why sixth:
 
@@ -27218,6 +27220,19 @@ Verification:
 - `python3 src/python/rl/evaluate_teacher_dataset.py --preset benchmark`
 - `python scripts/preflight.py --run`
 - `git status --short`
+
+Completion evidence:
+
+- Five-seed, four-arm comparison admitted 58 of 76 sourced scenarios at 16,384
+  simulator calls per cell; 16 failed matched baselines and two failed the
+  three-cycle source preflight without entering the dataset.
+- Duplicate suppression retained 131 schema-v2 records across 56 train, one
+  validation, and one holdout scenario. Java replayed 131/131 exactly; Python
+  reported 58 distinct seeds, zero source/loadout/normalization leakage, zero
+  near duplicates or invalid labels, and three shared train-holdout supports.
+- Manifest `1b57a2f27296dd66e5f0336dddf6ad4a9d3b0020c60290705f5adece0c0a6495`
+  reproduced bit-for-bit and is frozen with source-catalog hash
+  `f0973f950ffecae319ce2d7597ed353b438057e14406f8dcc0f3257f4a7a6d68`.
 
 ### Phase 22: Versioned Policy-Value Advisor Contract
 

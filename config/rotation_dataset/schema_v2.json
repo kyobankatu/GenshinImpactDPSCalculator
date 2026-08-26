@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "format": "gzip-jsonl",
-  "simulatorRevision": "rotation-simulator-v3",
+  "simulatorRevision": "rotation-simulator-v4",
   "requiredRecordFields": [
     "recordId",
     "recordHash",
@@ -23,6 +23,7 @@
   "requiredProvenanceFields": [
     "sourceSeedId",
     "sourceContentHash",
+    "sourceIds",
     "sourceAdaptationStatus",
     "parentRecordIds",
     "searchMode",
@@ -39,6 +40,8 @@
     "buildFingerprint",
     "rollHash",
     "partyLoadoutFingerprint",
+    "partyCharacters",
+    "partyArchetype",
     "scenarioBuildFingerprint",
     "erTargets",
     "partyRolls"

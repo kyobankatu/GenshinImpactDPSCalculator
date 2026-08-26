@@ -7,6 +7,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import mechanics.optimization.TotalOptimizationResult;
 import mechanics.rotation.RotationTeacherQualityReport.Arm;
@@ -23,6 +24,7 @@ public final class ExpertDatasetProvenance {
 
     private final String sourceSeedId;
     private final String sourceContentHash;
+    private final List<String> sourceIds;
     private final String sourceAdaptationStatus;
     private final List<String> parentRecordIds;
     private final String searchMode;
@@ -39,6 +41,8 @@ public final class ExpertDatasetProvenance {
     private final String buildFingerprint;
     private final String rollHash;
     private final String partyLoadoutFingerprint;
+    private final List<String> partyCharacters;
+    private final String partyArchetype;
     private final String scenarioBuildFingerprint;
     private final Map<String, Double> erTargets;
     private final Map<String, Map<String, Integer>> partyRolls;
@@ -47,6 +51,7 @@ public final class ExpertDatasetProvenance {
     public ExpertDatasetProvenance(
             String sourceSeedId,
             String sourceContentHash,
+            List<String> sourceIds,
             String sourceAdaptationStatus,
             List<String> parentRecordIds,
             String searchMode,
@@ -63,11 +68,14 @@ public final class ExpertDatasetProvenance {
             String buildFingerprint,
             String rollHash,
             String partyLoadoutFingerprint,
+            List<String> partyCharacters,
+            String partyArchetype,
             String scenarioBuildFingerprint,
             Map<String, Double> erTargets,
             Map<String, Map<String, Integer>> partyRolls) {
         this.sourceSeedId = sourceSeedId;
         this.sourceContentHash = sourceContentHash;
+        this.sourceIds = sourceIds == null ? null : List.copyOf(sourceIds);
         this.sourceAdaptationStatus = sourceAdaptationStatus;
         this.parentRecordIds = parentRecordIds == null
                 ? null : List.copyOf(parentRecordIds);
@@ -86,6 +94,9 @@ public final class ExpertDatasetProvenance {
         this.buildFingerprint = buildFingerprint;
         this.rollHash = rollHash;
         this.partyLoadoutFingerprint = partyLoadoutFingerprint;
+        this.partyCharacters = partyCharacters == null
+                ? null : List.copyOf(partyCharacters);
+        this.partyArchetype = partyArchetype;
         this.scenarioBuildFingerprint = scenarioBuildFingerprint;
         this.erTargets = immutableErTargets(erTargets);
         this.partyRolls = immutablePartyRolls(partyRolls);
@@ -123,6 +134,10 @@ public final class ExpertDatasetProvenance {
                 qualitySearchSeeds.add(trial.getSearchSeed());
             }
         }
+        List<String> partyCharacters = new ArrayList<>();
+        for (CharacterId characterId : definition.partyOrder()) {
+            partyCharacters.add(characterId.name());
+        }
         for (CharacterId characterId : CharacterId.values()) {
             Double er = build.erTargets.get(characterId);
             if (er == null) {
@@ -141,6 +156,7 @@ public final class ExpertDatasetProvenance {
         return new ExpertDatasetProvenance(
                 sourceSeed.getSeedId(),
                 sourceSeed.getContentHash(),
+                sourceSeed.getSourceIds(),
                 sourceSeed.getAdaptationStatus().name().toLowerCase(),
                 parentRecordIds,
                 teacher.getWireName(),
@@ -157,6 +173,8 @@ public final class ExpertDatasetProvenance {
                 build.getBuildFingerprint(),
                 calculateRollHash(partyRolls),
                 definition.loadoutFingerprint(),
+                partyCharacters,
+                "primary:" + partyCharacters.get(0),
                 scenario.getFingerprint(),
                 erTargets,
                 partyRolls);
@@ -166,6 +184,14 @@ public final class ExpertDatasetProvenance {
     public void validate() {
         requireText(sourceSeedId, "sourceSeedId");
         requireHash(sourceContentHash, "sourceContentHash");
+        if (sourceIds == null
+                || sourceIds.isEmpty()
+                || Set.copyOf(sourceIds).size() != sourceIds.size()) {
+            throw new IllegalArgumentException("Dataset source IDs are invalid");
+        }
+        for (String sourceId : sourceIds) {
+            requireText(sourceId, "sourceId");
+        }
         if (!"accepted".equals(sourceAdaptationStatus)
                 && !"adapted".equals(sourceAdaptationStatus)) {
             throw new IllegalArgumentException("Source seed is not usable: " + sourceSeedId);
@@ -212,6 +238,17 @@ public final class ExpertDatasetProvenance {
             throw new IllegalArgumentException("Dataset build revision mismatch");
         }
         requireText(partyLoadoutFingerprint, "partyLoadoutFingerprint");
+        if (partyCharacters == null
+                || partyCharacters.size() != 4
+                || Set.copyOf(partyCharacters).size() != partyCharacters.size()) {
+            throw new IllegalArgumentException("Dataset party characters are invalid");
+        }
+        for (String character : partyCharacters) {
+            CharacterId.valueOf(character);
+        }
+        if (!(("primary:" + partyCharacters.get(0)).equals(partyArchetype))) {
+            throw new IllegalArgumentException("Dataset party archetype is invalid");
+        }
         requireText(scenarioBuildFingerprint, "scenarioBuildFingerprint");
         requireHash(rollHash, "rollHash");
         TotalOptimizationResult build = reconstructBuild();
@@ -279,6 +316,10 @@ public final class ExpertDatasetProvenance {
 
     public String getPartyLoadoutFingerprint() {
         return partyLoadoutFingerprint;
+    }
+
+    public List<String> getPartyCharacters() {
+        return partyCharacters;
     }
 
     public String getScenarioBuildFingerprint() {
